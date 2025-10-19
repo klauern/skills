@@ -1,0 +1,23 @@
+{
+  "name": "klauern-skills",
+  "owner": {
+    "name": "klauern",
+    "email": "klauer@gmail.com"
+  },
+  "metadata": {
+    "description": "Custom skills developed by klauern for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "klauern-skills",
+      "description": "Custom skills developed by klauern for Claude Code",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./conventional-commits",
+        "./pr-creator"
+      ]
+    }
+  ]
+}
