@@ -19,26 +19,26 @@ Then search for and install individual skills from the klauern-skills marketplac
 ### Install All Skills
 
 ```bash
-/plugin install klauern-skills@klauern-skills
+/plugin install klauern/skills
 ```
 
 ### Install Individual Skills
 
 ```bash
-/plugin install conventional-commits@klauern-skills
-/plugin install pr-creator@klauern-skills
+/plugin install conventional-commits@klauern/skills
+/plugin install pr-creator@klauern/skills
 ```
 
 ### Local Development Installation
 
 1. Clone this repository:
 ```bash
-git clone https://github.com/klauern/claude-skills.git
+git clone https://github.com/klauern/skills.git
 ```
 
 2. Install the marketplace locally:
 ```bash
-/plugin add-marketplace /path/to/claude-skills
+/plugin add-marketplace /path/to/skills
 ```
 
 ## Available Skills
@@ -139,7 +139,7 @@ This command will:
 ## Repository Structure
 
 ```
-claude-skills/
+klauern-skills/
 ├── .claude-plugin/
 │   └── marketplace.json      # Marketplace configuration
 ├── commands/                 # Custom slash commands
