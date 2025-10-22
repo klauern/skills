@@ -37,6 +37,7 @@ User: /pr
 ```
 
 The skill will:
+
 1. Find your PR template (if it exists)
 2. Analyze your branch commits and changes
 3. Infer as much information as possible
@@ -48,6 +49,7 @@ The skill will:
 ### Phase 1: Discovery
 
 Searches for PR templates in common locations:
+
 - `.github/PULL_REQUEST_TEMPLATE.md`
 - `.github/pull_request_template.md`
 - `PULL_REQUEST_TEMPLATE.md`
@@ -55,6 +57,7 @@ Searches for PR templates in common locations:
 - `.github/PULL_REQUEST_TEMPLATE/*.md` (multiple templates)
 
 Then parses the template to identify:
+
 - Required fields (marked with `[Required]`, `*`, or `<!-- Required -->`)
 - Optional fields
 - Checkboxes that can be auto-filled
@@ -65,6 +68,7 @@ Then parses the template to identify:
 ### Phase 2: Commit Analysis
 
 Analyzes your branch to extract:
+
 - **Title**: From commit messages or branch name
 - **Type**: From conventional commit prefixes (`feat:`, `fix:`, etc.)
 - **Related issues**: From `#123`, `closes #123`, `fixes #123` patterns
@@ -74,6 +78,7 @@ Analyzes your branch to extract:
 - **Documentation changes**: Detected from `.md` file changes
 
 **Git Commands Used**:
+
 ```bash
 git rev-parse --abbrev-ref HEAD  # Current branch
 git log origin/main...HEAD --oneline
@@ -88,6 +93,7 @@ git diff origin/main...HEAD --name-status
 Determines what can be inferred vs. what needs user input:
 
 **High Confidence (Auto-fill)**:
+
 - Issue numbers from commits
 - Type from conventional commits
 - Files changed from git diff
@@ -95,11 +101,13 @@ Determines what can be inferred vs. what needs user input:
 - Docs updated (if .md files changed)
 
 **Medium Confidence (Confirm with user)**:
+
 - PR title (synthesized from commits)
 - Scope (inferred from file paths)
 - Checkbox items (based on file changes)
 
 **Low Confidence (Ask user)**:
+
 - "Why" or "Motivation" sections
 - Manual testing steps
 - Screenshots
@@ -112,12 +120,14 @@ Determines what can be inferred vs. what needs user input:
 ### Phase 4: PR Generation
 
 Composes the final PR:
+
 1. Fills template with inferred + user-provided data
 2. Adds auto-generated sections (commit list, file changes)
 3. Creates PR using `gh pr create`
 4. Optionally adds labels, reviewers, and links issues
 
 **Example Output**:
+
 ```bash
 gh pr create \
   --title "feat: Add user profile API endpoints" \
@@ -133,16 +143,20 @@ gh pr create \
 
 This skill uses different Claude models for optimal performance:
 
-### Claude 3.5 Haiku
+### Claude 4.5 Haiku
+
 **Use for**:
+
 - File and template discovery
 - Git command execution
 - Template parsing
 - Simple pattern matching
 - Field extraction
 
-### Claude 3.5 Sonnet
+### Claude 4.5 Sonnet
+
 **Use for**:
+
 - Commit analysis and intent understanding
 - PR title/description generation
 - Gap detection and reasoning
@@ -184,6 +198,7 @@ Repository has multiple templates - skill helps select the right one.
 - At least one commit on current branch (vs. base branch)
 
 **Installation**:
+
 ```bash
 # Install gh CLI
 brew install gh  # macOS
@@ -198,12 +213,14 @@ gh auth login
 ### Custom Template Locations
 
 If your team uses non-standard locations, the skill will:
+
 1. Ask you to provide the path
 2. Remember it for future PRs in this repository
 
 ### Default Base Branch
 
 The skill automatically detects your default branch using:
+
 ```bash
 git symbolic-ref refs/remotes/origin/HEAD
 # or
@@ -215,6 +232,7 @@ You can override by specifying: `Create PR targeting develop`
 ### Labels and Reviewers
 
 The skill can auto-apply labels based on PR type:
+
 - `feat:` → `enhancement` label
 - `fix:` → `bug` label
 - `docs:` → `documentation` label
@@ -224,6 +242,7 @@ And request reviewers from `CODEOWNERS` if configured.
 ## Error Handling
 
 The skill gracefully handles:
+
 - Missing templates (uses default structure)
 - No base branch detected (asks user)
 - No commits (warns and exits)
@@ -257,18 +276,22 @@ The skill gracefully handles:
 ## Troubleshooting
 
 **"No commits found"**
+
 - Ensure you're on a branch (not detached HEAD)
 - Check commits exist: `git log origin/main...HEAD`
 
 **"gh not authenticated"**
+
 - Run: `gh auth login`
 - Verify: `gh auth status`
 
 **"Cannot determine base branch"**
+
 - Set default: `git remote set-head origin main`
 - Or specify in request: `Create PR targeting develop`
 
 **"Required field missing"**
+
 - Review template for required markers
 - Provide requested information
 - Or update template if field shouldn't be required
