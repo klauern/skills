@@ -1,6 +1,6 @@
 # klauern-skills
 
-Custom skills for Claude Code developed by klauern.
+Custom skills for Claude Code.
 
 ## Overview
 
@@ -25,7 +25,7 @@ Add the marketplace once (GitHub repo or local path):
 /plugin marketplace add klauern/skills
 
 # Or from local path
-/plugin marketplace add /Users/nklauer/dev/klauern-skills
+/plugin marketplace add /path/to/klauern-skills
 ```
 
 ### Install Plugin (brings all skills and commands)
@@ -224,12 +224,6 @@ touch my-new-skill/SKILL.md
 }
 ```
 
-1. Test the skill locally:
-
-```bash
-/plugin reload
-```
-
 ### Adding New Commands
 
 1. Create a markdown file in the `commands/` directory:
@@ -258,7 +252,3 @@ Edit `.claude-plugin/marketplace.json` to manage the marketplace:
 ## Contributing
 
 Feel free to suggest improvements or report issues.
-
-## License
-
-See LICENSE file for details.
