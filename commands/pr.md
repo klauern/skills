@@ -22,7 +22,7 @@ The skill automatically infers:
 - **PR Title**: From commit messages or branch name
 - **Type of Change**: From conventional commit prefixes (`feat:`, `fix:`, `docs:`, etc.)
 - **Related Issues**: From commit messages containing `#123`, `closes #123`, `fixes #123`
-- **Breaking Changes**: From `BREAKING CHANGE:` or `!` in commits
+- **Breaking Changes**: From `BREAKING CHANGE:` or '!' in commits
 - **Tests Added**: If test files were modified
 - **Documentation Updated**: If `.md` files were changed
 - **Files Changed**: Complete list with add/modify/delete status
