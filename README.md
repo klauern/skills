@@ -14,31 +14,47 @@ This is a Claude Code plugin marketplace repository containing custom skills tha
 /plugin
 ```
 
-Then search for and install individual skills from the klauern-skills marketplace.
+Select “Browse Plugins” and install the `klauern-skills` plugin from the `klauern-skills` marketplace.
 
-### Install All Skills
+### Add Marketplace
 
-```bash
-/plugin install klauern/skills
-```
-
-### Install Individual Skills
+Add the marketplace once (GitHub repo or local path):
 
 ```bash
-/plugin install conventional-commits@klauern/skills
-/plugin install pr-creator@klauern/skills
+# From GitHub repository
+/plugin marketplace add klauern/skills
+
+# Or from local path
+/plugin marketplace add /Users/nklauer/dev/klauern-skills
 ```
 
-### Local Development Installation
+### Install Plugin (brings all skills and commands)
+
+```bash
+/plugin install klauern-skills@klauern-skills
+```
+
+### Verify Installation
+
+```bash
+/help
+```
+
+You should see the commands listed.
+
+### Local Development
 
 1. Clone this repository:
+
 ```bash
 git clone https://github.com/klauern/skills.git
 ```
 
-2. Install the marketplace locally:
+1. Add the local marketplace and install the plugin:
+
 ```bash
-/plugin add-marketplace /path/to/skills
+/plugin marketplace add /Users/nklauer/dev/klauern-skills
+/plugin install klauern-skills@klauern-skills
 ```
 
 ## Available Skills
@@ -54,6 +70,7 @@ A skill that helps write conventional commit messages following best practices a
 An intelligent pull request creation skill that discovers and parses PR templates, analyzes commits to infer context, and prompts only for information that can't be automatically determined.
 
 **Features**:
+
 - Auto-discovers PR templates from common locations
 - Analyzes commit history to extract PR title, type, related issues, and breaking changes
 - Intelligently fills template fields based on file changes
@@ -70,11 +87,13 @@ An intelligent pull request creation skill that discovers and parses PR template
 Create a well-formatted commit using the Conventional Commits specification.
 
 **Usage**:
+
 ```bash
 /commit
 ```
 
 This command will:
+
 - Analyze your staged and unstaged changes
 - Review recent commit history for style consistency
 - Create a properly formatted conventional commit message
@@ -85,27 +104,41 @@ This command will:
 Create a well-formatted commit and push it to the remote repository.
 
 **Usage**:
+
 ```bash
 /commit-push
 ```
 
 This command will:
+
 - Analyze your staged and unstaged changes
 - Review recent commit history for style consistency
 - Create a properly formatted conventional commit message
 - Commit the changes
 - Push to the remote repository
 
+### /merge-conflicts
+
+Resolve merge conflicts with a concise, prescriptive workflow.
+
+**Usage**:
+
+```bash
+/merge-conflicts
+```
+
 ### /pr
 
 Create an intelligent pull request with automatic template filling.
 
 **Usage**:
+
 ```bash
 /pr
 ```
 
 This command will:
+
 - Discover and parse your repository's PR template
 - Analyze commit history to infer PR title, type, and related issues
 - Detect breaking changes from commit messages
@@ -115,10 +148,12 @@ This command will:
 - Return the PR URL
 
 **Requirements**:
+
 - GitHub CLI (`gh`) must be installed and authenticated
 - Current branch must have commits not in the base branch
 
 **Example**:
+
 ```bash
 /pr
 
@@ -138,13 +173,14 @@ This command will:
 
 ## Repository Structure
 
-```
+```text
 klauern-skills/
 ├── .claude-plugin/
 │   └── marketplace.json      # Marketplace configuration
 ├── commands/                 # Custom slash commands
 │   ├── commit.md             # Commit command
 │   ├── commit-push.md        # Commit and push command
+│   ├── merge-conflicts.md    # Merge conflicts resolution
 │   └── pr.md                 # Pull request command
 ├── conventional-commits/     # Conventional commits skill
 │   ├── SKILL.md              # Skill definition
@@ -165,16 +201,19 @@ Each skill is self-contained in its own directory with a `SKILL.md` file contain
 ### Adding New Skills
 
 1. Create a new directory at the root level:
+
 ```bash
 mkdir my-new-skill
 ```
 
-2. Create a `SKILL.md` file in that directory with your skill definition:
+1. Create a `SKILL.md` file in that directory with your skill definition:
+
 ```bash
 touch my-new-skill/SKILL.md
 ```
 
-3. Add the skill to `.claude-plugin/marketplace.json`:
+1. Add the skill to `.claude-plugin/marketplace.json`:
+
 ```json
 {
   "plugins": [{
@@ -185,7 +224,8 @@ touch my-new-skill/SKILL.md
 }
 ```
 
-4. Test the skill locally:
+1. Test the skill locally:
+
 ```bash
 /plugin reload
 ```
@@ -193,13 +233,15 @@ touch my-new-skill/SKILL.md
 ### Adding New Commands
 
 1. Create a markdown file in the `commands/` directory:
+
 ```bash
 touch commands/my-command.md
 ```
 
-2. Define the command behavior in the markdown file with instructions for Claude
+1. Define the command behavior in the markdown file with instructions for Claude
 
-3. Test the command:
+1. Test the command:
+
 ```bash
 /my-command
 ```
@@ -207,6 +249,7 @@ touch commands/my-command.md
 ### Marketplace Configuration
 
 Edit `.claude-plugin/marketplace.json` to manage the marketplace:
+
 - `name`: Marketplace identifier
 - `version`: Semantic version number
 - `owner`: Marketplace owner information

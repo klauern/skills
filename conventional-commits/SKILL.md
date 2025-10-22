@@ -1,6 +1,8 @@
 ---
 name: conventional-commits
 description: Creates conventional commits following conventionalcommits.org. Analyzes git changes and generates properly formatted commit messages with types (feat, fix, docs, etc.) and scopes. Supports single/multi-commit workflows and commit-and-push operations.
+version: 1.0.0
+author: klauern
 ---
 
 # Conventional Commits
@@ -64,7 +66,7 @@ Use this skill when:
 
 ## Quick Format Reference
 
-```
+```text
 <type>[optional scope]: <description>
 
 [optional body]

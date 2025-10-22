@@ -1,12 +1,11 @@
-# pr-creator
-
-**Description**: Intelligent pull request creation with template-based field extraction and commit analysis
-
-**Version**: 1.0.0
-
-**Author**: klauern
-
 ---
+name: pr-creator
+description: Intelligent pull request creation with template-based field extraction and commit analysis
+version: 1.0.0
+author: klauern
+---
+
+# PR Creator
 
 ## Overview
 
@@ -30,7 +29,7 @@ Use this skill when you need to:
 
 ## Quick Start
 
-```
+```bash
 User: Create a PR for my changes
 # or
 User: /pr
@@ -275,22 +274,22 @@ The skill gracefully handles:
 
 ## Troubleshooting
 
-**"No commits found"**
+### No commits found
 
 - Ensure you're on a branch (not detached HEAD)
 - Check commits exist: `git log origin/main...HEAD`
 
-**"gh not authenticated"**
+### gh not authenticated
 
 - Run: `gh auth login`
 - Verify: `gh auth status`
 
-**"Cannot determine base branch"**
+### Cannot determine base branch
 
 - Set default: `git remote set-head origin main`
 - Or specify in request: `Create PR targeting develop`
 
-**"Required field missing"**
+### Required field missing
 
 - Review template for required markers
 - Provide requested information
