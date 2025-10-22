@@ -76,7 +76,7 @@ Use this skill when:
 
 **Common types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
 
-**Breaking changes**: Use `!` after type/scope or `BREAKING CHANGE:` footer
+**Breaking changes**: Use '!' after type/scope or `BREAKING CHANGE:` footer
 
 **For complete specification**, see [`format-reference.md`](format-reference.md)
 

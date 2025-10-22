@@ -77,7 +77,7 @@ Breaking changes MUST be indicated using either method:
 
 ### Method 1: Exclamation Mark
 
-Append `!` before the colon:
+Append '!' before the colon:
 ```
 feat!: remove support for Node 6
 refactor(api)!: change authentication method
@@ -209,6 +209,6 @@ ci(github): update Node version in actions
 - Types are case-insensitive (except `BREAKING CHANGE` in footers must be uppercase)
 - Footers use hyphens for whitespace tokens
 - `BREAKING-CHANGE` is synonymous with `BREAKING CHANGE` in footers
-- The `!` in `type!:` is an alternative to `BREAKING CHANGE` footer
+- The '!' in `type!:` is an alternative to `BREAKING CHANGE` footer
 - Scope is optional but recommended for larger projects
 - Body and footers are optional but encouraged for complex changes

@@ -13,6 +13,7 @@ The skill searches for PR templates in these locations (in order):
 5. `.github/PULL_REQUEST_TEMPLATE/*.md` (multiple templates)
 
 If multiple templates exist in the `PULL_REQUEST_TEMPLATE/` directory, the skill will:
+
 - List all available templates
 - Ask the user to select the appropriate one (e.g., bug_report.md vs feature.md)
 
@@ -109,13 +110,14 @@ The skill recognizes and can auto-fill common checkbox patterns:
 |---------------|------------------|
 | "Tests added" or "Tests updated" | Test files modified (e.g., `*.test.js`, `*_test.go`, `test_*.py`) |
 | "Documentation updated" | `.md` files changed or `docs/` directory modified |
-| "Breaking change" | Commits contain `BREAKING CHANGE:` or `!` after type |
+| "Breaking change" | Commits contain `BREAKING CHANGE:` or '!' after type |
 | "Version bump" | `package.json`, `Cargo.toml`, `pyproject.toml`, etc. modified |
 | "CI/CD passes" | Can be checked after PR creation via API |
 
 ### Checkbox Formatting
 
 Preserved checkbox states:
+
 ```markdown
 - [x] Checked item
 - [ ] Unchecked item
@@ -134,6 +136,7 @@ GitHub-style form fields:
 ```
 
 The skill extracts:
+
 - Field name (before the colon)
 - Field type (from options in brackets)
 - Default/placeholder values
@@ -160,6 +163,7 @@ fix/#789-memory-leak
 Patterns that indicate breaking changes:
 
 ### In Commits
+
 ```
 feat!: change API response format
 fix(api)!: remove deprecated endpoint
@@ -168,6 +172,7 @@ BREAKING CHANGE: The API now returns...
 ```
 
 ### In Template
+
 ```markdown
 ## Breaking Changes [Required if applicable]
 
@@ -189,6 +194,7 @@ TODO
 ```
 
 The skill will:
+
 1. Detect these placeholders
 2. Prompt user for values
 3. Replace them in the final PR body
@@ -206,6 +212,7 @@ For repositories with multiple templates:
 ```
 
 The skill will:
+
 1. Detect which template best matches the changes
 2. Suggest the template (e.g., "I see you changed only .md files, use documentation.md template?")
 3. Allow user to override the suggestion

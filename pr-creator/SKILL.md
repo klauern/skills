@@ -71,7 +71,7 @@ Analyzes your branch to extract:
 - **Title**: From commit messages or branch name
 - **Type**: From conventional commit prefixes (`feat:`, `fix:`, etc.)
 - **Related issues**: From `#123`, `closes #123`, `fixes #123` patterns
-- **Breaking changes**: From `BREAKING CHANGE:` or `!` markers
+- **Breaking changes**: From `BREAKING CHANGE:` or '!' markers
 - **Scope**: From file paths or commit scopes
 - **Test changes**: Detected from test file modifications
 - **Documentation changes**: Detected from `.md` file changes

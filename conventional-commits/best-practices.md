@@ -175,7 +175,7 @@ git log -10 --oneline
 
 Bad: Silently changing API behavior
 
-Good: Using `!` or `BREAKING CHANGE:` footer
+Good: Using '!' or `BREAKING CHANGE:` footer
 
 ## Quick Reference
 
@@ -195,4 +195,4 @@ Good: Using `!` or `BREAKING CHANGE:` footer
 
 **Common types**: feat, fix, docs, style, refactor, perf, test, build, ci, chore
 
-**Breaking changes**: Use `!` or `BREAKING CHANGE:` footer
+**Breaking changes**: Use '!' or `BREAKING CHANGE:` footer

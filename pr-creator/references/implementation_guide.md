@@ -87,7 +87,7 @@ git rev-list --count origin/main...HEAD
 | Type | Conventional commit prefix (`feat:`, `fix:`, etc.) |
 | Scope | Conventional commit scope OR common file path prefix |
 | Issues | Parse `#123`, `closes #123`, `fixes #123` from commit messages |
-| Breaking | Look for `BREAKING CHANGE:` or `!` in commits |
+| Breaking | Look for `BREAKING CHANGE:` or '!' in commits |
 | Files | `git diff --name-status` |
 | Test changes | Filter for `*.test.*`, `*_test.*`, `test_*.* ` files |
 | Doc changes | Filter for `*.md`, `docs/**/*` files |
