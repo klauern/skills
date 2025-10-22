@@ -1,4 +1,7 @@
-# Resolve Merge Conflicts
+---
+allowed-tools: Bash
+description: Resolve Merge Conflicts
+---
 
 Concise, prescriptive steps to resolve merge conflicts.
 

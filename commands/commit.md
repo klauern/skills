@@ -1,6 +1,8 @@
-# Commit with Conventional Commits
+---
+allowed-tools: Bash
+description: Create a well-formatted commit using the Conventional Commits specification.
+---
 
-Create a well-formatted commit using the Conventional Commits specification.
 
 ## Instructions
 

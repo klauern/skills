@@ -1,4 +1,7 @@
-# Create Pull Request
+---
+allowed-tools: Bash
+description: Create Pull Request following PULL_REQUEST_TEMPLATE.md
+---
 
 Create a well-structured pull request using the pr-creator skill. This command discovers your PR template, analyzes your commits, and intelligently fills in the PR description.
 

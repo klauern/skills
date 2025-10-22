@@ -1,4 +1,7 @@
-# Commit and Push with Conventional Commits
+---
+allowed-tools: Bash
+description: Commit and Push with Conventional Commits
+---
 
 Create a well-formatted commit using the Conventional Commits specification and push it to the remote repository.
 
