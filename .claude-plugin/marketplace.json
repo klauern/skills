@@ -17,6 +17,12 @@
       "skills": [
         "./conventional-commits",
         "./pr-creator"
+      ],
+      "commands": [
+        "./commands/commit.md",
+        "./commands/commit-push.md",
+        "./commands/pr.md",
+        "./commands/merge-conflicts.md"
       ]
     }
   ]
