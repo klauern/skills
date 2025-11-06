@@ -171,6 +171,78 @@ This command will:
 # Created: https://github.com/user/repo/pull/123
 ```
 
+### /pr-update
+
+Update PR title and description based on actual changes.
+
+**Usage**:
+
+```bash
+/pr-update [pr-number]
+```
+
+This command will:
+
+- Analyze commits, files, and diff content from the PR
+- Look for and use the repository's PR template structure
+- Generate an accurate title following conventional commit format
+- Create a comprehensive description based on actual changes
+- Show a preview and get approval before updating
+- Update the PR using GitHub CLI
+
+**Requirements**:
+
+- GitHub CLI (`gh`) must be installed and authenticated
+- Current branch associated with a PR or PR number provided
+- Permission to edit the PR (author or write access)
+
+### /pr-comment-review
+
+Review all comments on a pull request and build an actionable task list.
+
+**Usage**:
+
+```bash
+/pr-comment-review [pr-number]
+```
+
+This command will:
+
+- Fetch both PR conversation comments and inline review comments
+- Parse and categorize feedback (blocking, questions, suggestions, nits)
+- Group by file/area when applicable
+- Build prioritized task list with file paths and line numbers
+- Present for user approval before making changes
+
+**Requirements**:
+
+- GitHub CLI (`gh`) must be installed and authenticated
+- Valid PR number or current branch with an associated PR
+
+### /gh-checks
+
+Review GitHub Action check failures and fix issues when possible.
+
+**Usage**:
+
+```bash
+/gh-checks
+```
+
+This command will:
+
+- Check current branch status and list GitHub Action checks
+- Identify failing checks and retrieve failure logs
+- Categorize issues (formatting, linting, type errors, tests, dependencies)
+- Suggest or apply simple fixes (with approval)
+- Provide guidance for complex issues
+- Optionally re-run checks after fixes are committed
+
+**Requirements**:
+
+- GitHub CLI (`gh`) must be installed and authenticated
+- Current branch with GitHub Actions workflows
+
 ## Repository Structure
 
 ```text
@@ -181,7 +253,10 @@ klauern-skills/
 │   ├── commit.md             # Commit command
 │   ├── commit-push.md        # Commit and push command
 │   ├── merge-conflicts.md    # Merge conflicts resolution
-│   └── pr.md                 # Pull request command
+│   ├── pr.md                 # Pull request command
+│   ├── pr-update.md          # Update PR title and description
+│   ├── pr-comment-review.md  # Review PR comments
+│   └── gh-checks.md          # GitHub Actions check review
 ├── conventional-commits/     # Conventional commits skill
 │   ├── SKILL.md              # Skill definition
 │   └── references/           # Supporting documentation

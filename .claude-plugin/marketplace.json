@@ -22,7 +22,10 @@
         "./commands/commit.md",
         "./commands/commit-push.md",
         "./commands/pr.md",
-        "./commands/merge-conflicts.md"
+        "./commands/merge-conflicts.md",
+        "./commands/gh-checks.md",
+        "./commands/pr-comment-review.md",
+        "./commands/pr-update.md"
       ]
     }
   ]
