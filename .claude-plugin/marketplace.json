@@ -37,6 +37,17 @@
         "./commands/gh-checks.md",
         "./commands/merge-conflicts.md"
       ]
+    },
+    {
+      "name": "dev-utilities",
+      "description": "Development workflow and utilities",
+      "source": "./",
+      "strict": false,
+      "commands": [
+        "./commands/agents-md.md",
+        "./commands/continue.md",
+        "./commands/worktree.md"
+      ]
     }
   ]
 }
