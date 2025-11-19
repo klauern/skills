@@ -10,7 +10,7 @@
   },
   "plugins": [
     {
-      "name": "conventional-commits",
+      "name": "commits",
       "description": "Conventional commit message creation skill",
       "source": "./",
       "strict": false,
@@ -23,7 +23,7 @@
       ]
     },
     {
-      "name": "pr-creator",
+      "name": "pull-requests",
       "description": "Intelligent pull request creation skill",
       "source": "./",
       "strict": false,
