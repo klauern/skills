@@ -1,0 +1,87 @@
+---
+alwaysApply: true
+---
+# Development Workflow Standards
+
+This project follows specific development practices and tool preferences that should be applied consistently.
+
+## Formatting Tools
+
+### Go Development
+
+- **Always use `gofumpt`** for formatting Go code
+- Install: `go install mvdan.cc/gofumpt@latest`
+- Run on save or before commits: `gofumpt -w .`
+- This is preferred over standard `gofmt`
+
+### Python Development
+
+- **Use `uv run`** for all Python scripts
+- Declare dependencies inline following: <https://docs.astral.sh/uv/guides/scripts/#declaring-script-dependencies>
+- Example script header:
+
+  ```python
+  # /// script
+  # dependencies = ["requests", "pandas==2.0.0"]
+  # ///
+  ```
+
+## Authentication & CLI Tools
+
+### AWS Authentication
+
+- **Use `aws-sso`** for AWS account access
+- This is an internally-developed tool at Zendesk
+- GitHub repo: `gh repo zendesk/aws-sso`
+- Provides seamless SSO authentication to AWS accounts
+
+### Issue Tracking
+
+- **JIRA CLI** is available and configured
+- Use for looking up tickets: `FSEC-####`, `SECURE-####`, etc.
+- The CLI should "just work" without additional configuration
+
+### GitHub Operations
+
+- **Prefer `gh` CLI** over MCP calls or fetch requests to GitHub
+- Use `gh` for:
+  - Creating PRs: `gh pr create`
+  - Viewing issues: `gh issue view`
+  - Repository operations: `gh repo view`
+  - Authentication status: `gh auth status`
+
+### File Operations
+
+- **Use `fd`** for finding files instead of `find`
+- More intuitive syntax: `fd pattern` vs `find . -name "*pattern*"`
+- Respects `.gitignore` by default
+- Faster and more user-friendly
+
+## Commit Standards
+
+### Conventional Commits
+
+Follow <https://www.conventionalcommits.org/en/v1.0.0/>:
+
+- Format: `<type>[optional scope]: <description>`
+- Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+- Breaking changes: Add `!` after type/scope or use `BREAKING CHANGE:` footer
+- Examples:
+  - `feat(auth): add OAuth2 support`
+  - `fix: resolve race condition in worker pool`
+  - `docs: update API documentation`
+
+### Commit Workflow
+
+- Use `/commit` for commits without pushing
+- Use `/commit-push` for commits with immediate push
+- Multi-commit workflows for complex changes
+- Reference issues in commits: `Fixes #123`, `Closes #456`
+
+## Best Practices
+
+1. **Tool Installation**: Ensure all required tools are installed before starting work
+2. **Consistent Formatting**: Run formatters before committing
+3. **Semantic Commits**: Always use conventional commit format
+4. **CLI First**: Prefer CLI tools over web interfaces or API calls
+5. **Efficiency**: Use the most efficient tool for the job (fd > find, gh > API)

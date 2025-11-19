@@ -1,0 +1,250 @@
+---
+globs: commands/*.md,.claude-plugin/marketplace.json
+---
+# Slash Command Development Guide
+
+When creating or modifying slash commands for Claude skills, follow these patterns and best practices.
+
+## Command Structure
+
+Commands are markdown files in the [`commands/`](mdc:commands/) directory that define behavior for Claude.
+
+### Basic Command Template
+```markdown
+# Command Name
+
+Brief description of what the command does.
+
+## Usage
+
+` ``
+/command-name [optional arguments]
+` ``
+
+## Behavior
+
+1. First step Claude takes
+2. Second step
+3. Final output
+
+## Examples
+
+### Example 1: Basic usage
+` ``
+/command-name
+` ``
+
+### Example 2: With arguments
+` ``
+/command-name --option value
+` ``
+```
+
+## Existing Commands Reference
+
+### /commit
+- **File**: [`commands/commit.md`](mdc:commands/commit.md)
+- **Purpose**: Create conventional commits without pushing
+- **Behavior**: Analyzes changes, generates commit message, commits locally
+
+### /commit-push
+- **File**: [`commands/commit-push.md`](mdc:commands/commit-push.md)
+- **Purpose**: Create conventional commits and push to remote
+- **Behavior**: Same as /commit but includes push operation
+
+### /pr
+- **File**: [`commands/pr.md`](mdc:commands/pr.md)
+- **Purpose**: Create intelligent pull requests
+- **Behavior**: Discovers template, analyzes commits, fills PR, creates via gh
+
+## Command Implementation Patterns
+
+### 1. Git Status Analysis
+```markdown
+First, I'll check the current git status:
+- Staged vs unstaged changes
+- Current branch
+- Remote tracking status
+```
+
+### 2. Decision Flow
+```markdown
+Based on the status:
+- If staged changes exist → single commit workflow
+- If only unstaged changes → multi-commit workflow
+- If no changes → inform user and exit
+```
+
+### 3. User Interaction
+```markdown
+I'll ask for any required information:
+- Commit message details (if not inferable)
+- PR description sections (if required by template)
+- Confirmation before destructive operations
+```
+
+### 4. Error Handling
+```markdown
+Common issues I'll handle:
+- No changes to commit
+- Authentication required
+- Merge conflicts
+- Network issues
+```
+
+## Command Naming Conventions
+
+### Patterns
+- **Action-based**: `/commit`, `/push`, `/merge`
+- **Resource-based**: `/pr`, `/issue`, `/branch`
+- **Composite**: `/commit-push`, `/pr-merge`
+
+### Guidelines
+- Use lowercase with hyphens
+- Keep names short and memorable
+- Be consistent with existing conventions
+- Avoid abbreviations unless well-known
+
+## Skill Integration
+
+Commands should reference their associated skills:
+
+```markdown
+This command uses the conventional-commits skill to:
+- Analyze your changes
+- Generate properly formatted commits
+- Follow repository conventions
+
+See the skill documentation for details.
+```
+
+## Command Registration
+
+Add new commands to [`.claude-plugin/marketplace.json`](mdc:.claude-plugin/marketplace.json):
+
+```json
+{
+  "plugins": [
+    {
+      "name": "conventional-commits",
+      "commands": [
+        "./commands/commit.md",
+        "./commands/commit-push.md"
+      ]
+    },
+    {
+      "name": "pr-creator",
+      "commands": [
+        "./commands/pr.md",
+        "./commands/new-command.md"  // Add here
+      ]
+    }
+  ]
+}
+```
+
+## Testing Commands
+
+### Manual Testing
+1. Install locally: `/plugin reload`
+2. Test basic usage: `/command-name`
+3. Test with arguments
+4. Test error cases
+5. Verify integration with skills
+
+### Test Scenarios
+- Fresh repository (no commits)
+- Clean working directory
+- Uncommitted changes
+- Merge conflicts
+- No network connection
+- Missing dependencies (gh, git, etc.)
+
+## Command Documentation
+
+Each command should include:
+
+### Required Sections
+1. **Description**: What the command does
+2. **Usage**: How to invoke it
+3. **Behavior**: Step-by-step process
+4. **Requirements**: Dependencies or prerequisites
+
+### Optional Sections
+1. **Examples**: Common use cases
+2. **Options**: Available flags or arguments
+3. **Troubleshooting**: Common issues
+4. **Related Commands**: Similar functionality
+
+## Best Practices
+
+### Do's
+- ✓ Provide clear feedback at each step
+- ✓ Handle errors gracefully with helpful messages
+- ✓ Ask for confirmation on destructive operations
+- ✓ Use existing skills for complex logic
+- ✓ Follow repository conventions
+- ✓ Test edge cases thoroughly
+
+### Don'ts
+- ✗ Don't assume user environment setup
+- ✗ Don't perform actions without clear indication
+- ✗ Don't hide errors or warnings
+- ✗ Don't duplicate skill functionality
+- ✗ Don't make commands too complex
+
+## Advanced Patterns
+
+### Sub-commands
+```markdown
+/pr create      # Create new PR
+/pr update      # Update existing PR
+/pr merge       # Merge PR
+```
+
+### Options Handling
+```markdown
+/commit --amend           # Amend last commit
+/commit --no-verify       # Skip hooks
+/commit-push --force      # Force push
+```
+
+### Interactive Flows
+```markdown
+1. Detect context
+2. Present options to user
+3. Guide through process
+4. Confirm before execution
+5. Provide result summary
+```
+
+## Debugging Commands
+
+### Verbose Output
+Include detailed information when things go wrong:
+```markdown
+I encountered an error:
+- Command: git push origin feature-branch
+- Exit code: 128
+- Error: fatal: unable to access...
+- Suggestion: Check your network connection
+```
+
+### State Inspection
+Show relevant state for debugging:
+```markdown
+Current state:
+- Branch: feature-branch
+- Changes: 3 files modified
+- Remote: origin (https://github.com/...)
+- Last commit: abc123 "fix: resolve issue"
+```
+
+## Future Command Ideas
+
+Consider these patterns for new commands:
+- `/review` - Automated code review
+- `/changelog` - Generate changelog from commits
+- `/release` - Create releases with notes
+- `/sync` - Sync fork with upstream
+- `/clean` - Clean up branches and tags

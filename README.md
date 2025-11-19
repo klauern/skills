@@ -1,6 +1,6 @@
 # klauern-skills
 
-Custom skills for Claude Code.
+Custom skills for Claude Code. The plugin is available in the marketplace as **klauern**.
 
 ## Overview
 
@@ -14,7 +14,9 @@ This is a Claude Code plugin marketplace repository containing custom skills tha
 /plugin
 ```
 
-Select “Browse Plugins” and install the `klauern-skills` plugin from the `klauern-skills` marketplace.
+Select "Browse Plugins" and install plugins from the `klauern-skills` marketplace:
+- `conventional-commits` - Conventional commit message creation
+- `pr-creator` - Intelligent pull request creation
 
 ### Add Marketplace
 
@@ -22,16 +24,29 @@ Add the marketplace once (GitHub repo or local path):
 
 ```bash
 # From GitHub repository
-/plugin marketplace add klauern/skills
+/plugin marketplace add klauern/klauern-skills
 
 # Or from local path
 /plugin marketplace add /path/to/klauern-skills
 ```
 
-### Install Plugin (brings all skills and commands)
+### Install Plugins
+
+Install all plugins:
 
 ```bash
-/plugin install klauern-skills@klauern-skills
+/plugin install conventional-commits@klauern-skills
+/plugin install pr-creator@klauern-skills
+```
+
+Or install selectively:
+
+```bash
+# Just commit tools
+/plugin install conventional-commits@klauern-skills
+
+# Just PR tools
+/plugin install pr-creator@klauern-skills
 ```
 
 ### Verify Installation
@@ -47,25 +62,34 @@ You should see the commands listed.
 1. Clone this repository:
 
 ```bash
-git clone https://github.com/klauern/skills.git
+git clone https://github.com/klauern/klauern-skills.git
 ```
 
-1. Add the local marketplace and install the plugin:
+1. Add the local marketplace and install plugins:
 
 ```bash
 /plugin marketplace add /Users/nklauer/dev/klauern-skills
-/plugin install klauern-skills@klauern-skills
+/plugin install conventional-commits@klauern-skills
+/plugin install pr-creator@klauern-skills
 ```
 
-## Available Skills
+## Available Plugins
 
 ### conventional-commits
+
+**Plugin**: `conventional-commits@klauern-skills`
 
 A skill that helps write conventional commit messages following best practices and the Conventional Commits specification.
 
 **Usage**: Claude will automatically use this skill when you ask for help with commit messages.
 
+**Includes**:
+- `/commit` command
+- `/commit-push` command
+
 ### pr-creator
+
+**Plugin**: `pr-creator@klauern-skills`
 
 An intelligent pull request creation skill that discovers and parses PR templates, analyzes commits to infer context, and prompts only for information that can't be automatically determined.
 
@@ -80,9 +104,18 @@ An intelligent pull request creation skill that discovers and parses PR template
 
 **Usage**: Claude will automatically use this skill when you ask to create a pull request, or use the `/pr` command.
 
+**Includes**:
+- `/pr` command
+- `/pr-update` command
+- `/pr-comment-review` command
+- `/gh-checks` command
+- `/merge-conflicts` command
+
 ## Available Commands
 
 ### /commit
+
+**Plugin**: `conventional-commits@klauern-skills`
 
 Create a well-formatted commit using the Conventional Commits specification.
 
@@ -100,6 +133,8 @@ This command will:
 - Commit the changes (does not push to remote)
 
 ### /commit-push
+
+**Plugin**: `conventional-commits@klauern-skills`
 
 Create a well-formatted commit and push it to the remote repository.
 
@@ -119,6 +154,8 @@ This command will:
 
 ### /merge-conflicts
 
+**Plugin**: `pr-creator@klauern-skills`
+
 Resolve merge conflicts with a concise, prescriptive workflow.
 
 **Usage**:
@@ -128,6 +165,8 @@ Resolve merge conflicts with a concise, prescriptive workflow.
 ```
 
 ### /pr
+
+**Plugin**: `pr-creator@klauern-skills`
 
 Create an intelligent pull request with automatic template filling.
 
@@ -173,6 +212,8 @@ This command will:
 
 ### /pr-update
 
+**Plugin**: `pr-creator@klauern-skills`
+
 Update PR title and description based on actual changes.
 
 **Usage**:
@@ -198,6 +239,8 @@ This command will:
 
 ### /pr-comment-review
 
+**Plugin**: `pr-creator@klauern-skills`
+
 Review all comments on a pull request and build an actionable task list.
 
 **Usage**:
@@ -220,6 +263,8 @@ This command will:
 - Valid PR number or current branch with an associated PR
 
 ### /gh-checks
+
+**Plugin**: `pr-creator@klauern-skills`
 
 Review GitHub Action check failures and fix issues when possible.
 

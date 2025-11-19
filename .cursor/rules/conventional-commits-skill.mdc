@@ -1,0 +1,164 @@
+---
+globs: conventional-commits/**,commands/commit*.md
+---
+# Conventional Commits Skill Development
+
+When working on the conventional commits skill, follow these patterns and guidelines.
+
+## Skill Structure
+
+The conventional commits skill consists of:
+
+- **Main Definition**: [`conventional-commits/SKILL.md`](mdc:conventional-commits/SKILL.md)
+- **Workflows Guide**: [`conventional-commits/workflows.md`](mdc:conventional-commits/workflows.md)
+- **Examples**: [`conventional-commits/examples.md`](mdc:conventional-commits/examples.md)
+- **Best Practices**: [`conventional-commits/best-practices.md`](mdc:conventional-commits/best-practices.md)
+- **Format Reference**: [`conventional-commits/format-reference.md`](mdc:conventional-commits/format-reference.md)
+
+## Commands
+
+- [`/commit`](mdc:commands/commit.md) - Create commit without push
+- [`/commit-push`](mdc:commands/commit-push.md) - Create commit and push
+
+## Commit Format Specification
+
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Valid Types
+
+- `feat`: New feature
+- `fix`: Bug fix
+- `docs`: Documentation only
+- `style`: Formatting, missing semicolons, etc.
+- `refactor`: Code change that neither fixes a bug nor adds a feature
+- `perf`: Performance improvement
+- `test`: Adding missing tests
+- `build`: Changes to build system or dependencies
+- `ci`: CI configuration changes
+- `chore`: Other changes that don't modify src or test files
+
+### Scope Guidelines
+
+- Use file/module names: `feat(auth): add login`
+- Use feature areas: `fix(api): handle null response`
+- Keep scopes consistent within a project
+- Omit scope for changes affecting multiple areas
+
+### Breaking Changes
+
+Two ways to indicate:
+
+1. Add `!` after type/scope: `feat!: remove deprecated API`
+2. Add footer: `BREAKING CHANGE: description of what breaks`
+
+## Workflow Patterns
+
+### Single Commit Workflow (Staged Changes)
+
+1. Check for staged changes: `git diff --cached`
+2. Analyze changes for type and scope
+3. Generate commit message
+4. Commit with `git commit -m`
+
+### Multi-Commit Workflow (Unstaged Changes)
+
+1. Analyze all changes: `git diff`
+2. Group related changes
+3. Stage and commit each group separately
+4. Use `git add -p` for partial staging
+
+### Sub-Agent Strategy
+
+- **Use Haiku 3.5** for:
+  - Quick diff analysis
+  - File categorization
+  - Simple message drafting
+
+- **Use Sonnet 3.5** for:
+  - Complex commit planning
+  - Scope identification
+  - Multi-commit strategies
+  - Cross-cutting change analysis
+
+## Implementation Details
+
+When implementing commit functionality:
+
+1. **Git Status Check**
+
+   ```bash
+   git status --porcelain
+   git diff --cached --stat  # For staged
+   git diff --stat           # For unstaged
+   ```
+
+2. **Commit History Analysis**
+
+   ```bash
+   git log --oneline -10    # Recent commits for style
+   git log --grep="^feat"   # Find feature commits
+   ```
+
+3. **Message Validation**
+   - Verify type is valid
+   - Check description starts with lowercase
+   - Ensure no period at end of subject
+   - Validate line length (50 for subject, 72 for body)
+
+4. **Push Operations**
+   - Check remote status first
+   - Handle conflicts gracefully
+   - Verify branch protection rules
+
+## Common Patterns
+
+### Feature Development
+
+```
+feat(component): add user profile widget
+feat(api): implement user preferences endpoint
+test(component): add user profile tests
+docs(api): document preferences endpoint
+```
+
+### Bug Fixes
+
+```
+fix(auth): prevent session timeout during upload
+fix(ui): correct button alignment on mobile
+test(auth): verify session extension works
+```
+
+### Refactoring
+
+```
+refactor(database): extract connection pooling
+refactor(api): simplify error handling
+style(api): apply consistent formatting
+```
+
+## Error Handling
+
+Common issues to handle:
+
+- No changes to commit
+- Uncommitted changes when pushing
+- Merge conflicts
+- Protected branch violations
+- Invalid commit message format
+
+## Testing Commits
+
+When testing the skill:
+
+1. Create test changes in different scopes
+2. Verify message format compliance
+3. Test both single and multi-commit flows
+4. Ensure push operations work correctly
+5. Validate breaking change handling

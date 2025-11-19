@@ -10,22 +10,32 @@
   },
   "plugins": [
     {
-      "name": "klauern-skills",
-      "description": "Custom skills developed by klauern for Claude Code",
+      "name": "conventional-commits",
+      "description": "Conventional commit message creation skill",
       "source": "./",
       "strict": false,
       "skills": [
-        "./conventional-commits",
-        "./pr-creator"
+        "./conventional-commits"
       ],
       "commands": [
         "./commands/commit.md",
-        "./commands/commit-push.md",
+        "./commands/commit-push.md"
+      ]
+    },
+    {
+      "name": "pr-creator",
+      "description": "Intelligent pull request creation skill",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./pr-creator"
+      ],
+      "commands": [
         "./commands/pr.md",
-        "./commands/merge-conflicts.md",
-        "./commands/gh-checks.md",
+        "./commands/pr-update.md",
         "./commands/pr-comment-review.md",
-        "./commands/pr-update.md"
+        "./commands/gh-checks.md",
+        "./commands/merge-conflicts.md"
       ]
     }
   ]

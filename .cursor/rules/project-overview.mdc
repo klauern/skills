@@ -1,0 +1,62 @@
+---
+alwaysApply: true
+---
+# Klauern Skills Project Overview
+
+This is a Claude Code plugin marketplace repository containing custom skills that extend Claude's capabilities.
+
+## Repository Structure
+
+The project follows a modular structure where each skill is self-contained:
+
+- **Skills Directory**: Each skill has its own directory at the root level
+- **Command Files**: Slash commands are defined in the [`commands/`](mdc:commands/) directory
+- **Marketplace Config**: Plugin definitions in [`.claude-plugin/marketplace.json`](mdc:.claude-plugin/marketplace.json)
+
+## Main Entry Points
+
+- **Repository README**: [`README.md`](mdc:README.md) - Installation instructions and overview
+- **Conventional Commits Skill**: [`conventional-commits/SKILL.md`](mdc:conventional-commits/SKILL.md)
+- **PR Creator Skill**: [`pr-creator/SKILL.md`](mdc:pr-creator/SKILL.md)
+
+## Available Commands
+
+- [`/commit`](mdc:commands/commit.md) - Create conventional commits without pushing
+- [`/commit-push`](mdc:commands/commit-push.md) - Create conventional commits and push
+- [`/pr`](mdc:commands/pr.md) - Create intelligent pull requests
+
+## Skills Documentation
+
+### Conventional Commits
+
+- **Main**: [`conventional-commits/SKILL.md`](mdc:conventional-commits/SKILL.md)
+- **Workflows**: [`conventional-commits/workflows.md`](mdc:conventional-commits/workflows.md)
+- **Examples**: [`conventional-commits/examples.md`](mdc:conventional-commits/examples.md)
+- **Best Practices**: [`conventional-commits/best-practices.md`](mdc:conventional-commits/best-practices.md)
+- **Format Reference**: [`conventional-commits/format-reference.md`](mdc:conventional-commits/format-reference.md)
+
+### PR Creator
+
+- **Main**: [`pr-creator/SKILL.md`](mdc:pr-creator/SKILL.md)
+- **Example Workflows**: [`pr-creator/references/example_workflows.md`](mdc:pr-creator/references/example_workflows.md)
+- **Implementation Guide**: [`pr-creator/references/implementation_guide.md`](mdc:pr-creator/references/implementation_guide.md)
+- **Template Patterns**: [`pr-creator/references/template_patterns.md`](mdc:pr-creator/references/template_patterns.md)
+
+## Development Guidelines
+
+When developing in this repository:
+
+1. Each skill should be self-contained in its own directory
+2. Skills must include a `SKILL.md` file with metadata and instructions
+3. Commands go in the `commands/` directory as markdown files
+4. Reference documentation goes in skill subdirectories
+5. All skills must be registered in `.claude-plugin/marketplace.json`
+
+## Installation Methods
+
+Users can install skills via:
+
+- Interactive: `/plugin` then search
+- All plugins: `/plugin install conventional-commits@klauern-skills` and `/plugin install pr-creator@klauern-skills`
+- Individual: `/plugin install conventional-commits@klauern-skills` or `/plugin install pr-creator@klauern-skills`
+- Local dev: `/plugin add-marketplace /path/to/repo`

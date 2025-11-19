@@ -1,0 +1,216 @@
+---
+globs: pr-creator/**,commands/pr.md
+---
+# PR Creator Skill Development
+
+When working on the PR creator skill, follow these patterns for intelligent pull request generation.
+
+## Skill Components
+
+- **Main Definition**: [`pr-creator/SKILL.md`](mdc:pr-creator/SKILL.md)
+- **Template Patterns**: [`pr-creator/references/template_patterns.md`](mdc:pr-creator/references/template_patterns.md)
+- **Example Workflows**: [`pr-creator/references/example_workflows.md`](mdc:pr-creator/references/example_workflows.md)
+- **Implementation Guide**: [`pr-creator/references/implementation_guide.md`](mdc:pr-creator/references/implementation_guide.md)
+- **Command**: [`/pr`](mdc:commands/pr.md)
+
+## Core Workflow Phases
+
+### Phase 1: Template Discovery
+Search locations in order:
+1. `.github/PULL_REQUEST_TEMPLATE.md`
+2. `.github/pull_request_template.md`
+3. `PULL_REQUEST_TEMPLATE.md`
+4. `docs/PULL_REQUEST_TEMPLATE.md`
+5. `.github/PULL_REQUEST_TEMPLATE/*.md` (multiple templates)
+
+Template parsing patterns:
+- Required fields: `[Required]`, `*`, `<!-- Required -->`
+- Checkboxes: `- [ ]`, `- [x]`
+- Dropdowns: `<!-- Options: A, B, C -->`
+- Placeholders: `[placeholder text]`, `<!-- instructions -->`
+
+### Phase 2: Commit Analysis
+Extract information using:
+```bash
+git rev-parse --abbrev-ref HEAD         # Current branch
+git log origin/main...HEAD --oneline    # Commit messages
+git diff origin/main...HEAD --stat      # Changed files
+git diff origin/main...HEAD --name-status # File operations
+```
+
+Information to extract:
+- **Title**: From commits or branch name
+- **Type**: From conventional commit prefixes
+- **Issues**: `#123`, `closes #123`, `fixes #123`
+- **Breaking changes**: `BREAKING CHANGE:` or `!`
+- **Test changes**: Modifications to test files
+- **Doc changes**: Modifications to `.md` files
+
+### Phase 3: Intelligent Gap Filling
+
+#### Auto-fillable (High Confidence)
+- Issue numbers from commit messages
+- PR type from conventional commits
+- Files changed from git diff
+- Test checkbox if test files modified
+- Docs checkbox if `.md` files changed
+- Breaking changes from commit markers
+
+#### Confirmable (Medium Confidence)
+- PR title synthesized from commits
+- Scope inferred from file paths
+- Related components from changed directories
+
+#### User Input Required (Low Confidence)
+- Motivation/Why section
+- Manual testing steps
+- Screenshots or demos
+- Migration guides
+- Security implications
+
+### Phase 4: PR Generation
+```bash
+gh pr create \
+  --title "feat: Add user authentication" \
+  --body "$(cat pr_body.md)" \
+  --base main \
+  --label "enhancement" \
+  --assignee "@me"
+```
+
+## Model Usage Strategy
+
+### Use Haiku 3.5 for:
+- File system operations
+- Template discovery
+- Git command execution
+- Pattern matching
+- Simple text extraction
+
+### Use Sonnet 3.5 for:
+- Commit intent analysis
+- PR description generation
+- Gap detection logic
+- Natural language synthesis
+- Complex decision making
+
+## Template Pattern Examples
+
+### Standard Sections
+```markdown
+## Description
+[Auto-filled from commits]
+
+## Type of Change
+- [x] Bug fix (detected: fix: in commits)
+- [ ] New feature (detected: feat: in commits)
+
+## Related Issues
+Closes #123 (extracted from commits)
+
+## Testing
+- [x] Tests added (detected: test files modified)
+- [ ] Manual testing completed [USER INPUT NEEDED]
+
+## Checklist
+- [x] Documentation updated (detected: .md files changed)
+- [ ] Breaking changes documented [CHECK IF DETECTED]
+```
+
+### Required Field Detection
+```markdown
+<!-- Required -->
+## Why are we making this change?
+[USER INPUT REQUIRED]
+
+## What changed? *
+[AUTO-FILLED from git diff]
+
+### Security Review [Required]
+[USER INPUT REQUIRED]
+```
+
+## Implementation Patterns
+
+### Template Discovery
+```python
+template_locations = [
+    '.github/PULL_REQUEST_TEMPLATE.md',
+    '.github/pull_request_template.md',
+    'PULL_REQUEST_TEMPLATE.md',
+    'docs/PULL_REQUEST_TEMPLATE.md'
+]
+
+# Check for multiple templates
+multi_template_dir = '.github/PULL_REQUEST_TEMPLATE/'
+if os.path.isdir(multi_template_dir):
+    templates = glob.glob(f"{multi_template_dir}*.md")
+```
+
+### Commit Analysis
+```python
+# Extract PR title
+commits = git_log_output.splitlines()
+if len(commits) == 1:
+    pr_title = commits[0].split(': ', 1)[1]
+else:
+    # Synthesize from multiple commits
+    pr_title = find_common_theme(commits)
+
+# Extract issues
+issue_pattern = r'(?:closes?|fixes?|resolves?)\s+#(\d+)'
+issues = re.findall(issue_pattern, commit_text, re.I)
+```
+
+### Intelligent Prompting
+Only ask for what you can't determine:
+```
+✓ Title: feat: Add user authentication (from commits)
+✓ Type: New feature (from feat: prefix)
+✓ Issues: Closes #42 (from commit message)
+✓ Tests: Added (test files modified)
+
+Need from you:
+1. Why are we making this change?
+2. Any breaking changes to document?
+3. Security considerations?
+```
+
+## Error Handling
+
+### Common Issues
+- **No template found**: Use sensible defaults
+- **No commits on branch**: Exit with helpful message
+- **gh not authenticated**: Guide through `gh auth login`
+- **Multiple templates**: Let user choose
+- **Base branch detection failed**: Ask user
+
+### Graceful Degradation
+1. Missing template → Use minimal structure
+2. Can't detect type → Ask user
+3. No issue references → Leave blank
+4. Complex changes → Prompt for more context
+
+## Testing the Skill
+
+1. **Template Discovery**
+   - Test with various template locations
+   - Test with missing templates
+   - Test with multiple templates
+
+2. **Commit Analysis**
+   - Single commit branches
+   - Multi-commit branches
+   - Various commit formats
+   - Breaking changes
+
+3. **Gap Detection**
+   - Verify auto-fill accuracy
+   - Test prompting logic
+   - Validate user input handling
+
+4. **PR Creation**
+   - Test with different base branches
+   - Verify label application
+   - Test reviewer assignment
+   - Validate markdown formatting
