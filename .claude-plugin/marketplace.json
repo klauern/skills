@@ -1,53 +1,53 @@
 {
-  "name": "klauern-skills",
-  "owner": {
-    "name": "klauern",
-    "email": "klauer@gmail.com"
-  },
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "1.0.0"
+    "version": "1.1.0"
+  },
+  "name": "klauern-skills",
+  "owner": {
+    "email": "klauer@gmail.com",
+    "name": "klauern"
   },
   "plugins": [
     {
-      "name": "commits",
-      "description": "Conventional commit message creation skill",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./conventional-commits"
-      ],
       "commands": [
         "./commands/commit.md",
         "./commands/commit-push.md"
-      ]
+      ],
+      "description": "Conventional commit message creation skill",
+      "name": "commits",
+      "skills": [
+        "./conventional-commits"
+      ],
+      "source": "./",
+      "strict": false
     },
     {
-      "name": "pull-requests",
-      "description": "Intelligent pull request creation skill",
-      "source": "./",
-      "strict": false,
-      "skills": [
-        "./pr-creator"
-      ],
       "commands": [
         "./commands/pr.md",
         "./commands/pr-update.md",
         "./commands/pr-comment-review.md",
         "./commands/gh-checks.md",
         "./commands/merge-conflicts.md"
-      ]
+      ],
+      "description": "Intelligent pull request creation skill",
+      "name": "pull-requests",
+      "skills": [
+        "./pr-creator"
+      ],
+      "source": "./",
+      "strict": false
     },
     {
-      "name": "dev-utilities",
-      "description": "Development workflow and utilities",
-      "source": "./",
-      "strict": false,
       "commands": [
         "./commands/agents-md.md",
         "./commands/continue.md",
         "./commands/worktree.md"
-      ]
+      ],
+      "description": "Development workflow and utilities",
+      "name": "dev-utilities",
+      "source": "./",
+      "strict": false
     }
   ]
 }
