@@ -121,7 +121,7 @@ An intelligent pull request creation skill that discovers and parses PR template
 
 **Plugin**: `dev-utilities@klauern-skills`
 
-Development workflow utilities for managing agent configuration standards, work session continuation, and parallel git worktrees.
+Development workflow utilities for managing agent configuration standards, work session continuation, parallel git worktrees, and GitHub Actions upgrades.
 
 **Usage**: Use the commands directly when you need workflow automation.
 
@@ -129,6 +129,7 @@ Development workflow utilities for managing agent configuration standards, work 
 - `/dev-utilities:agents-md` - Migrate to AGENTS.md standard
 - `/dev-utilities:continue` - Resume incomplete work from notebooks
 - `/dev-utilities:worktree` - Manage git worktrees for parallel development
+- `/dev-utilities:gh-actions-upgrade` - Upgrade GitHub Actions in workflows
 
 ## Available Commands
 
@@ -386,29 +387,89 @@ This command will:
 - Each worktree maintains its own working directory and state
 - Ideal for managing concurrent code reviews or experiments
 
+### /dev-utilities:gh-actions-upgrade
+
+**Plugin**: `dev-utilities@klauern-skills`
+
+Automatically detect, analyze, and upgrade GitHub Actions in your repository's workflows.
+
+**Usage**:
+
+```bash
+/dev-utilities:gh-actions-upgrade
+```
+
+This command will:
+
+- Scan all workflow files in `.github/workflows/`
+- Detect all action references and their current versions
+- Check if actions are forks using `gh api` (automatically detects parent repositories)
+- Find available upgrades for each action
+- Identify major version changes with potential breaking changes
+- Generate detailed upgrade plans
+- Apply upgrades to workflow files
+- Commit changes and create a comprehensive PR
+
+**Features**:
+
+- **Automatic fork detection**: Uses GitHub CLI to check if any action is a fork and identifies the upstream parent
+- **Version analysis**: Compares current versions with latest releases
+- **Breaking change detection**: Identifies major version upgrades and potential issues
+- **Interactive decisions**: Asks for guidance on fork migrations and breaking upgrades
+- **Smart parameter handling**: Preserves or updates parameters based on your preferences
+- **Comprehensive PR**: Creates detailed pull requests with upgrade documentation
+
+**Requirements**:
+
+- `.github/workflows/` directory with workflow files
+- GitHub CLI (`gh`) installed and authenticated
+- Write access to repository
+- Internet connection for API access
+
+**Example output**:
+
+```text
+Found 3 workflow files with 8 action references
+
+Analyzing actions...
+✓ actions/checkout@v3 → v4 available (major upgrade)
+✓ actions/setup-node@v3 → v4 available (major upgrade)
+⚠ custom-org/checkout@v2 is a fork of actions/checkout
+  → Upstream at v4, recommend migrating
+
+Created PR #123 with all upgrades
+```
+
 ## Repository Structure
 
 ```text
 klauern-skills/
 ├── .claude-plugin/
-│   └── marketplace.json      # Marketplace configuration
-├── commands/                 # Custom slash commands
-│   ├── agents-md.md          # AGENTS.md migration command
-│   ├── commit.md             # Commit command
-│   ├── commit-push.md        # Commit and push command
-│   ├── continue.md           # Continue work from notebooks
-│   ├── gh-checks.md          # GitHub Actions check review
-│   ├── merge-conflicts.md    # Merge conflicts resolution
-│   ├── pr.md                 # Pull request command
-│   ├── pr-comment-review.md  # Review PR comments
-│   ├── pr-update.md          # Update PR title and description
-│   └── worktree.md           # Git worktree management
-├── conventional-commits/     # Conventional commits skill
-│   ├── SKILL.md              # Skill definition
-│   └── references/           # Supporting documentation
-├── pr-creator/               # Pull request creation skill
-│   ├── SKILL.md              # Skill definition
-│   └── references/           # Supporting documentation
+│   └── marketplace.json          # Marketplace configuration
+├── commands/                     # Custom slash commands
+│   ├── agents-md.md              # AGENTS.md migration command
+│   ├── commit.md                 # Commit command
+│   ├── commit-push.md            # Commit and push command
+│   ├── continue.md               # Continue work from notebooks
+│   ├── gh-actions-upgrade.md     # GitHub Actions upgrade command
+│   ├── gh-checks.md              # GitHub Actions check review
+│   ├── merge-conflicts.md        # Merge conflicts resolution
+│   ├── pr.md                     # Pull request command
+│   ├── pr-comment-review.md      # Review PR comments
+│   ├── pr-update.md              # Update PR title and description
+│   └── worktree.md               # Git worktree management
+├── conventional-commits/         # Conventional commits skill
+│   ├── SKILL.md                  # Skill definition
+│   └── references/               # Supporting documentation
+├── gh-actions-upgrader/          # GitHub Actions upgrade skill
+│   ├── SKILL.md                  # Skill definition
+│   └── references/               # Supporting documentation
+│       ├── analysis_guide.md     # Fork detection and analysis
+│       ├── detection_patterns.md # Action reference patterns
+│       └── examples.md           # Complete usage examples
+├── pr-creator/                   # Pull request creation skill
+│   ├── SKILL.md                  # Skill definition
+│   └── references/               # Supporting documentation
 │       ├── template_patterns.md
 │       ├── example_workflows.md
 │       └── implementation_guide.md

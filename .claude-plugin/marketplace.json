@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "1.1.0"
+    "version": "1.2.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -42,10 +42,14 @@
       "commands": [
         "./commands/agents-md.md",
         "./commands/continue.md",
-        "./commands/worktree.md"
+        "./commands/worktree.md",
+        "./commands/gh-actions-upgrade.md"
       ],
       "description": "Development workflow and utilities",
       "name": "dev-utilities",
+      "skills": [
+        "./gh-actions-upgrader"
+      ],
       "source": "./",
       "strict": false
     }
