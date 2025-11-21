@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "SlashCommand(/commit-push)",
+      "SlashCommand(/pr)",
+      "Bash(gh:*)",
+      "Skill(pr-creator)",
+      "Bash(cp:*)",
+      "mcp__exa__get_code_context_exa",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:claudecodemarketplace.net)",
+      "Bash(mkdir:*)",
+      "Bash(tree:*)",
+      "Bash(ln:*)",
+    ],
+    "deny": [],
+    "ask": [],
+    "additionalDirectories": [
+      "/Users/nklauer/.claude"
+    ]
+  }
+}
