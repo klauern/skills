@@ -322,16 +322,16 @@ Migrate your repository to the AGENTS.md standard for cross-agent compatibility.
 
 This command will:
 
-- Check if CLAUDE.md exists in the repository
-- Move CLAUDE.md to AGENTS.md if it exists
-- Create a symbolic link from CLAUDE.md to AGENTS.md for backward compatibility
-- Merge both files if AGENTS.md already exists, deduplicating content
-- Update any references to CLAUDE.md in the repository to point to AGENTS.md
+- Check if `CLAUDE.md` exists in the repository
+- Move `CLAUDE.md` to `AGENTS.md` if it exists
+- Create a symbolic link from `CLAUDE.md` to `AGENTS.md` for backward compatibility
+- Merge both files if `AGENTS.md` already exists, deduplicating content
+- Update any references to `CLAUDE.md` in the repository to point to `AGENTS.md`
 
 **Benefits**:
 
-- Single source of truth for agent instructions across multiple AI coding assistants
-- Backward compatibility with tools still using CLAUDE.md
+- Single source of truth for agent instructions across multiple AI coding assistants (Claude Code, Cursor, Windsurf, Cline, Roo-Cline, etc.)
+- Backward compatibility with tools still using `CLAUDE.md`
 - Follows the [agents.md specification](https://agents.md/)
 
 ### /dev-utilities:continue
