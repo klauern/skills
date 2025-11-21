@@ -140,6 +140,17 @@ All commits must follow https://www.conventionalcommits.org/:
   )"
   ```
 
+### Git Workflow
+
+**Branch Management**:
+- Always create feature branches from `main` for new work
+- Never commit directly to `main` or `master`
+- After merging a feature branch to `main`, **always delete the branch** both locally and remotely:
+  ```bash
+  git branch -d feature-branch-name
+  git push origin --delete feature-branch-name
+  ```
+
 ### PR Creation Workflow
 
 The `pr-creator` skill intelligently infers PR metadata:
@@ -186,7 +197,7 @@ Marketplace uses semantic versioning. When adding features:
 2. Create conventional commit with `feat(plugin-name):` prefix
 3. Tag release if publishing to marketplace
 
-Current version: 1.2.0
+Current version: 1.3.0
 
 ## Cross-Agent Compatibility
 
