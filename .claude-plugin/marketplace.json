@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "1.2.0"
+    "version": "1.3.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -27,7 +27,6 @@
         "./commands/pr.md",
         "./commands/pr-update.md",
         "./commands/pr-comment-review.md",
-        "./commands/gh-checks.md",
         "./commands/merge-conflicts.md"
       ],
       "description": "Intelligent pull request creation skill",
@@ -43,12 +42,14 @@
         "./commands/agents-md.md",
         "./commands/continue.md",
         "./commands/worktree.md",
-        "./commands/gh-actions-upgrade.md"
+        "./commands/gh-actions-upgrade.md",
+        "./commands/gh-checks.md"
       ],
       "description": "Development workflow and utilities",
       "name": "dev-utilities",
       "skills": [
-        "./gh-actions-upgrader"
+        "./gh-actions-upgrader",
+        "./ci-failure-analyzer"
       ],
       "source": "./",
       "strict": false
