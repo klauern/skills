@@ -1164,14 +1164,17 @@ Note: Consider mocking all external API calls in tests to prevent future flakine
 | 4. Lock File           | Dependency          | Haiku  | Yes (100%)    | ~10s | $0.002 |
 | 5. Breaking Change     | Dependency          | Sonnet | No            | ~45s | $0.020 |
 | 6. Flaky Test          | Test Infrastructure | Sonnet | No            | ~80s | $0.017 |
+| **7. Missing Secret** ⭐ | **Secrets/Permissions** | **Sonnet** | **No** | **~20s** | **$0.010** |
+| **8. Matrix Partial** ⭐ | **Matrix Failure** | **Mixed** | **Yes (targeted)** | **~35s** | **$0.018** |
 
 **Key Insights**:
 
 1. **Mechanical issues** (formatting, lock files) are fast and cheap (Haiku-driven)
 2. **Logic issues** (tests, breaking changes) require analysis (Sonnet-driven)
-3. **Mixed scenarios** benefit from hybrid approach
-4. **Auto-fix success** correlates with issue complexity
-5. **User interaction** is valuable for non-obvious fixes
+3. **Infrastructure issues** (secrets, permissions, matrix) require non-code remediation
+4. **Mixed scenarios** benefit from hybrid approach
+5. **Auto-fix success** correlates with issue complexity
+6. **User interaction** is valuable for non-obvious fixes
 
 **Average Success Metrics**:
 
@@ -1317,5 +1320,7 @@ export function makeId() {
 ```
 
 ```
+Note: If you can't reproduce locally with Node 18, you can also rerun just the failing job in CI to inspect logs more carefully—sometimes the issue appears only in CI's environment.
+
 After patching, rerun only the failing matrix child.
 ```

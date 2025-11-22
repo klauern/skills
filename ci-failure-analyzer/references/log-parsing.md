@@ -571,7 +571,7 @@ Reusable workflows show up as jobs whose `steps[].name` equals `Run workflow`.
 
 1. Inspect parent logs for `workflow_call` metadata.
 2. Download child workflow logs via `gh run view <child-run-id> --log`.
-3. Note that reusable workflows may hide the true job name; rely on `needs` graph to map dependencies.
+3. Note that reusable workflows may hide the true job name; rely on `needs` graph to map dependencies. If you can't find the failing step in parent logs, check the reusable workflow's own run logs separately.
 
 ### Prioritization Tips
 
@@ -601,8 +601,9 @@ Error: Unable to process command '::set-env name=...::...' successfully.
    ```regex
    secrets\.([A-Z0-9_]+)
    ```
+   Note: This won't catch environment variable indirection (e.g., `env: NPM_TOKEN: ${{ secrets.TOKEN }}`); check workflow files if direct references aren't found.
 3. For permission blocks, capture YAML snippet around `permissions:` to report missing scopes.
-4. Record the step name (column 2) so you can instruct users which part of the workflow to adjust.
+4. Record the step name and workflow file path (e.g., `.github/workflows/deploy.yml:25`) so users can verify configuration.
 
 ### Reporting
 
@@ -643,6 +644,7 @@ GitHub Actions may truncate very large logs.
 3. **Focus on Recent Output**:
    - Errors usually near the end
    - Scan last 1000 lines first
+   - Note: For matrix jobs with many parallel children, errors from failed matrix children typically appear near their own job's conclusion, not necessarily at the end of the entire log
 
    ```bash
    gh run view --log-failed | tail -1000

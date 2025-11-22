@@ -89,5 +89,5 @@ gh pr checks
 - **Multiple recent runs**: Default to the latest concluded run but mention other failing runs for context.
 - **Logs unavailable**: If `gh run view --log-failed` says logs are missing, wait or notify the user to rerun once logs are ready.
 - **Matrix jobs**: Report failing axis values explicitly and avoid rerunning the full matrix unless asked.
-- **Secrets/permissions**: Detect `Resource not accessible by integration` or missing secret names and direct the user to update GitHub secrets instead of guessing values.
+- **Secrets/permissions**: Detect `Resource not accessible by integration` or missing secret names and direct the user to update GitHub secrets instead of guessing values. See [Secrets & Permissions Workflow](../ci-failure-analyzer/references/workflows.md#secrets--permissions-workflow) for detailed remediation.
 - **Flaky tests**: When the same test both passes and fails on the same commit, label it as flaky and recommend mitigation steps (mocking, retries) instead of silent retries.

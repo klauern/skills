@@ -961,7 +961,7 @@ Cache restore/save steps or artifact download/upload failures.
 1. Surface cache key and step name from logs.
 2. Recommend bumping cache key suffix (e.g., `cache-node-modules-v2`).
 3. Suggest deleting/re-uploading artifact if corruption suspected.
-4. Encourage re-running the affected job only after cache adjustments.
+4. Encourage re-running the affected job only after cache adjustments. Note: If failures persist, the cache may need additional time to expire completely.
 
 **Model Strategy**:
 
@@ -992,7 +992,7 @@ Only a single matrix combination fails (e.g., Node 18 on ubuntu-latest).
 
 1. Enumerate all matrix combinations and mark failing ones.
 2. Determine if failure is unique to runtime/OS or underlying code.
-3. Provide targeted repro instructions (e.g., `nvm use 18 && npm test`).
+3. Provide targeted repro instructions (e.g., `nvm use 18 && npm test`). Suggest running repro locally first for quick iteration, then rerun only the failing axis in CI once you have a fix.
 4. Avoid rerunning entire matrix—rerun only the failing axis once fix is applied.
 
 **Model Strategy**:
