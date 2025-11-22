@@ -5,13 +5,14 @@ How to detect which formatters, linters, and build tools a project uses.
 ## Table of Contents
 
 1. [Detection Strategy](#detection-strategy)
-2. [JavaScript/TypeScript Projects](#javascripttypescript-projects)
-3. [Python Projects](#python-projects)
-4. [Go Projects](#go-projects)
-5. [Rust Projects](#rust-projects)
-6. [Ruby Projects](#ruby-projects)
-7. [CI Workflow Analysis](#ci-workflow-analysis)
-8. [Fallback Defaults](#fallback-defaults)
+2. [Monorepo & Subdirectory Detection](#monorepo--subdirectory-detection)
+3. [JavaScript/TypeScript Projects](#javascripttypescript-projects)
+4. [Python Projects](#python-projects)
+5. [Go Projects](#go-projects)
+6. [Rust Projects](#rust-projects)
+7. [Ruby Projects](#ruby-projects)
+8. [CI Workflow Analysis](#ci-workflow-analysis)
+9. [Fallback Defaults](#fallback-defaults)
 
 ---
 
@@ -55,11 +56,60 @@ Is tool mentioned in CI workflow?
 
 ---
 
+## Monorepo & Subdirectory Detection
+
+Many repositories contain multiple apps/packages with distinct toolchains. Detect tooling inside each workspace to avoid running the wrong formatter.
+
+### Discovery Steps
+
+1. **Find Manifests**
+   ```bash
+   fd -tf --max-depth 4 'package.json|pyproject.toml|go.mod|Cargo.toml'
+   ```
+2. **Group by Directory**
+   - Yarn/pnpm workspaces live under `apps/*`, `packages/*`, `services/*`
+   - `go.work` and `Cargo.toml` often list member paths
+3. **Iterate Per Package**
+
+   ```python
+   import json, subprocess, pathlib
+
+   def detect_monorepo_tools(root):
+       manifests = subprocess.run(
+           ["fd", "-tf", "--max-depth", "4", "package.json"],
+           cwd=root, capture_output=True, text=True,
+       ).stdout.strip().splitlines()
+
+       per_pkg = {}
+       for manifest in manifests:
+           pkg_dir = pathlib.Path(root, manifest).parent
+           per_pkg[str(pkg_dir)] = detect_all_tools(str(pkg_dir))
+       return per_pkg
+   ```
+
+### Reporting
+
+```
+Detected tools:
+- apps/web: prettier, eslint, tsc
+- apps/api: prettier, eslint, jest
+- services/billing: gofumpt, golangci-lint
+```
+
+### Guardrails
+
+- Never run formatters/linters at repo root if tools differ per workspace—scope commands to the failing package.
+- When CI logs include a path (e.g., `apps/admin`), restrict detection to that directory first.
+- If two workspaces use conflicting formatter versions, mention the conflict before auto-running fixes.
+
+---
+
 ## JavaScript/TypeScript Projects
 
 ### Prettier Detection
 
 **1. Config Files**:
+
 ```bash
 # Check for prettier config (any of these)
 fd -t f '\.prettierrc|\.prettierrc\.(json|yml|yaml|js|cjs|toml)|prettier\.config\.(js|cjs)$'
@@ -69,6 +119,7 @@ grep -q '"prettier"' package.json
 ```
 
 **Files to check**:
+
 - `.prettierrc`
 - `.prettierrc.json`, `.prettierrc.yml`, `.prettierrc.yaml`
 - `.prettierrc.js`, `.prettierrc.cjs`
@@ -76,18 +127,21 @@ grep -q '"prettier"' package.json
 - `package.json` (with `"prettier"` key)
 
 **2. Package.json Scripts**:
+
 ```bash
 # Look for format scripts
 grep -E '"(format|prettier)".*prettier' package.json
 ```
 
 **3. Dependencies**:
+
 ```bash
 # Check if prettier is installed
 jq -r '.devDependencies.prettier // .dependencies.prettier // empty' package.json
 ```
 
 **Detection Code**:
+
 ```python
 def detect_prettier(project_path):
     # 1. Check config files
@@ -136,23 +190,27 @@ def detect_prettier(project_path):
 ### ESLint Detection
 
 **1. Config Files**:
+
 ```bash
 # Check for eslint config
 fd -t f '\.eslintrc|\.eslintrc\.(json|yml|yaml|js|cjs)|eslint\.config\.(js|cjs|mjs)$'
 ```
 
 **Files to check**:
+
 - `.eslintrc`
 - `.eslintrc.json`, `.eslintrc.yml`, `.eslintrc.js`, `.eslintrc.cjs`
 - `eslint.config.js` (ESLint 9+ flat config)
 
 **2. Package.json**:
+
 ```bash
 # Check for eslint in scripts or config
 grep -E '"(lint|eslint)"' package.json
 ```
 
 **Detection Code**:
+
 ```python
 def detect_eslint(project_path):
     eslint_configs = [
@@ -200,18 +258,21 @@ def detect_eslint(project_path):
 ### TypeScript (tsc) Detection
 
 **1. Config File**:
+
 ```bash
 # tsconfig.json is definitive
 test -f tsconfig.json && echo "TypeScript project"
 ```
 
 **2. Package.json**:
+
 ```bash
 # Check for typescript dependency
 jq -r '.devDependencies.typescript // .dependencies.typescript // empty' package.json
 ```
 
 **Detection Code**:
+
 ```python
 def detect_typescript(project_path):
     tsconfig = os.path.join(project_path, 'tsconfig.json')
@@ -246,6 +307,7 @@ def detect_typescript(project_path):
 ### Black Detection
 
 **1. Config Files**:
+
 ```bash
 # Check pyproject.toml for [tool.black]
 grep -q '\[tool\.black\]' pyproject.toml
@@ -255,11 +317,13 @@ test -f .black && echo "Black configured"
 ```
 
 **2. Setup.cfg**:
+
 ```bash
 grep -q '\[tool:black\]' setup.cfg
 ```
 
 **3. Dependencies**:
+
 ```bash
 # Check if black is in requirements or poetry
 grep -q '^black' requirements.txt requirements-dev.txt
@@ -267,6 +331,7 @@ poetry show black 2>/dev/null
 ```
 
 **Detection Code**:
+
 ```python
 def detect_black(project_path):
     # Check pyproject.toml
@@ -296,6 +361,7 @@ def detect_black(project_path):
 ### Ruff Detection
 
 **1. Config Files**:
+
 ```bash
 # Check pyproject.toml for [tool.ruff]
 grep -q '\[tool\.ruff\]' pyproject.toml
@@ -305,12 +371,14 @@ test -f ruff.toml && echo "Ruff configured"
 ```
 
 **2. Dependencies**:
+
 ```bash
 grep -q '^ruff' requirements.txt requirements-dev.txt
 poetry show ruff 2>/dev/null
 ```
 
 **Detection Code**:
+
 ```python
 def detect_ruff(project_path):
     # Check pyproject.toml
@@ -342,6 +410,7 @@ def detect_ruff(project_path):
 ### mypy Detection
 
 **1. Config Files**:
+
 ```bash
 # Check mypy.ini
 test -f mypy.ini && echo "mypy configured"
@@ -354,6 +423,7 @@ grep -q '\[mypy\]' setup.cfg
 ```
 
 **Detection Code**:
+
 ```python
 def detect_mypy(project_path):
     mypy_configs = [
@@ -392,12 +462,14 @@ def detect_mypy(project_path):
 **Note**: User's CLAUDE.md specifies preference for `gofumpt` over `gofmt`
 
 **1. CI Workflow Check**:
+
 ```bash
 # Check if gofumpt is used in CI
 grep -r 'gofumpt' .github/workflows/
 ```
 
 **2. Default to gofumpt** (user preference):
+
 ```python
 def detect_go_formatter(project_path):
     # Check for Go project
@@ -434,6 +506,7 @@ def detect_go_formatter(project_path):
 ### golangci-lint Detection
 
 **1. Config File**:
+
 ```bash
 # Check for golangci-lint config
 test -f .golangci.yml && echo "golangci-lint configured"
@@ -442,6 +515,7 @@ test -f .golangci.toml && echo "golangci-lint configured"
 ```
 
 **Detection Code**:
+
 ```python
 def detect_golangci_lint(project_path):
     configs = ['.golangci.yml', '.golangci.yaml', '.golangci.toml', '.golangci.json']
@@ -464,6 +538,7 @@ def detect_golangci_lint(project_path):
 ### rustfmt Detection
 
 **1. Config File**:
+
 ```bash
 # Check for rustfmt.toml
 test -f rustfmt.toml && echo "rustfmt configured"
@@ -474,6 +549,7 @@ test -f .rustfmt.toml && echo "rustfmt configured"
 All Rust projects use `cargo fmt` (rustfmt) by default
 
 **Detection Code**:
+
 ```python
 def detect_rustfmt(project_path):
     # Check for Rust project
@@ -504,6 +580,7 @@ def detect_rustfmt(project_path):
 Clippy is part of the Rust toolchain, available for all Rust projects
 
 **Detection Code**:
+
 ```python
 def detect_clippy(project_path):
     if os.path.exists(os.path.join(project_path, 'Cargo.toml')):
@@ -522,16 +599,19 @@ def detect_clippy(project_path):
 ### RuboCop Detection
 
 **1. Config File**:
+
 ```bash
 test -f .rubocop.yml && echo "RuboCop configured"
 ```
 
 **2. Gemfile**:
+
 ```bash
 grep -q 'rubocop' Gemfile
 ```
 
 **Detection Code**:
+
 ```python
 def detect_rubocop(project_path):
     # Check for config
@@ -564,11 +644,13 @@ The most reliable detection: **check what CI actually runs**.
 ### GitHub Actions Workflow Parsing
 
 **1. Find Workflow Files**:
+
 ```bash
 fd -t f '\.yml$|\.yaml$' .github/workflows/
 ```
 
 **2. Parse Workflow**:
+
 ```python
 import yaml
 
@@ -617,6 +699,7 @@ def parse_ci_workflows(project_path):
 ```
 
 **Benefits**:
+
 - 99% confidence - this is what CI actually runs
 - Handles custom commands and scripts
 - Reveals exact command-line flags used
@@ -628,6 +711,7 @@ def parse_ci_workflows(project_path):
 When no explicit configuration is found, use these language defaults:
 
 ### JavaScript/TypeScript
+
 ```python
 defaults = {
     'formatter': 'prettier',  # Most common
@@ -637,6 +721,7 @@ defaults = {
 ```
 
 ### Python
+
 ```python
 defaults = {
     'formatter': 'black',     # Most popular
@@ -646,6 +731,7 @@ defaults = {
 ```
 
 ### Go
+
 ```python
 defaults = {
     'formatter': 'gofumpt',   # User preference per CLAUDE.md
@@ -654,6 +740,7 @@ defaults = {
 ```
 
 ### Rust
+
 ```python
 defaults = {
     'formatter': 'rustfmt',   # Standard
@@ -716,6 +803,7 @@ def detect_all_tools(project_path):
 ```
 
 **Usage**:
+
 ```python
 tools = detect_all_tools('/path/to/project')
 
@@ -741,12 +829,14 @@ if formatter:
 - Command detection
 
 **Use Haiku for**:
+
 - Running detection functions
 - Parsing config files
 - Checking file existence
 - Extracting commands from workflows
 
 **Use Sonnet when**:
+
 - User has conflicting tools
 - Need to explain trade-offs
 - Choosing between multiple valid options

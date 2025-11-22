@@ -9,7 +9,13 @@ This document provides detailed step-by-step workflows for analyzing and fixing 
 - [Multiple Failure Workflow](#multiple-failure-workflow)
 - [Test Failure Workflow](#test-failure-workflow)
 - [Dependency Failure Workflow](#dependency-failure-workflow)
+- [Formatter & Linter Auto-Fix Workflow](#formatter--linter-auto-fix-workflow)
+- [Secrets & Permissions Workflow](#secrets--permissions-workflow)
+- [Cache and Artifact Workflow](#cache-and-artifact-workflow)
+- [Matrix Workflow](#matrix-workflow)
 - [Flaky Test Workflow](#flaky-test-workflow)
+- [Breaking Change Detection](#breaking-change-detection)
+- [Result Reporting Template](#result-reporting-template)
 - [Model Strategy by Phase](#model-strategy-by-phase)
 - [Troubleshooting](#troubleshooting)
 
@@ -28,22 +34,27 @@ This is the default workflow for analyzing CI failures.
 **Steps**:
 
 1. **Verify Git Status**
+
    ```bash
    git status
    ```
+
    - Check for uncommitted changes
    - Ensure working directory is clean
 
 2. **Get Current Branch**
+
    ```bash
    git branch --show-current
    ```
+
    - Needed for branch-based check queries
 
 3. **Check PR Existence**
    ```bash
    gh pr view --json number,title,state 2>/dev/null
    ```
+
    - Determines if we use PR-based or branch-based queries
    - PR context provides better check information
 
@@ -60,16 +71,20 @@ This is the default workflow for analyzing CI failures.
 **Steps**:
 
 1. **If PR Exists**:
+
    ```bash
    gh pr checks
    ```
+
    - Shows check name, status, elapsed time
    - More reliable than branch-based queries
 
 2. **If No PR (Branch-Based)**:
+
    ```bash
    gh run list --branch $(git branch --show-current) --limit 5 --json databaseId,conclusion,name,status
    ```
+
    - Lists recent workflow runs
    - Filter for `conclusion: "failure"`
 
@@ -81,6 +96,7 @@ This is the default workflow for analyzing CI failures.
 **Output**: List of failing checks with run IDs
 
 **Edge Cases**:
+
 - No checks found: May be still queued or not triggered
 - All checks passing: Nothing to analyze
 - Checks in progress: Wait or analyze completed ones
@@ -96,9 +112,11 @@ This is the default workflow for analyzing CI failures.
 **Steps**:
 
 1. **For Each Failing Check**:
+
    ```bash
    gh run view <run-id> --log-failed
    ```
+
    - Gets only failed job logs (not entire run)
    - Output can be large (thousands of lines)
 
@@ -113,6 +131,7 @@ This is the default workflow for analyzing CI failures.
 **Output**: Raw log content for each failure
 
 **Edge Cases**:
+
 - Logs not available yet: "Logs are not available yet"
 - Very large logs: May be truncated by gh CLI
 - Multiple job failures: Need to retrieve each separately
@@ -155,6 +174,7 @@ This is the default workflow for analyzing CI failures.
 **Output**: Categorized failures with fix strategies
 
 **Reasoning Tasks** (why Sonnet):
+
 - Ambiguous error messages require interpretation
 - Correlating multiple related failures
 - Assessing whether issue is code vs. environment
@@ -173,6 +193,7 @@ This is the default workflow for analyzing CI failures.
 **Model**: Haiku 4.5 (command execution)
 
 1. **Show Intent**:
+
    ```
    I found formatting issues that can be auto-fixed.
    Running: npx prettier --write .
@@ -183,9 +204,11 @@ This is the default workflow for analyzing CI failures.
    - Capture output
 
 3. **Verify Fix**:
+
    ```bash
    git diff
    ```
+
    - Show what changed
    - Ensure no unexpected modifications
 
@@ -195,6 +218,7 @@ This is the default workflow for analyzing CI failures.
    ```
 
 **Auto-Fix Examples**:
+
 ```bash
 # Prettier
 npx prettier --write .
@@ -240,6 +264,7 @@ poetry lock --no-update
    - "Should I open the file for you to edit?"
 
 **Manual Fix Examples**:
+
 - Type errors requiring code changes
 - Test logic failures
 - API breaking changes
@@ -256,11 +281,13 @@ poetry lock --no-update
 **Steps**:
 
 1. **Ask User**:
+
    ```
    Fixes have been applied. Would you like me to re-run the CI checks?
    ```
 
 2. **If Yes**:
+
    ```bash
    gh run rerun <run-id>
    ```
@@ -269,10 +296,12 @@ poetry lock --no-update
    ```bash
    gh run watch <run-id>
    ```
+
    - Real-time status updates
    - Can be slow, user may prefer to check later
 
 **Note**: Only re-run if:
+
 - Fixes were actually applied
 - User confirms
 - Not too many failures (avoid wasting CI resources)
@@ -308,6 +337,7 @@ poetry lock --no-update
 6. **Verify and Optionally Re-run** (Haiku)
 
 **Model Strategy**:
+
 - Try Haiku first for pattern matching
 - Escalate to Sonnet only if categorization is uncertain
 - Most single formatting/linting failures can be handled entirely with Haiku
@@ -361,6 +391,7 @@ poetry lock --no-update
    - Avoid multiple re-runs (wastes CI resources)
 
 **Model Strategy**:
+
 - Sonnet is critical for failure correlation
 - Haiku handles the mechanical fixes
 - Sonnet makes strategic decisions on fix order
@@ -399,9 +430,11 @@ poetry lock --no-update
    - Identify what changed recently (git diff)
 
 5. **Correlate with Recent Changes** (Sonnet)
+
    ```bash
    git diff main -- <test-related-files>
    ```
+
    - See what code changed that might affect test
    - Check if test itself was modified
 
@@ -423,6 +456,7 @@ poetry lock --no-update
    - **Consult user for non-obvious changes**
 
 **Model Strategy**:
+
 - Sonnet handles entire workflow (tests require semantic understanding)
 - Only use Haiku for log retrieval
 - Test failures rarely have mechanical fixes
@@ -452,6 +486,7 @@ poetry lock --no-update
 4. **Attempt Auto-Fix** (Haiku)
 
    **Lock file mismatch**:
+
    ```bash
    # npm
    npm ci
@@ -470,6 +505,7 @@ poetry lock --no-update
    ```
 
    **Missing package** (if obvious):
+
    ```bash
    npm install <package>
    poetry add <package>
@@ -477,14 +513,17 @@ poetry lock --no-update
    ```
 
    **Audit failure** (minor):
+
    ```bash
    npm audit fix
    ```
 
 5. **Verify Fix** (Haiku)
+
    ```bash
    git diff package-lock.json
    ```
+
    - Ensure reasonable changes
    - Check if major version changes occurred
 
@@ -501,11 +540,126 @@ poetry lock --no-update
    - See [Breaking Change Detection](#breaking-change-detection)
 
 **Model Strategy**:
+
 - Haiku for simple lock file regeneration
 - Sonnet for conflicts and breaking changes
 - Most dependency issues can be Haiku-driven
 
 **Auto-Fix Rate**: High (~70-80% of dependency issues)
+
+---
+
+## Formatter & Linter Auto-Fix Workflow
+
+**Scenario**: Formatting/linting jobs fail with clearly auto-fixable issues.
+
+### Steps
+
+1. **Detect Tool + Config** (Haiku)
+   - Inspect workflow logs for tool name (`prettier`, `black`, `gofumpt`, `eslint`, `ruff`)
+   - Confirm config files exist (`.prettierrc`, `.eslintrc.*`, `pyproject.toml`, etc.)
+2. **Confirm Safe Scope** (Haiku)
+   - Count affected files by parsing log summary
+   - If >25 files or multiple languages, warn user before proceeding
+3. **Announce Intent** (Sonnet for narration)
+   - “Formatting issues detected in 6 files. Running: npx prettier --write .”
+4. **Apply Fix** (Haiku)
+   - Run formatter/linter once with `--fix` or write mode
+   - Capture exit code and stdout/stderr
+5. **Verify & Show Diff** (Haiku)
+   - `git status -sb` and `git diff --stat`
+   - For lint, optionally re-run in `--check` mode to confirm
+6. **Summarize Outcome** (Sonnet)
+   - Include file count, commands executed, and remaining manual issues (if any)
+
+**Guardrails**:
+
+- Never strip unused _variables_ automatically—only imports/whitespace unless log proves safety.
+- If formatter exits non-zero (config mismatch), stop and ask before retrying with guessed flags.
+
+---
+
+## Secrets & Permissions Workflow
+
+**Scenario**: Jobs fail due to missing secrets, insufficient scopes, or org policies.
+
+### Steps
+
+1. **Detect Permission Error** (Sonnet)
+   - Look for `Resource not accessible by integration`, `##[error]No value for required secret`, exit code `78`, or `HttpError: 403 Forbidden`.
+2. **Identify Missing Secret/Scope** (Haiku)
+   - Parse log lines mentioning `secrets.<NAME>` or `permissions: write-all`
+   - Cross-check workflow YAML for the `env`/`with` keys referencing secrets
+3. **Confirm Repo State** (Haiku)
+   - `gh secret list --app actions` (if permitted) or instruct user to verify via GitHub UI
+4. **Provide Remediation Plan** (Sonnet)
+   - Example: “Define `secrets.NPM_TOKEN` at repo/org level with publish scope”
+   - Mention required permissions block (e.g., `permissions: contents: write`)
+5. **Decide Next Action** (Sonnet)
+   - If user can update settings now → wait and rerun
+   - Otherwise → mark as blocked and recommend contacting repo admin
+
+**Guardrails**:
+
+- Never attempt to print or guess secret values.
+- Avoid editing workflow files unless explicitly requested—these failures are configuration issues, not code defects.
+
+---
+
+## Cache and Artifact Workflow
+
+**Scenario**: Cache restore/save or artifact download/upload fails, usually with tar/curl errors.
+
+### Steps
+
+1. **Detect Cache/Artifact Failure** (Haiku)
+   - Recognize phrases like `Failed to restore cache`, `tar: short read`, `Artifact has expired`.
+2. **Identify Cache Key** (Haiku)
+   - From log: `Key: linux-node-18-<hash>`
+   - Note whether restore or save step failed
+3. **Assess Impact** (Sonnet)
+   - Determine if failure is fatal (build needed cached deps) or merely adds runtime
+4. **Recommend Fix** (Sonnet)
+   - Bump cache key suffix (e.g., add `.v2`)
+   - Manually delete corrupted artifact via GitHub UI
+   - Re-run job without cache (if optional)
+5. **Document Next Steps** (Sonnet)
+   - “No repo changes necessary; update workflow cache key and rerun once artifact is cleared.”
+
+**Guardrails**:
+
+- Do not attempt to modify or delete caches via API without explicit user approval.
+- Highlight that these failures often resolve after cache bust + rerun.
+
+---
+
+## Matrix Workflow
+
+**Scenario**: Only a subset of matrix combinations fail (e.g., Node 18 on ubuntu).
+
+### Steps
+
+1. **Enumerate Jobs** (Haiku)
+   - `gh run view <run-id> --json jobs --jq '.jobs[] | {name, conclusion, steps}'`
+   - Or `gh run view <run-id> --job "<job-name>" --log-failed` for targeted logs
+2. **Extract Matrix Values** (Haiku)
+   - Parse job name suffixes (e.g., `test (node-version: 18, os: ubuntu-latest)`)
+   - Build table of pass/fail per axis
+3. **Identify Root Axis** (Sonnet)
+   - Determine whether the failure is tied to language/runtime, OS, architecture, etc.
+   - Check if failure matches a known pattern (e.g., only Windows builds fail due to path casing)
+4. **Prioritize Fix** (Sonnet)
+   - Focus on earliest failing axis; skip re-running passing combos
+5. **Advise Repro** (Sonnet)
+   - Provide local command to reproduce (e.g., `nvm use 18 && npm test`)
+   - Suggest targeted rerun: `gh run rerun <run-id> --job <job-name>`
+6. **Summarize** (Sonnet)
+   - “Matrix summary: Node16 ✅, Node18 ❌ (tsc compile error), Node20 ✅. Fix Node18-specific dependency.”
+
+**Guardrails**:
+
+- Never rerun the entire matrix unless the underlying config changed.
+- Make it obvious when downstream jobs are only failing because a dependency job did not produce artifacts.
 
 ---
 
@@ -551,6 +705,7 @@ poetry lock --no-update
    - Reduce test order dependencies
 
 **Model Strategy**:
+
 - Sonnet drives entire workflow
 - Flaky tests require deep reasoning about test behavior
 - Historical pattern analysis is key
@@ -578,9 +733,11 @@ poetry lock --no-update
    - Identify specific API changes
 
 3. **Find All Usage Locations** (Haiku)
+
    ```bash
    rg "oldMethodName" --type ts
    ```
+
    - Search codebase for affected calls
    - List files needing updates
 
@@ -601,9 +758,43 @@ poetry lock --no-update
    - If complex, guide user through manual process
 
 **Model Strategy**:
+
 - Sonnet analyzes changelogs and assesses impact
 - Haiku searches codebase and applies mechanical changes
 - Sonnet provides strategic migration guidance
+
+---
+
+## Result Reporting Template
+
+Use this template at the end of every `/gh-checks` run to keep user-facing updates consistent.
+
+```
+CI Failure Summary
+------------------
+Branch/PR: <name or link>
+Failing jobs: <job-name 1> (status), <job-name 2> (status)
+
+Root causes:
+1. <Category> — <one-line description> (confidence: High/Med/Low)
+   Relevant log excerpt: <line/path>
+   Proposed action: <auto-fix command OR manual guidance>
+   Status: <Done / Needs approval / Blocked>
+
+Actions taken:
+- [x] npx prettier --write .
+- [ ] Analyze failing test (waiting for user)
+
+Next steps:
+- Optionally rerun <job-name> via `gh run rerun <id>`
+- Manual follow-up (e.g., update secret `NPM_TOKEN`)
+```
+
+**Guidelines**:
+
+- Always include confidence level and whether the issue is auto-fixable.
+- If nothing was changed, explicitly say “No code changes applied; investigation only.”
+- Link to relevant reference docs when suggesting manual fixes (e.g., failure pattern section).
 
 ---
 
@@ -680,11 +871,13 @@ Many workflows use both:
 **Symptoms**: Workflow reports no failures but user says CI is failing
 
 **Diagnosis**:
+
 1. Check if on correct branch: `git branch --show-current`
 2. Verify PR exists: `gh pr view`
 3. Check if checks are still queued: `gh run list --limit 10`
 
 **Solutions**:
+
 - Switch to correct branch
 - Wait for checks to start
 - Create PR if working with branch-based checks
@@ -696,11 +889,13 @@ Many workflows use both:
 **Symptoms**: `gh run view --log-failed` returns empty or error
 
 **Diagnosis**:
+
 1. Check run status: May still be in progress
 2. Verify permissions: `gh auth status`
 3. Check run ID: May be incorrect
 
 **Solutions**:
+
 - Wait for run to complete
 - Re-authenticate: `gh auth login`
 - Use `gh run list` to get correct run ID
@@ -712,11 +907,13 @@ Many workflows use both:
 **Symptoms**: Applied formatter/linter but CI still fails
 
 **Diagnosis**:
+
 1. Check if all issues were auto-fixable
 2. Verify formatter config matches CI
 3. Ensure no additional manual fixes needed
 
 **Solutions**:
+
 - Review remaining errors in log
 - Check for CI-specific configuration
 - Apply manual fixes for non-auto-fixable issues
@@ -728,11 +925,13 @@ Many workflows use both:
 **Symptoms**: 10+ different checks failing
 
 **Diagnosis**:
+
 1. Likely root cause affecting many checks
 2. May be environment or setup issue
 3. Could be major breaking change
 
 **Solutions**:
+
 - Identify common root cause (Sonnet analysis)
 - Fix highest priority failure first
 - Consider if PR is too large (split into smaller changes)
@@ -744,12 +943,14 @@ Many workflows use both:
 **Symptoms**: Same test passes locally but fails in CI
 
 **Diagnosis**:
+
 1. Environment differences (CI vs. local)
 2. Timing issues (CI may be slower/faster)
 3. Test order dependencies
 4. External dependencies
 
 **Solutions**:
+
 - Add logging to understand failure
 - Increase timeouts
 - Improve test isolation
@@ -763,6 +964,7 @@ Many workflows use both:
 For complete real-world examples with full logs and step-by-step resolution, see [examples.md](examples.md).
 
 Quick reference:
+
 - **Example 1**: Simple Prettier formatting failure (Haiku-driven)
 - **Example 2**: Multiple ESLint + TypeScript errors (Mixed)
 - **Example 3**: Test failure with assertion mismatch (Sonnet-driven)

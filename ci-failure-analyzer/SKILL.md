@@ -108,12 +108,14 @@ Use this skill when:
 The skill follows a conservative, user-respecting approach:
 
 **Autonomous Fixes** (apply without asking):
+
 - Code formatting (prettier, black, gofmt, rustfmt)
 - Linting with --fix flags (eslint --fix, ruff check --fix)
 - Lock file updates (package-lock.json, poetry.lock)
 - Simple dependency installations
 
 **Interactive Fixes** (consult user first):
+
 - Type errors requiring code changes
 - Test logic failures
 - Breaking changes from dependencies
@@ -124,11 +126,25 @@ The skill follows a conservative, user-respecting approach:
 
 **See [workflows.md](references/workflows.md) for detailed step-by-step instructions.**
 
+### Autonomy Guardrails
+
+| Action                                                                            | Auto-run?                                      | Notes                                                                     |
+| --------------------------------------------------------------------------------- | ---------------------------------------------- | ------------------------------------------------------------------------- |
+| Formatters (`prettier`, `black`, `gofumpt`, `rustfmt`)                            | ✅ Yes                                         | Only after detecting the tool/config. Show a `git diff --stat` afterward. |
+| Safe lint fixes (`eslint --fix`, `ruff --fix`)                                    | ✅ Yes                                         | Run once; surface remaining violations for manual review.                 |
+| Lock file regeneration (`npm install`, `poetry lock --no-update`, `cargo update`) | ✅ Yes                                         | Call out dependency deltas and warn if majors changed.                    |
+| Missing dependency installation                                                   | ✅ Yes, if import → package mapping is obvious | Default to dev dependency when failure happened in lint/tests.            |
+| Type/test/build changes                                                           | ⚠️ Ask first                                   | Present options (update types vs. adjust code) and wait for approval.     |
+| Secrets, permissions, workflow YAML edits, bulk retries                           | ❌ Never                                       | Provide guidance only; do not mutate CI configs or spam reruns.           |
+
+Each `/gh-checks` run should explicitly state which bucket a proposed fix falls into before executing commands.
+
 ## Model Strategy
 
 ### Use Haiku 4.5 for
 
 **Fast I/O Operations**:
+
 - Executing `gh run list`, `gh run view`, `gh pr checks`
 - Reading failure logs from files
 - Running formatters and linters
@@ -136,6 +152,7 @@ The skill follows a conservative, user-respecting approach:
 - Pattern matching against known error signatures
 
 **Simple Decision Making**:
+
 - Categorizing failures into known types
 - Extracting file paths from error messages
 - Determining which formatter/linter to run
@@ -144,24 +161,28 @@ The skill follows a conservative, user-respecting approach:
 ### Use Sonnet 4.5 for
 
 **Complex Analysis**:
+
 - Root cause determination for ambiguous failures
 - Correlating multiple related failures
 - Understanding test failure semantics
 - Assessing breaking change impacts
 
 **Reasoning Tasks**:
+
 - Determining if failure is code vs. environment
 - Deciding autonomous fix vs. user consultation
 - Prioritizing multiple failures
 - Risk assessment for automated changes
 
 **Natural Language Generation**:
+
 - Explaining complex failures to users
 - Providing debugging guidance
 - Suggesting fix approaches for manual issues
 - Writing comprehensive analysis reports
 
 **Strategic Decision Making**:
+
 - Whether to batch fixes or apply incrementally
 - Determining fix order for dependent failures
 - Assessing confidence in proposed solutions
@@ -232,6 +253,14 @@ Handles dependency updates causing failures:
 - **Version Pinning**: Suggests temporary pins while addressing changes
 - **Changelog Analysis**: Reviews dependency changelogs for insights
 
+### 7. Edge Cases & Matrix Awareness
+
+- **Matrix Jobs**: Use `gh run view <run-id> --json jobs` or `gh run view <run-id> --job <job-name>` to isolate failing matrix combinations (e.g., `node-version=18, os=ubuntu-latest`). Report the entire matrix dimension and highlight only failing tuples.
+- **Reusable/Dependent Jobs**: Respect `needs` relationships from workflow YAML. Fix the earliest failing job first and classify downstream failures as “blocked” rather than independent issues.
+- **Secrets & Permissions**: Detect `Resource not accessible by integration`, exit code `78`, or `##[error]No value for required secret`. Provide remediation steps (update secrets, adjust token scopes) instead of modifying workflow files.
+- **Cache/Artifact Corruption**: When cache restore or artifact download fails (`tar: short read`, `Failed to download artifact`), instruct the user to bump cache keys or clear artifacts. Code changes rarely help.
+- **Reporting Expectations**: Every analysis should end with: failing job names, detected category, confidence level, actions taken, and next steps (e.g., rerun, user manual fix).
+
 ## Quick Reference
 
 ### Common Failure Types
@@ -278,6 +307,21 @@ This skill handles these failure categories:
    - Auto-fix: No (CI configuration needed)
    - Example: "Connection timeout after 30s"
 
+9. **Secrets & Permissions**
+   - Issues: Missing repository/org secrets, insufficient token scopes
+   - Auto-fix: No
+   - Example: "Resource not accessible by integration" or "##[error]No value for required secret"
+
+10. **Cache / Artifact Corruption**
+    - Issues: Cache restore checksum mismatches, artifact download failures
+    - Auto-fix: No (requires cache bust or rerun)
+    - Example: "tar: short read" or "Failed to download artifact"
+
+11. **Matrix Partial Failures**
+    - Issues: Only a single matrix combination fails (e.g., `node-version: 18`)
+    - Auto-fix: Depends on underlying category; requires axis-aware reporting
+    - Example: "Job test (node-version: 18) failed; node-version: 16 passed"
+
 **For complete taxonomy and fix strategies**, see [failure-patterns.md](references/failure-patterns.md)
 
 ## Documentation Index
@@ -293,6 +337,7 @@ This skill handles these failure categories:
 - **[log-parsing.md](references/log-parsing.md)** - Log parsing techniques and patterns
 - **[tool-detection.md](references/tool-detection.md)** - Project tool/formatter detection
 - **[examples.md](references/examples.md)** - Real-world failure scenarios with solutions
+- **[test-matrix.md](references/test-matrix.md)** - Manual CI validation scenarios for `/gh-checks`
 
 ### Command Documentation
 
@@ -342,21 +387,25 @@ This skill prioritizes:
 ### Common Issues
 
 **"No failing checks found"**
+
 - Verify you're on the correct branch
 - Check if PR exists: `gh pr view`
 - Run `gh run list --branch $(git branch --show-current)` manually
 
 **"Cannot retrieve logs"**
+
 - Logs may not be available yet (run still in progress)
 - Check GitHub Actions permissions
 - Verify `gh` CLI is authenticated
 
 **"Auto-fix didn't work"**
+
 - Some linters require manual fixes
 - Type errors often need code changes
 - Test failures usually require logic updates
 
 **"Too many failures"**
+
 - Skill prioritizes by impact
 - Fix one category at a time
 - Consider addressing root cause first
@@ -366,6 +415,7 @@ This skill prioritizes:
 ## Version History
 
 ### 1.0.0 (Current)
+
 - Initial release
 - Core failure detection and analysis
 - Pattern-based categorization
