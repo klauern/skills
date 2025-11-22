@@ -10,6 +10,8 @@ Real-world failure scenarios with complete analysis and resolution steps.
 4. [Example 4: Dependency Lock File Mismatch](#example-4-dependency-lock-file-mismatch)
 5. [Example 5: Breaking Change in Upstream Package](#example-5-breaking-change-in-upstream-package)
 6. [Example 6: Flaky Test Detection](#example-6-flaky-test-detection)
+7. [Example 7: Missing Secret / Permission](#example-7-missing-secret--permission)
+8. [Example 8: Matrix Partial Failure](#example-8-matrix-partial-failure)
 
 ---
 
@@ -39,6 +41,7 @@ Error: Process completed with exit code 1.
 **Model**: Haiku 4.5 (straightforward pattern match)
 
 **Detection**:
+
 1. Log contains "prettier"
 2. Exit code 1
 3. Files listed with `[warn]` prefix
@@ -51,6 +54,7 @@ Error: Process completed with exit code 1.
 ### Resolution Steps
 
 **Step 1: Verify Tool Configuration** (Haiku)
+
 ```bash
 # Check if prettier config exists
 ls .prettierrc* prettier.config.*
@@ -59,11 +63,13 @@ ls .prettierrc* prettier.config.*
 Found: `.prettierrc`
 
 **Step 2: Apply Auto-Fix** (Haiku)
+
 ```bash
 npx prettier --write .
 ```
 
 Output:
+
 ```
 src/index.ts 150ms
 src/utils/helper.ts 45ms
@@ -71,11 +77,13 @@ src/components/Button.tsx 87ms
 ```
 
 **Step 3: Verify Fix** (Haiku)
+
 ```bash
 git diff --stat
 ```
 
 Output:
+
 ```
  src/index.ts              | 12 ++++++------
  src/utils/helper.ts       |  3 +--
@@ -84,11 +92,13 @@ Output:
 ```
 
 **Step 4: Confirm** (Haiku)
+
 ```bash
 npx prettier --check .
 ```
 
 Output:
+
 ```
 All matched files use Prettier code style!
 ```
@@ -158,11 +168,13 @@ Error: Process completed with exit code 1.
 **Model**: Mixed (Haiku for auto-fix, Sonnet for manual fixes)
 
 **Detection** (Haiku):
+
 1. Log contains "eslint"
 2. Error format: `file:line:col  level  message  rule`
 3. Message indicates some are fixable with `--fix`
 
 **Categorization**:
+
 - **Auto-fixable** (2): no-unused-vars (remove), potentially others
 - **Manual** (3): Type annotations, unsafe assignments
 
@@ -171,11 +183,13 @@ Error: Process completed with exit code 1.
 ### Resolution Steps
 
 **Step 1: Apply Auto-Fix** (Haiku)
+
 ```bash
 npx eslint --fix .
 ```
 
 Output:
+
 ```
 /Users/runner/work/project/src/api.ts
   15:10  error  'response' is assigned a value but never used  @typescript-eslint/no-unused-vars
@@ -190,22 +204,25 @@ Output:
 **Step 2: Analyze Remaining Errors** (Sonnet)
 
 Read the affected file:
+
 ```typescript
 // src/api.ts:15
-const response = await fetch('/api/data');  // ← unused variable
+const response = await fetch("/api/data"); // ← unused variable
 
 // src/api.ts:23
-async function fetchData(id: string) {  // ← missing return type
+async function fetchData(id: string) {
+  // ← missing return type
   const data = await fetch(`/api/${id}`);
   return data.json();
 }
 
 // src/api.ts:28
-const result: any = getConfig();  // ← unsafe any assignment
+const result: any = getConfig(); // ← unsafe any assignment
 const config = result.data;
 ```
 
 **Analysis** (Sonnet):
+
 1. **Line 15**: `response` assigned but never used
    - **Fix**: Either use it or remove it
    - **Question**: Is this intended for future use?
@@ -221,6 +238,7 @@ const config = result.data;
 **Step 3: Interactive Fixes** (Sonnet guides, user decides)
 
 **For Line 15 (unused variable)**:
+
 ```
 I found an unused variable on line 15:
   const response = await fetch('/api/data');
@@ -236,6 +254,7 @@ What would you like to do?
 User response: "A - remove it"
 
 **For Line 23 (missing return type)**:
+
 ```
 Function fetchData is missing a return type on line 23.
 
@@ -256,6 +275,7 @@ C) Skip for now
 User response: "A - add Promise<any>"
 
 **For Line 28 (unsafe any)**:
+
 ```
 Line 28 has an unsafe any assignment:
   const result: any = getConfig();
@@ -288,11 +308,13 @@ const config = result.data;
 ```
 
 **Step 5: Verify All Fixed** (Haiku)
+
 ```bash
 npx eslint .
 ```
 
 Output:
+
 ```
 ✓ No problems found
 ```
@@ -375,6 +397,7 @@ Tests:       1 failed, 7 passed, 8 total
 **Model**: Sonnet 4.5 (requires semantic understanding)
 
 **Detection** (Sonnet):
+
 1. Jest test failure
 2. Assertion mismatch: Expected 15, Received 12
 3. Test: `calculateTotal` with input `[3, 4, 5]`
@@ -390,6 +413,7 @@ But it returns 12.
 Math check: 3 + 4 + 5 = 12
 
 Wait, that's correct! So either:
+
 1. The function is correct and test expectation is wrong (15 should be 12)
 2. The function has a bug
 
@@ -400,6 +424,7 @@ git diff main -- src/calculator.ts
 ```
 
 Output:
+
 ```diff
 -export function calculateTotal(numbers: number[]): number {
 -  return numbers.reduce((sum, n) => sum + n, 0);
@@ -410,11 +435,13 @@ Output:
 ```
 
 **Aha!** The initial value `0` was removed. Without it, `reduce` uses the first element as the initial value:
+
 - Start: `sum = 3` (first element)
 - Iteration 1: `sum = 3 + 4 = 7`
 - Iteration 2: `sum = 7 + 5 = 12`
 
 Should be:
+
 - Start: `sum = 0`
 - Iteration 1: `sum = 0 + 3 = 3`
 - Iteration 2: `sum = 3 + 4 = 7`
@@ -460,7 +487,7 @@ User: "Yes, please fix it"
 ```typescript
 // src/calculator.ts
 export function calculateTotal(numbers: number[]): number {
-  return numbers.reduce((sum, n) => sum + n, 0);  // ✓ Fixed: added initial value
+  return numbers.reduce((sum, n) => sum + n, 0); // ✓ Fixed: added initial value
 }
 ```
 
@@ -471,6 +498,7 @@ npm test -- calculator.test.ts
 ```
 
 Output:
+
 ```
  PASS  src/calculator.test.ts
   Calculator
@@ -550,6 +578,7 @@ Error: Process completed with exit code 1.
 **Model**: Haiku 4.5 (clear pattern, mechanical fix)
 
 **Detection**:
+
 1. "npm ci" command
 2. Error: "package.json and package-lock.json... not in sync"
 3. Specific mismatch: lodash@4.17.20 vs lodash@^4.17.21
@@ -568,6 +597,7 @@ grep lodash package.json
 ```
 
 Output:
+
 ```json
 "lodash": "^4.17.21"
 ```
@@ -578,6 +608,7 @@ grep '"lodash"' package-lock.json | head -1
 ```
 
 Output:
+
 ```json
 "lodash": {
   "version": "4.17.20",
@@ -592,6 +623,7 @@ npm install
 ```
 
 Output:
+
 ```
 added 1 package, changed 1 package, and audited 487 packages in 3s
 
@@ -605,6 +637,7 @@ git diff package-lock.json | head -20
 ```
 
 Output:
+
 ```diff
        "node_modules/lodash": {
 -        "version": "4.17.20",
@@ -623,6 +656,7 @@ npm ci
 ```
 
 Output:
+
 ```
 added 487 packages in 5s
 ```
@@ -711,6 +745,7 @@ Error: Process completed with exit code 2.
 **Model**: Sonnet 4.5 (requires understanding breaking changes)
 
 **Detection** (Sonnet):
+
 1. TypeScript compilation errors
 2. All related to axios types
 3. Property missing, signature changed, type renamed
@@ -718,11 +753,13 @@ Error: Process completed with exit code 2.
 **Investigation** (Sonnet):
 
 Check recent dependency changes:
+
 ```bash
 git diff main -- package.json
 ```
 
 Output:
+
 ```diff
 -    "axios": "^0.27.2",
 +    "axios": "^1.0.0",
@@ -733,6 +770,7 @@ Axios was updated from 0.x to 1.0.0 (major version bump = breaking changes)
 **Research Breaking Changes** (Sonnet with WebFetch if available):
 
 Axios 1.0.0 breaking changes:
+
 1. Response structure changed: `response.data` still exists, but types changed
 2. `axios.get()` now takes only 2 arguments (url, config), timeout moved into config
 3. `AxiosRequestConfig` renamed to `AxiosRequestConfig<D>`
@@ -784,12 +822,12 @@ User: "A - migrate to 1.0.0"
 ```typescript
 // src/api.ts:28
 // Before:
-axios.get('/api/users', config, timeout);
+axios.get("/api/users", config, timeout);
 
 // After:
-axios.get('/api/users', {
+axios.get("/api/users", {
   ...config,
-  timeout
+  timeout,
 });
 ```
 
@@ -799,12 +837,12 @@ axios.get('/api/users', {
 // src/utils/http.ts:42
 // Before:
 const config: AxiosRequestConfig = {
-  headers: { 'Content-Type': 'application/json' }
+  headers: { "Content-Type": "application/json" },
 };
 
 // After:
 const config: AxiosRequestConfig<any> = {
-  headers: { 'Content-Type': 'application/json' }
+  headers: { "Content-Type": "application/json" },
 };
 ```
 
@@ -828,6 +866,7 @@ npm run build
 ```
 
 Output:
+
 ```
 > tsc
 
@@ -916,6 +955,7 @@ Tests:       1 failed, 15 passed, 16 total
 **Model**: Sonnet 4.5 (requires pattern analysis)
 
 **Detection** (Sonnet):
+
 1. Test timeout (not assertion failure)
 2. Async operation exceeded 5000ms
 
@@ -927,6 +967,7 @@ gh run list --workflow "CI" --limit 20 --json conclusion,name,headSha
 ```
 
 Output shows:
+
 - Run #45 (commit abc123): FAIL - "fetches user data" timeout
 - Run #44 (commit abc123): SUCCESS - all tests pass
 - Run #43 (commit def456): SUCCESS
@@ -940,15 +981,17 @@ This is a **flaky test**.
 ### Root Cause Investigation (Sonnet)
 
 Read the test:
+
 ```typescript
 // src/api.test.ts:45
-it('fetches user data', async () => {
-  const data = await fetchUser(123);  // ← Makes real HTTP request?
-  expect(data.name).toBe('John Doe');
+it("fetches user data", async () => {
+  const data = await fetchUser(123); // ← Makes real HTTP request?
+  expect(data.name).toBe("John Doe");
 });
 ```
 
 Check implementation:
+
 ```typescript
 // src/api.ts
 export async function fetchUser(id: number) {
@@ -958,6 +1001,7 @@ export async function fetchUser(id: number) {
 ```
 
 **Flakiness Causes**:
+
 1. **Real Network Request**: Test makes actual HTTP call to external API
 2. **No Timeout Control**: External API response time varies
 3. **No Mocking**: Dependent on external service availability
@@ -1010,30 +1054,30 @@ User: "1 - mock the HTTP call"
 
 ```typescript
 // src/api.test.ts
-import axios from 'axios';
-import { fetchUser } from './api';
+import axios from "axios";
+import { fetchUser } from "./api";
 
 // Mock axios
-jest.mock('axios');
+jest.mock("axios");
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-describe('API Tests', () => {
-  it('fetches user data', async () => {
+describe("API Tests", () => {
+  it("fetches user data", async () => {
     // Setup mock response
     mockedAxios.get.mockResolvedValue({
       data: {
         id: 123,
-        name: 'John Doe'
-      }
+        name: "John Doe",
+      },
     });
 
     // Test
     const data = await fetchUser(123);
-    expect(data.name).toBe('John Doe');
+    expect(data.name).toBe("John Doe");
 
     // Verify
     expect(mockedAxios.get).toHaveBeenCalledWith(
-      'https://api.example.com/users/123'
+      "https://api.example.com/users/123",
     );
   });
 });
@@ -1047,6 +1091,7 @@ for i in {1..5}; do npm test -- api.test.ts; done
 ```
 
 Output:
+
 ```
 Run 1: PASS (125ms)
 Run 2: PASS (118ms)
@@ -1111,24 +1156,171 @@ Note: Consider mocking all external API calls in tests to prevent future flakine
 
 ## Summary Table
 
-| Example | Type | Model | Auto-Fix | Time | Cost |
-|---------|------|-------|----------|------|------|
-| 1. Prettier | Formatting | Haiku | Yes (100%) | ~5s | $0.001 |
-| 2. ESLint + TypeScript | Linting + Types | Mixed | Partial (40%) | ~30s | $0.015 |
-| 3. Test Failure | Logic Bug | Sonnet | No | ~27s | $0.012 |
-| 4. Lock File | Dependency | Haiku | Yes (100%) | ~10s | $0.002 |
-| 5. Breaking Change | Dependency | Sonnet | No | ~45s | $0.020 |
-| 6. Flaky Test | Test Infrastructure | Sonnet | No | ~80s | $0.017 |
+| Example                | Type                | Model  | Auto-Fix      | Time | Cost   |
+| ---------------------- | ------------------- | ------ | ------------- | ---- | ------ |
+| 1. Prettier            | Formatting          | Haiku  | Yes (100%)    | ~5s  | $0.001 |
+| 2. ESLint + TypeScript | Linting + Types     | Mixed  | Partial (40%) | ~30s | $0.015 |
+| 3. Test Failure        | Logic Bug           | Sonnet | No            | ~27s | $0.012 |
+| 4. Lock File           | Dependency          | Haiku  | Yes (100%)    | ~10s | $0.002 |
+| 5. Breaking Change     | Dependency          | Sonnet | No            | ~45s | $0.020 |
+| 6. Flaky Test          | Test Infrastructure | Sonnet | No            | ~80s | $0.017 |
+| **7. Missing Secret** ⭐ | **Secrets/Permissions** | **Sonnet** | **No** | **~20s** | **$0.010** |
+| **8. Matrix Partial** ⭐ | **Matrix Failure** | **Mixed** | **Yes (targeted)** | **~35s** | **$0.018** |
 
 **Key Insights**:
 
 1. **Mechanical issues** (formatting, lock files) are fast and cheap (Haiku-driven)
 2. **Logic issues** (tests, breaking changes) require analysis (Sonnet-driven)
-3. **Mixed scenarios** benefit from hybrid approach
-4. **Auto-fix success** correlates with issue complexity
-5. **User interaction** is valuable for non-obvious fixes
+3. **Infrastructure issues** (secrets, permissions, matrix) require non-code remediation
+4. **Mixed scenarios** benefit from hybrid approach
+5. **Auto-fix success** correlates with issue complexity
+6. **User interaction** is valuable for non-obvious fixes
 
 **Average Success Metrics**:
+
 - Auto-fixable issues: < 10 seconds, < $0.002
 - Manual issues with guidance: < 60 seconds, < $0.020
 - Overall: ~60% of CI failures can be auto-fixed
+
+---
+
+## Example 7: Missing Secret / Permission
+
+### Scenario
+
+Deployment job pushes to npm but `NPM_TOKEN` secret is missing.
+
+### CI Log Output
+
+```
+Run Publish package
+  npm publish
+
+Error: Process completed with exit code 1.
+npm ERR! code E403
+npm ERR! Unable to authenticate, need: Basic realm="GitHub Package Registry"
+
+##[error]No value for required secret 'NPM_TOKEN'.
+Error: Resource not accessible by integration
+```
+
+### Analysis
+
+**Model**: Sonnet (needs configuration reasoning)
+
+1. Logs explicitly mention missing secret `NPM_TOKEN`.
+2. Exit code 403 indicates authentication failure.
+3. Step name `Publish package` corresponds to workflow block:
+   ```yaml
+   - name: Publish package
+     env:
+       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+     run: npm publish
+   ```
+
+### Resolution Steps
+
+1. **Confirm Secret Usage** (Haiku)
+   - Surface YAML snippet referencing `secrets.NPM_TOKEN`.
+2. **Explain Root Cause** (Sonnet)
+   - “The repository/org secret `NPM_TOKEN` is not defined or lacks required scope.”
+3. **Provide Remediation Guidance** (Sonnet)
+   - Add secret via `Settings → Secrets and variables → Actions → New repository secret`.
+   - Ensure token has `publish` scope on npm (or GitHub Packages).
+4. **Advise Rerun** (Haiku)
+   - After secret is added, rerun the single job: `gh run rerun <run-id> --job publish`.
+
+### Communication Snippet
+
+```
+Permission failure in job “Publish package”.
+
+Root cause:
+- Workflow expects secrets.NPM_TOKEN but it is undefined.
+- npm publish exits 403 due to missing token.
+
+Action items:
+1. Create repository/org secret `NPM_TOKEN` with npm publish scope.
+2. Rerun job via `gh run rerun <id> --job 'Publish package'`.
+
+No code changes applied.
+```
+
+---
+
+## Example 8: Matrix Partial Failure
+
+### Scenario
+
+Matrix job runs tests on Node 16, 18, and 20. Only Node 18 exits with TypeScript compile error.
+
+### CI Log Output
+
+```
+Run Test (node-version: 18, os: ubuntu-latest)
+  npm run test
+
+> project@1.0.0 test
+> tsc && jest
+
+src/index.ts:12:5 - error TS2304: Cannot find name 'crypto'.
+
+12     crypto.randomUUID();
+       ~~~~~~
+
+Error: Process completed with exit code 2.
+```
+
+Other matrix children:
+
+```
+✔ test (node-version: 16, os: ubuntu-latest)
+✔ test (node-version: 20, os: ubuntu-latest)
+```
+
+### Analysis
+
+**Model**: Mixed
+
+1. Use `gh run view <run-id> --json jobs --jq '.jobs[] | {name, conclusion}'` to list matrix results.
+2. Only Node 18 job failed; same commit passes on Node 20, so failure is runtime-specific.
+3. TypeScript error referencing `crypto.randomUUID()` implies Node 18 lacks global types (needs `dom` lib or polyfill).
+
+### Resolution Steps
+
+1. **Report Matrix Summary** (Sonnet)
+   - “Matrix summary: Node16 ✅, Node18 ❌ (TS2304), Node20 ✅.”
+2. **Identify Fix Options** (Sonnet)
+   - Option A: Add polyfill import for Node 18 (e.g., `import { randomUUID } from 'crypto'`).
+   - Option B: Drop Node 18 support if no longer required.
+3. **Offer Targeted Commands** (Haiku)
+   - Reproduce locally: `nvm use 18 && npm run test`.
+   - Once fixed, rerun only the failing job: `gh run rerun <run-id> --job "test (node-version: 18, os: ubuntu-latest)"`.
+
+### Communication Snippet
+
+```
+Matrix result:
+- Node16: pass
+- Node18: fail (TS2304 crypto.randomUUID undefined)
+- Node20: pass
+
+Cause:
+Node 18’s type definitions don’t expose global crypto. Import it explicitly or guard the call.
+
+Suggested fix:
+```
+
+```typescript
+import { randomUUID } from "crypto";
+
+export function makeId() {
+  return randomUUID();
+}
+```
+
+```
+Note: If you can't reproduce locally with Node 18, you can also rerun just the failing job in CI to inspect logs more carefully—sometimes the issue appears only in CI's environment.
+
+After patching, rerun only the failing matrix child.
+```

@@ -10,8 +10,10 @@ Technical guide for parsing GitHub Actions logs and extracting meaningful error 
 4. [Stack Trace Parsing](#stack-trace-parsing)
 5. [Test Framework Output](#test-framework-output)
 6. [Multi-Job Correlation](#multi-job-correlation)
-7. [Truncation Handling](#truncation-handling)
-8. [Common Regex Patterns](#common-regex-patterns)
+7. [Matrix & Reusable Workflow Parsing](#matrix--reusable-workflow-parsing)
+8. [Secret and Permission Indicators](#secret-and-permission-indicators)
+9. [Truncation Handling](#truncation-handling)
+10. [Common Regex Patterns](#common-regex-patterns)
 
 ---
 
@@ -27,6 +29,7 @@ job-name	step-name	timestamp	log-line
 ```
 
 **Example**:
+
 ```
 build	Run tests	2024-01-15T10:30:45.1234567Z	npm test
 build	Run tests	2024-01-15T10:30:46.7891011Z	  PASS src/utils.test.ts
@@ -50,12 +53,14 @@ build	Run tests	2024-01-15T10:30:47.5678901Z	    ● API test › returns data
 ### Parsing Strategy
 
 **Use tab splitting**:
+
 ```bash
 # Extract just the log lines (4th field)
 gh run view <run-id> --log-failed | cut -f4-
 ```
 
 **Or in code**:
+
 ```python
 for line in log_output.split('\n'):
     parts = line.split('\t', 3)
@@ -88,6 +93,7 @@ GitHub Actions logs contain ANSI escape codes for colors:
 ```
 
 Rendered:
+
 ```
 Error: src/index.ts:15:10 - error TS2322
 ```
@@ -95,11 +101,13 @@ Error: src/index.ts:15:10 - error TS2322
 ### Stripping ANSI Codes
 
 **Regex Pattern**:
+
 ```regex
 \x1b\[[0-9;]*m
 ```
 
 **Python**:
+
 ```python
 import re
 
@@ -109,6 +117,7 @@ def strip_ansi(text):
 ```
 
 **Bash**:
+
 ```bash
 # Using sed
 sed 's/\x1b\[[0-9;]*m//g'
@@ -130,27 +139,35 @@ Most error messages include file paths with line/column numbers:
 **Common Formats**:
 
 1. **TypeScript/JavaScript**:
+
    ```
    src/index.ts(15,10): error TS2322: Type 'string' is not assignable to type 'number'
    ```
+
    Pattern: `filename(line,col): error CODE: message`
 
 2. **ESLint**:
+
    ```
    /path/to/file.ts:15:10  error  'x' is defined but never used  @typescript-eslint/no-unused-vars
    ```
+
    Pattern: `filepath:line:col  level  message  rule-name`
 
 3. **Python (pytest/black)**:
+
    ```
    src/utils.py:23: error: Incompatible types
    ```
+
    Pattern: `filepath:line: level: message`
 
 4. **Go**:
+
    ```
    ./main.go:15:10: undefined: foo
    ```
+
    Pattern: `filepath:line:col: message`
 
 5. **Rust**:
@@ -167,6 +184,7 @@ Most error messages include file paths with line/column numbers:
 ```
 
 **Explanation**:
+
 - `(?P<file>...)` - Capture filename with extension
 - `[:(\[]` - Followed by `:`, `(`, or `[`
 - `(?P<line>\d+)` - Line number (required)
@@ -174,6 +192,7 @@ Most error messages include file paths with line/column numbers:
 - `.*(?:error|warning)` - Contains "error" or "warning"
 
 **Python Usage**:
+
 ```python
 import re
 
@@ -210,6 +229,7 @@ def extract_error_message(line):
 ### JavaScript/TypeScript Stack Traces
 
 **Format**:
+
 ```
 Error: Something went wrong
     at Object.<anonymous> (/path/to/file.ts:15:10)
@@ -219,14 +239,15 @@ Error: Something went wrong
 
 **Parsing Strategy**:
 
-1. **Detect Start**: Line containing "Error:" or "    at"
-2. **Extract Frames**: Each line starting with "    at"
+1. **Detect Start**: Line containing "Error:" or " at"
+2. **Extract Frames**: Each line starting with " at"
 3. **Parse Frame**:
    ```regex
    at\s+(?:(?P<fn>[\w.<>]+)\s+)?\((?P<file>.+):(?P<line>\d+):(?P<col>\d+)\)
    ```
 
 **Python**:
+
 ```python
 def parse_js_stack_trace(lines):
     frames = []
@@ -255,6 +276,7 @@ def parse_js_stack_trace(lines):
 ### Python Stack Traces
 
 **Format**:
+
 ```
 Traceback (most recent call last):
   File "/path/to/file.py", line 15, in <module>
@@ -267,13 +289,14 @@ TypeError: unsupported operand type(s) for +: 'int' and 'str'
 **Parsing Strategy**:
 
 1. **Detect Start**: "Traceback (most recent call last):"
-2. **Extract Frames**: Lines starting with "  File"
+2. **Extract Frames**: Lines starting with " File"
 3. **Parse Frame**:
    ```regex
    File\s+"([^"]+)",\s+line\s+(\d+),\s+in\s+(.+)
    ```
 
 **Python**:
+
 ```python
 def parse_python_stack_trace(lines):
     frames = []
@@ -304,6 +327,7 @@ def parse_python_stack_trace(lines):
 ### Go Stack Traces
 
 **Format**:
+
 ```
 panic: runtime error: invalid memory address
 
@@ -323,12 +347,14 @@ main.main()
 ### Jest (JavaScript/TypeScript)
 
 **Success Pattern**:
+
 ```
 PASS src/utils.test.ts
   ✓ adds two numbers (3 ms)
 ```
 
 **Failure Pattern**:
+
 ```
 FAIL src/api.test.ts
   ✕ API test › returns data (15 ms)
@@ -348,12 +374,15 @@ FAIL src/api.test.ts
 **Parsing**:
 
 1. **Identify Failed Test**:
+
    ```regex
    ✕\s+(.+?)\s+\(\d+ ms\)
    ```
+
    Captures: Test name
 
 2. **Extract Expectation**:
+
    ```regex
    Expected:\s*(.+)\s*Received:\s*(.+)
    ```
@@ -365,6 +394,7 @@ FAIL src/api.test.ts
    The line with `>` marker
 
 **Python**:
+
 ```python
 def parse_jest_failure(lines):
     test_name = None
@@ -399,11 +429,13 @@ def parse_jest_failure(lines):
 ### pytest (Python)
 
 **Success Pattern**:
+
 ```
 tests/test_utils.py::test_add PASSED
 ```
 
 **Failure Pattern**:
+
 ```
 FAILED tests/test_api.py::test_get_data - AssertionError: assert 3 == 5
     def test_get_data():
@@ -414,9 +446,11 @@ E       assert 3 == 5
 **Parsing**:
 
 1. **Identify Failed Test**:
+
    ```regex
    FAILED\s+([^:]+)::(\w+)\s+-\s+(.+)
    ```
+
    Captures: file, test_name, error_message
 
 2. **Extract Assertion**:
@@ -427,12 +461,14 @@ E       assert 3 == 5
 ### Go Test
 
 **Failure Pattern**:
+
 ```
 --- FAIL: TestGetData (0.00s)
     api_test.go:15: got 3, want 5
 ```
 
 **Parsing**:
+
 ```regex
 ---\s+FAIL:\s+(\w+).*\n\s+([^:]+):(\d+):\s+(.+)
 ```
@@ -448,6 +484,7 @@ When multiple jobs fail, correlate them to find root causes:
 **Pattern**: Job B fails because Job A failed
 
 **Example**:
+
 ```
 Job: build  → FAILED (compilation error)
 Job: test   → FAILED (no artifact from build)
@@ -455,6 +492,7 @@ Job: lint   → PASSED
 ```
 
 **Analysis**:
+
 - `test` depends on `build`
 - If `build` fails, `test` will also fail
 - Fix `build` first
@@ -462,6 +500,7 @@ Job: lint   → PASSED
 **Detection Strategy**:
 
 1. **Parse Workflow YAML** (if available):
+
    ```yaml
    jobs:
      test:
@@ -469,6 +508,7 @@ Job: lint   → PASSED
    ```
 
 2. **Look for Artifact Errors**:
+
    ```
    Error: Unable to download artifact 'build-output'
    ```
@@ -479,16 +519,96 @@ Job: lint   → PASSED
 ### Common Root Causes
 
 **Dependency Installation Failure**:
+
 - All subsequent jobs fail with "command not found"
 - Fix: install job
 
 **Build Failure**:
+
 - Test and deployment jobs fail
 - Fix: build job
 
 **Environment Setup**:
+
 - Multiple jobs fail with same error
 - Fix: environment configuration
+
+---
+
+## Matrix & Reusable Workflow Parsing
+
+Matrix jobs and reusable workflows add metadata that helps pinpoint the failing axis.
+
+### Extract Matrix Metadata
+
+```bash
+gh run view <run-id> --json jobs --jq '
+  .jobs[] | {
+    name,
+    conclusion,
+    startedAt,
+    completedAt,
+    steps: [.steps[] | {name, conclusion}],
+    matrix: .strategy?.matrix
+  }'
+```
+
+- `matrix` contains the parameter set (`{"node-version": "18", "os": "ubuntu-latest"}`)
+- Job `name` often repeats these values; parse text between parentheses.
+
+### Target a Specific Matrix Child
+
+```bash
+gh run view <run-id> --job "test (node-version: 18, os: ubuntu-latest)" --log-failed
+```
+
+- Works even when other matrix children succeed.
+- Combine with `cut -f4-` to strip metadata, then search for tool-specific errors.
+
+### Reusable Workflow Calls
+
+Reusable workflows show up as jobs whose `steps[].name` equals `Run workflow`.
+
+1. Inspect parent logs for `workflow_call` metadata.
+2. Download child workflow logs via `gh run view <child-run-id> --log`.
+3. Note that reusable workflows may hide the true job name; rely on `needs` graph to map dependencies. If you can't find the failing step in parent logs, check the reusable workflow's own run logs separately.
+
+### Prioritization Tips
+
+- Sort jobs by `startedAt` to find earliest failure.
+- If multiple children fail with identical matrix values, deduplicate before summarizing for the user.
+
+---
+
+## Secret and Permission Indicators
+
+Some log lines implicitly reveal missing secrets or insufficient permissions.
+
+### Common Patterns
+
+```
+Resource not accessible by integration
+HttpError: 403 Forbidden
+##[error]No value for required secret
+fatal: could not read Username for 'https://github.com': No such device or address
+Error: Unable to process command '::set-env name=...::...' successfully.
+```
+
+### Parsing Strategy
+
+1. Search logs case-insensitively for `secret`, `permission`, `resource not accessible`, `forbidden`, `exit code 78`.
+2. Extract the secret/key name using regex:
+   ```regex
+   secrets\.([A-Z0-9_]+)
+   ```
+   Note: This won't catch environment variable indirection (e.g., `env: NPM_TOKEN: ${{ secrets.TOKEN }}`); check workflow files if direct references aren't found.
+3. For permission blocks, capture YAML snippet around `permissions:` to report missing scopes.
+4. Record the step name and workflow file path (e.g., `.github/workflows/deploy.yml:25`) so users can verify configuration.
+
+### Reporting
+
+- Provide the failing step, missing secret/key, and recommended remediation (“Define `NPM_TOKEN` in repo secrets”).
+- If the log references organization policies, remind users to contact org admins rather than editing the workflow.
 
 ---
 
@@ -499,6 +619,7 @@ GitHub Actions may truncate very large logs.
 ### Detection
 
 **Indicators**:
+
 - Log ends abruptly mid-line
 - Log size is exactly at a round number (1MB, 5MB)
 - Missing expected end markers (like "Done")
@@ -506,6 +627,7 @@ GitHub Actions may truncate very large logs.
 ### Strategies
 
 1. **Request Full Logs**:
+
    ```bash
    # gh CLI may have limits, download raw logs
    gh run download <run-id> --name <artifact-name>
@@ -514,6 +636,7 @@ GitHub Actions may truncate very large logs.
 2. **Search for Key Patterns**:
    - Don't try to read entire log
    - Search for "error", "fail", "ERROR"
+
    ```bash
    gh run view --log-failed | grep -i error
    ```
@@ -521,6 +644,8 @@ GitHub Actions may truncate very large logs.
 3. **Focus on Recent Output**:
    - Errors usually near the end
    - Scan last 1000 lines first
+   - Note: For matrix jobs with many parallel children, errors from failed matrix children typically appear near their own job's conclusion, not necessarily at the end of the entire log
+
    ```bash
    gh run view --log-failed | tail -1000
    ```
@@ -685,6 +810,7 @@ class LogParser:
 ```
 
 **Usage**:
+
 ```python
 parser = LogParser(log_content)
 errors = parser.extract_errors()
@@ -741,5 +867,6 @@ relevant_lines = [l for l in lines if 'error' in l.lower() or 'fail' in l.lower(
 8. **Performance**: Use compiled regex and streaming for large logs
 
 **Model Usage**:
+
 - **Haiku**: Pattern matching, regex application, file extraction
 - **Sonnet**: Understanding error semantics, correlating failures, complex diagnostics
