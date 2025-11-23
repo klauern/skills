@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "1.4.0"
+    "version": "1.5.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -44,13 +44,15 @@
         "./commands/continue.md",
         "./commands/worktree.md",
         "./commands/gh-actions-upgrade.md",
-        "./commands/gh-checks.md"
+        "./commands/gh-checks.md",
+        "./commands/git-optimize.md"
       ],
       "description": "Development workflow and utilities",
       "name": "dev-utilities",
       "skills": [
         "./gh-actions-upgrader",
-        "./ci-failure-analyzer"
+        "./ci-failure-analyzer",
+        "./git-optimize"
       ],
       "source": "./",
       "strict": false
