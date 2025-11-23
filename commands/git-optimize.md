@@ -22,6 +22,7 @@ This command helps you optimize your Git repository using your configured aliase
    - For quick operations: Run immediately
    - For heavy operations (optimize, trimall): Warn user about time commitment
    - Always show what will happen before executing
+   - **For git-trim**: Use the non-interactive execution pattern (see Execution Strategy below)
 
 4. **Verify results**:
    - Run `git branch` to show remaining branches
@@ -44,7 +45,7 @@ This command helps you optimize your Git repository using your configured aliase
 
 **git-trim** (if installed)
 - Smart merge detection (classic/rebase/squash)
-- Interactive confirmation
+- Non-interactive execution recommended (see execution notes below)
 - Use `git trim --dry-run` to preview
 
 ### Slow Operations (Minutes to Hours)
@@ -81,12 +82,20 @@ This command helps you optimize your Git repository using your configured aliase
   ```
   Fallback to `git cleanup` and `git sweep` if unavailable.
 
+- **git-trim interactive mode**: Do NOT use `yes | git trim` or `echo 'y' | git trim` as git-trim uses terminal control sequences that don't work in pipes. Instead:
+  1. Run `git trim --dry-run` to identify branches to delete
+  2. Parse the output to extract branch names
+  3. Use `git branch -d <branch>` and `git push origin --delete <branch>` directly
+  4. Handle "remote ref does not exist" errors gracefully (remote already deleted)
+
 - **Heavy operations** (`optimize`, `trimall`) can take hours on large repos.
   Always warn the user and suggest running during low-activity periods.
 
 - **Safety**: Always use `--dry-run` or explain what will happen before destructive operations.
 
 - **Recovery**: Remind users that deleted branches can be recovered via `git reflog` if needed.
+
+- **Remote branch deletion**: It's common for remote branches to be already deleted (during fetch/prune). The error "remote ref does not exist" is not a failure - acknowledge it positively.
 
 ## Example Interactions
 
@@ -99,13 +108,23 @@ Deleted branch feature/old-feature (was abc1234).
 Deleted branch bugfix/old-bug (was def5678).
 ```
 
-**Weekly maintenance**:
+**Weekly maintenance with git-trim**:
 ```
 User: Do my weekly git maintenance
-Assistant: I'll run git trim to check for merged and stray branches.
+Assistant: I'll use git trim to identify and clean up merged branches.
+
+First, let me check what branches can be deleted:
 $ git trim --dry-run
-[Shows preview]
-Proceed with deletion? [y/N] y
+
+Found merged branches:
+- feature/old-feature
+
+Now I'll delete them directly:
+$ git branch -d feature/old-feature
+Deleted branch feature/old-feature (was abc1234).
+
+$ git push origin --delete feature/old-feature
+error: remote ref does not exist (already deleted - this is fine)
 ```
 
 **Deep optimization**:
@@ -128,6 +147,31 @@ This includes:
 
 This may take 10 minutes to hours depending on repo size. Continue? [y/N] y
 $ git trimall
+```
+
+## Execution Strategy for git-trim
+
+Since git-trim uses interactive terminal controls that don't work with pipes:
+
+```bash
+# 1. Run dry-run to identify branches
+git trim --dry-run
+
+# 2. Parse output for branch names in "Delete merged local branches:" section
+# Example output:
+#   Delete merged local branches:
+#     - feature/old-branch
+#     - bugfix/another-branch
+
+# 3. For each branch, delete directly:
+git branch -d <branch-name>
+
+# 4. Attempt remote deletion (gracefully handle "already deleted" errors):
+git push origin --delete <branch-name>
+# If error "remote ref does not exist" - acknowledge positively, don't treat as failure
+
+# 5. Verify final state:
+git branch -vv
 ```
 
 ## Configuration Check
