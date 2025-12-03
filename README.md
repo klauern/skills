@@ -59,6 +59,24 @@ git clone https://github.com/klauern/skills.git
 
 ## Available Skills
 
+### claude-md-generator
+
+A skill that generates high-quality AGENTS.md files following the agents.md specification and HumanLayer's best practices. Supports both single-file and multi-file patterns.
+
+**Features**:
+
+- **Two patterns**: Single AGENTS.md (30-60 lines) OR .cursor/rules/ (4-8 files, 10-30 lines each)
+- Interactive wizard to choose and configure pattern
+- Generates files with WHAT/WHY/HOW structure
+- Always creates CLAUDE.md → AGENTS.md symlink for Claude Code compatibility
+- Follows agents.md spec (universal format for all AI coding assistants)
+- Suggests progressive disclosure patterns for complex topics
+- Follows instruction budget best practices (~150-200 total)
+- Avoids anti-patterns (style guides, code snippets, task-specific content)
+- Domain-specific files for multi-tech stacks (react.md, typescript.md, testing.md, etc.)
+
+**Usage**: Use the `/generate-claude-md` command to launch the interactive wizard.
+
 ### conventional-commits
 
 A skill that helps write conventional commit messages following best practices and the Conventional Commits specification.
@@ -81,6 +99,30 @@ An intelligent pull request creation skill that discovers and parses PR template
 **Usage**: Claude will automatically use this skill when you ask to create a pull request, or use the `/pr` command.
 
 ## Available Commands
+
+### /generate-claude-md
+
+Generate a high-quality AGENTS.md file for your project using an interactive wizard.
+
+**Usage**:
+
+```bash
+/generate-claude-md
+```
+
+This command will:
+
+- Choose between single AGENTS.md or .cursor/rules/ pattern
+- Analyze your codebase to detect tech stack and architecture
+- Ask key questions about project purpose and conventions
+- Generate AGENTS.md (single file, target <60 lines) OR .cursor/rules/ (multi-file)
+- Create CLAUDE.md → AGENTS.md symlink for Claude Code compatibility
+- Suggest progressive disclosure docs for complex topics
+- Provide quality assessment and line count
+
+**Based on**:
+- [agents.md specification](https://agents.md/) - Universal format for AI assistants
+- [Writing a Good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md) - Best practices
 
 ### /commit
 
@@ -180,8 +222,14 @@ klauern-skills/
 ├── commands/                 # Custom slash commands
 │   ├── commit.md             # Commit command
 │   ├── commit-push.md        # Commit and push command
+│   ├── generate-claude-md.md # CLAUDE.md generator command
 │   ├── merge-conflicts.md    # Merge conflicts resolution
 │   └── pr.md                 # Pull request command
+├── claude-md-generator/      # CLAUDE.md generator skill
+│   ├── SKILL.md              # Skill definition
+│   ├── guidelines.md         # Best practices and anti-patterns
+│   ├── template.md           # Templates and examples
+│   └── progressive-disclosure.md  # Progressive disclosure patterns
 ├── conventional-commits/     # Conventional commits skill
 │   ├── SKILL.md              # Skill definition
 │   └── references/           # Supporting documentation

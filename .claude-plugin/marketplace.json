@@ -16,13 +16,15 @@
       "strict": false,
       "skills": [
         "./conventional-commits",
-        "./pr-creator"
+        "./pr-creator",
+        "./claude-md-generator"
       ],
       "commands": [
         "./commands/commit.md",
         "./commands/commit-push.md",
         "./commands/pr.md",
-        "./commands/merge-conflicts.md"
+        "./commands/merge-conflicts.md",
+        "./commands/generate-claude-md.md"
       ]
     }
   ]
