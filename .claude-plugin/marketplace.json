@@ -41,6 +41,7 @@
     {
       "commands": [
         "./commands/agents-md.md",
+        "./commands/generate-claude-md.md",
         "./commands/continue.md",
         "./commands/worktree.md",
         "./commands/gh-actions-upgrade.md",
@@ -50,6 +51,7 @@
       "description": "Development workflow and utilities",
       "name": "dev-utilities",
       "skills": [
+        "./claude-md-generator",
         "./gh-actions-upgrader",
         "./ci-failure-analyzer",
         "./git-optimize"
