@@ -13,7 +13,10 @@
       "Bash(mkdir:*)",
       "Bash(tree:*)",
       "Bash(ln:*)",
-      "Bash(bd:*)"
+      "Bash(bd:*)",
+      "Bash(yes:*)",
+      "WebFetch(domain:aws.amazon.com)",
+      "Bash(test:*)"
     ],
     "deny": [],
     "ask": [],

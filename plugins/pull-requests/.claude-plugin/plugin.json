@@ -1,10 +1,9 @@
 {
-  "name": "pull-requests",
-  "description": "Intelligent pull request creation skill",
-  "version": "1.0.0",
   "author": {
-    "name": "klauern",
-    "email": "klauer@gmail.com"
-  }
+    "email": "klauer@gmail.com",
+    "name": "klauern"
+  },
+  "description": "Intelligent pull request creation skill",
+  "name": "pull-requests",
+  "version": "1.0.0"
 }
-

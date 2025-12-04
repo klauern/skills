@@ -10,18 +10,18 @@
   },
   "plugins": [
     {
-      "name": "commits",
       "description": "Conventional commit message creation skill",
+      "name": "commits",
       "source": "./plugins/commits"
     },
     {
-      "name": "pull-requests",
       "description": "Intelligent pull request creation skill",
+      "name": "pull-requests",
       "source": "./plugins/pull-requests"
     },
     {
-      "name": "dev-utilities",
       "description": "Development workflow and utilities",
+      "name": "dev-utilities",
       "source": "./plugins/dev-utilities"
     }
   ]

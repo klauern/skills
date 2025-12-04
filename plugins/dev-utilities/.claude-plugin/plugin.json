@@ -1,10 +1,9 @@
 {
-  "name": "dev-utilities",
-  "description": "Development workflow and utilities",
-  "version": "1.0.0",
   "author": {
-    "name": "klauern",
-    "email": "klauer@gmail.com"
-  }
+    "email": "klauer@gmail.com",
+    "name": "klauern"
+  },
+  "description": "Development workflow and utilities",
+  "name": "dev-utilities",
+  "version": "1.0.0"
 }
-
