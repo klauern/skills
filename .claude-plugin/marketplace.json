@@ -19,8 +19,7 @@
       "skills": [
         "./conventional-commits"
       ],
-      "source": "./",
-      "strict": false
+      "strict": true
     },
     {
       "commands": [
@@ -35,8 +34,7 @@
         "./pr-creator",
         "./pr-conflict-resolver"
       ],
-      "source": "./",
-      "strict": false
+      "strict": true
     },
     {
       "commands": [
@@ -56,8 +54,7 @@
         "./ci-failure-analyzer",
         "./git-optimize"
       ],
-      "source": "./",
-      "strict": false
+      "strict": true
     }
   ]
 }
