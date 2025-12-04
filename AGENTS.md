@@ -26,7 +26,7 @@ This is a Claude Code plugin marketplace containing three plugins that automate 
 
 ### Adding New Skills
 
-1. Create directory: `mkdir skill-name`
+1. Navigate to the appropriate plugin directory: `plugins/<plugin-name>/`
 2. Create `skill-name/SKILL.md` with frontmatter:
    ```yaml
    ---
@@ -37,12 +37,10 @@ This is a Claude Code plugin marketplace containing three plugins that automate 
    ---
    ```
 3. Add references documentation in `skill-name/references/`
-4. Register in `.claude-plugin/marketplace.json` under the appropriate plugin
-5. Bump marketplace version in `marketplace.json`
 
 ### Adding New Commands
 
-1. Create `commands/command-name.md` with frontmatter:
+1. Create `plugins/<plugin-name>/commands/command-name.md` with frontmatter:
    ```yaml
    ---
    allowed-tools: Bash
@@ -50,47 +48,73 @@ This is a Claude Code plugin marketplace containing three plugins that automate 
    ---
    ```
 2. Write bash implementation with clear instructions
-3. Register in plugin's `commands` array in `.claude-plugin/marketplace.json`
-4. Test with `/command-name`
+3. Test with `/plugin-name:command-name`
 
 ## Architecture
 
 ### Plugin Organization
 
+Each plugin is self-contained in its own directory under `plugins/`:
+
 ```
-commits/          → Conventional commit creation
-  ├── SKILL.md
-  ├── workflows.md
-  ├── examples.md
-  ├── best-practices.md
-  └── format-reference.md
-
-pr-creator/       → PR creation with template inference
-  ├── SKILL.md
-  └── references/
-
-gh-actions-upgrader/  → GitHub Actions upgrade automation
-  ├── SKILL.md
-  └── references/
-
-commands/         → Slash command implementations
-  ├── commit.md
-  ├── pr.md
-  └── gh-actions-upgrade.md
+plugins/
+├── commits/                      → Conventional commit creation
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── commands/
+│   │   ├── commit.md
+│   │   └── commit-push.md
+│   └── conventional-commits/     → Skill with docs
+│       ├── SKILL.md
+│       ├── workflows.md
+│       ├── examples.md
+│       ├── best-practices.md
+│       └── format-reference.md
+│
+├── pull-requests/                → PR creation and management
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── commands/
+│   │   ├── pr.md
+│   │   ├── pr-update.md
+│   │   ├── pr-comment-review.md
+│   │   └── merge-conflicts.md
+│   ├── pr-creator/               → PR creation skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── pr-conflict-resolver/     → Conflict resolution skill
+│       ├── SKILL.md
+│       └── references/
+│
+└── dev-utilities/                → Development workflow tools
+    ├── .claude-plugin/
+    │   └── plugin.json
+    ├── commands/
+    │   ├── agents-md.md
+    │   ├── generate-claude-md.md
+    │   ├── continue.md
+    │   ├── worktree.md
+    │   ├── gh-actions-upgrade.md
+    │   ├── gh-checks.md
+    │   └── git-optimize.md
+    ├── claude-md-generator/      → CLAUDE.md generation skill
+    ├── gh-actions-upgrader/      → GH Actions upgrade skill
+    ├── ci-failure-analyzer/      → CI failure analysis skill
+    └── git-optimize/             → Git optimization skill
 
 .claude-plugin/
-  └── marketplace.json  → Plugin registry (three plugins defined)
-
-.cursor/rules/    → Cursor IDE context rules (MDC format)
+└── marketplace.json              → Plugin registry (points to ./plugins/*)
 ```
 
 ### Key Architectural Patterns
+
+**Plugin Isolation**: Each plugin has its own directory with commands and skills, preventing command duplication across plugins.
 
 **Skill Structure**: Each skill contains a `SKILL.md` file with metadata frontmatter plus optional `references/` directory for supporting documentation.
 
 **Command Structure**: Commands are markdown files with frontmatter defining `allowed-tools` and `description`. Commands contain bash scripts and natural language instructions.
 
-**Three-Plugin Architecture**: The marketplace defines three separate plugins, each with distinct responsibilities. Each plugin can have multiple skills and commands.
+**Three-Plugin Architecture**: The marketplace defines three separate plugins, each with distinct responsibilities. Each plugin has its own isolated commands.
 
 **Model Strategy**: Skills explicitly define when to use Haiku vs Sonnet:
 - **Haiku 4.5**: Fast operations (file I/O, pattern matching, parsing, git commands)
@@ -176,28 +200,27 @@ The `gh-actions-upgrader` skill:
 ## Key Files
 
 **Plugin Configuration**:
-- `.claude-plugin/marketplace.json` - Three plugin definitions, version tracking
+- `.claude-plugin/marketplace.json` - Plugin registry pointing to `./plugins/*`
+- `plugins/*/. claude-plugin/plugin.json` - Individual plugin metadata
 
 **Development Context**:
 - `.cursor/rules/development-workflow.mdc` - Tool preferences (always active)
 - `.cursor/rules/project-overview.mdc` - Repository structure (always active)
-- `.cursor/rules/conventional-commits-skill.mdc` - Active for `conventional-commits/**`
-- `.cursor/rules/pr-creator-skill.mdc` - Active for `pr-creator/**`
 
 **Skill References**:
-- `conventional-commits/SKILL.md` - Commit message standards and workflows
-- `pr-creator/SKILL.md` - PR creation with template inference logic
-- `gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
+- `plugins/commits/conventional-commits/SKILL.md` - Commit message standards
+- `plugins/pull-requests/pr-creator/SKILL.md` - PR creation with template inference
+- `plugins/dev-utilities/gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
 
 ## Versioning
 
 Marketplace uses semantic versioning. When adding features:
 
-1. Update plugin version in `.claude-plugin/marketplace.json`
+1. Update version in `.claude-plugin/marketplace.json`
 2. Create conventional commit with `feat(plugin-name):` prefix
 3. Tag release if publishing to marketplace
 
-Current version: 1.3.0
+Current version: 2.0.0
 
 ## Cross-Agent Compatibility
 

@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "1.5.0"
+    "version": "2.0.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -10,54 +10,19 @@
   },
   "plugins": [
     {
-      "commands": [
-        "./commands/commit.md",
-        "./commands/commit-push.md"
-      ],
-      "description": "Conventional commit message creation skill",
       "name": "commits",
-      "skills": [
-        "./conventional-commits"
-      ],
-      "source": "./",
-      "strict": true
+      "description": "Conventional commit message creation skill",
+      "source": "./plugins/commits"
     },
     {
-      "commands": [
-        "./commands/pr.md",
-        "./commands/pr-update.md",
-        "./commands/pr-comment-review.md",
-        "./commands/merge-conflicts.md"
-      ],
-      "description": "Intelligent pull request creation skill",
       "name": "pull-requests",
-      "skills": [
-        "./pr-creator",
-        "./pr-conflict-resolver"
-      ],
-      "source": "./",
-      "strict": true
+      "description": "Intelligent pull request creation skill",
+      "source": "./plugins/pull-requests"
     },
     {
-      "commands": [
-        "./commands/agents-md.md",
-        "./commands/generate-claude-md.md",
-        "./commands/continue.md",
-        "./commands/worktree.md",
-        "./commands/gh-actions-upgrade.md",
-        "./commands/gh-checks.md",
-        "./commands/git-optimize.md"
-      ],
-      "description": "Development workflow and utilities",
       "name": "dev-utilities",
-      "skills": [
-        "./claude-md-generator",
-        "./gh-actions-upgrader",
-        "./ci-failure-analyzer",
-        "./git-optimize"
-      ],
-      "source": "./",
-      "strict": true
+      "description": "Development workflow and utilities",
+      "source": "./plugins/dev-utilities"
     }
   ]
 }
