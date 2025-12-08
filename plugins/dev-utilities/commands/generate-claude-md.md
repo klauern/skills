@@ -1,15 +1,16 @@
 ---
 allowed-tools: Glob, Grep, Read, Write, Bash, AskUserQuestion
-description: Interactive wizard to generate high-quality AGENTS.md or .cursor/rules/ following agents.md and humanlayer.dev best practices
+description: Interactive wizard to generate AGENTS.md, full .cursor/rules/ set, or individual .mdc rule
 ---
 
 ## Instructions
 
-Generate lean, effective project rules using either:
-- **Single file**: AGENTS.md (30-60 lines) with CLAUDE.md symlink for compatibility
-- **Multiple files**: `.cursor/rules/` (4-8 files, 10-30 lines each)
+Generate lean, effective project rules using:
+- **Single file**: AGENTS.md (30-60 lines) with CLAUDE.md symlink
+- **Multiple files**: `.cursor/rules/*.mdc` (4-8 files) with frontmatter
+- **Individual rule**: Single `.cursor/rules/*.mdc` file
 
-Both patterns follow the WHAT/WHY/HOW structure, agents.md specification, and use progressive disclosure for deep topics.
+All patterns follow WHAT/WHY/HOW structure, agents.md specification, and use progressive disclosure. Cursor .mdc files use YAML frontmatter (alwaysApply, description, globs) for intelligent loading.
 
 **Important**: Always create AGENTS.md as the primary file (per agents.md spec) with CLAUDE.md symlinked to it.
 
@@ -22,10 +23,14 @@ Both patterns follow the WHAT/WHY/HOW structure, agents.md specification, and us
 
 2. Ask user which pattern to use (via AskUserQuestion):
    - **Option 1: Single AGENTS.md** - One file (30-60 lines), simpler projects
-   - **Option 2: .cursor/rules/** - Multiple files (4-8 files), multi-tech stack
+   - **Option 2: Full .cursor/rules/ set** - Multiple .mdc files (4-8 files), multi-tech stack
+   - **Option 3: Individual .mdc rule** - Add single rule to existing setup
 
-   If `.cursor/rules/` exists, default to that pattern.
-   If `AGENTS.md` or `CLAUDE.md` exists, default to single file.
+   **Recommendations**:
+   - If `.cursor/rules/` exists, offer Options 2 or 3
+   - If `AGENTS.md` or `CLAUDE.md` exists, default to Option 1
+   - If neither exists and project has <3 tech domains, suggest Option 1
+   - If neither exists and project has 3+ tech domains, suggest Option 2
 
 ### Step 1: Analyze the Codebase
 
@@ -114,28 +119,199 @@ Skip to Step 5.
 
 ### Step 3B: Generate .cursor/rules/ (if chosen)
 
-Create `.cursor/rules/` directory and generate files based on detected domains:
+Create `.cursor/rules/` directory and generate .mdc files with frontmatter based on detected domains:
 
 **Always create**:
-1. **`core.md`** (20-30 lines) - Project overview, purpose, workflow
+1. **`core.mdc`** (20-30 lines) - Project overview, purpose, workflow
+   ```yaml
+   ---
+   alwaysApply: true
+   ---
+   ```
 
-**Create based on tech stack**:
-2. **`react.md`** (15-20 lines) - If React detected
-3. **`typescript.md`** (15-20 lines) - If TypeScript detected
-4. **`python.md`** (15-20 lines) - If Python detected
-5. **`go.md`** (15-20 lines) - If Go detected
-6. **`testing.md`** (15-25 lines) - Always include if tests exist
-7. **`api.md`** (15-20 lines) - If API routes/endpoints detected
-8. **`build.md`** (15-20 lines) - If complex build process
+**Create based on tech stack** (use globs for language/framework files):
+2. **`react.mdc`** (15-20 lines) - If React detected
+   ```yaml
+   ---
+   globs: *.tsx,*.jsx
+   ---
+   ```
+
+3. **`typescript.mdc`** (15-20 lines) - If TypeScript detected
+   ```yaml
+   ---
+   globs: *.ts,*.tsx
+   ---
+   ```
+
+4. **`python.mdc`** (15-20 lines) - If Python detected
+   ```yaml
+   ---
+   globs: *.py,*.pyi
+   ---
+   ```
+
+5. **`go.mdc`** (15-20 lines) - If Go detected
+   ```yaml
+   ---
+   globs: *.go
+   ---
+   ```
+
+6. **`testing.mdc`** (15-25 lines) - If tests exist
+   ```yaml
+   ---
+   description: Testing patterns and integration test setup
+   ---
+   ```
+
+7. **`api.mdc`** (15-20 lines) - If API routes/endpoints detected
+   ```yaml
+   ---
+   description: API conventions and HTTP handler patterns
+   ---
+   ```
+
+8. **`build.mdc`** (15-20 lines) - If complex build process
+   ```yaml
+   ---
+   description: Build system and deployment procedures
+   ---
+   ```
+
+**Frontmatter Decision Guide**:
+- **core.mdc**: Always use `alwaysApply: true` (universal project info)
+- **Language-specific** (react, typescript, python, go): Use `globs: "*.ext"`
+- **Task-specific** (testing, api, build): Use `description: "..."`
 
 **Budget check**:
-- [ ] Each file 10-30 lines
+- [ ] Each file 10-30 lines (content only, not including frontmatter)
 - [ ] Total all files < 200 lines
+- [ ] All alwaysApply files combined < 50 lines
 - [ ] No duplicate content across files
 - [ ] Uses file:line references, not code snippets
 - [ ] Cross-references between related files
+- [ ] Appropriate frontmatter for each file's purpose
 
-Use templates from `claude-md-generator/cursor-rules-pattern.md`.
+Use templates from `claude-md-generator/template.md` (Cursor .mdc Templates section).
+
+Skip to Step 4.
+
+### Step 3C: Generate Individual .mdc Rule (if chosen)
+
+Use AskUserQuestion to gather:
+
+1. **Rule purpose**: What should this rule cover?
+   Examples: "Python conventions", "Testing patterns", "Deployment procedures", "Database migrations"
+
+2. **Target scope** (helps determine frontmatter):
+   - Is this relevant to ALL tasks? → alwaysApply: true
+   - Is this specific to file types? → globs: "*.ext"
+   - Is this specific to tasks/workflows? → description: "..."
+
+3. **Content outline**: What are the key points to include?
+
+4. **Filename**: Suggest based on purpose (e.g., `python-conventions.mdc`, `deployment.mdc`, `testing.mdc`)
+
+**Frontmatter Decision Logic**:
+
+```
+Is this relevant to EVERY task?
+  YES → Is it <30 lines?
+    YES → Use alwaysApply: true
+    NO  → Too long for alwaysApply, use description instead
+
+  NO  → Is it specific to file types?
+    YES → Use globs: "*.ext,*.ext2"
+
+    NO  → Is it specific to tasks/workflows?
+      YES → Use description: "Clear task description"
+```
+
+**Generate .mdc file** with structure:
+
+For **alwaysApply**:
+```markdown
+---
+alwaysApply: true
+---
+# [Domain] Core
+
+## [Key Section]
+
+[Brief, universally applicable content]
+- [Essential commands or patterns]
+- [File references]
+
+## [Optional Section]
+
+[More essential info if needed]
+```
+
+For **globs**:
+```markdown
+---
+globs: *.ext,*.ext2
+---
+# [Language/Framework] Conventions
+
+## Style
+
+- Format: `[command]`
+- Lint: `[command]`
+
+## Patterns
+
+[File references to examples]
+
+## [Optional Section]
+
+[Additional conventions]
+```
+
+For **description**:
+```markdown
+---
+description: [Clear description of when to use this rule]
+---
+# [Task/Domain] Guide
+
+## [Main Section]
+
+[Detailed guidance for this specific task]
+
+### [Subsection]
+
+[Step-by-step procedures or detailed patterns]
+
+## [Additional Sections as needed]
+
+[More task-specific content]
+```
+
+**Quality Checks**:
+- [ ] Frontmatter matches content scope
+- [ ] alwaysApply files <30 lines
+- [ ] globs files 15-25 lines
+- [ ] description files 30-50+ lines (can be longer)
+- [ ] Uses file references, not code snippets
+- [ ] Description is clear and specific (if using description)
+- [ ] Glob patterns are correct (if using globs)
+- [ ] Content is focused on one domain/task
+
+**Example Output**:
+
+```
+✓ Generated .cursor/rules/python-conventions.mdc (18 lines)
+
+Frontmatter: globs: "*.py,*.pyi"
+Content: Python tool preferences (uv), type hints, format/lint commands
+Auto-attaches when editing Python files
+
+Quality: ✓ File-type specific, clear patterns, file references
+```
+
+Skip to Step 5.
 
 ### Step 4: Create Symlinks (for .cursor/rules only)
 
@@ -207,34 +383,57 @@ Quality: ✓ Under 60 lines, universal content, no code snippets, agents.md comp
 ### For .cursor/rules/ Pattern
 
 Show the user:
-1. List of generated files with line counts
-2. Total line count across all files
+1. List of files with frontmatter types and line counts
+2. Total line count and always-applied count
 3. Commands to create symlinks
-4. Suggested progressive disclosure files (if any)
-5. Quality assessment
+4. Frontmatter summary
+5. Suggested progressive disclosure files (if any)
+6. Quality assessment
 
 Example:
 ```
 ✓ Created .cursor/rules/ directory
 
 Generated files:
-- core.md (25 lines) - Project overview and workflow
-- react.md (18 lines) - React patterns
-- typescript.md (15 lines) - TypeScript conventions
-- testing.md (20 lines) - Testing patterns
-- api.md (17 lines) - API conventions
+- core.mdc (25 lines) [alwaysApply: true] - Project overview and workflow
+- react.mdc (18 lines) [globs: *.tsx,*.jsx] - React patterns
+- typescript.mdc (15 lines) [globs: *.ts,*.tsx] - TypeScript conventions
+- testing.mdc (20 lines) [description: Testing patterns] - Testing guide
+- api.mdc (17 lines) [description: API conventions] - API guide
 
 Total: 95 lines across 5 files
+Always-applied: 25 lines (core.mdc only)
+On-demand: 70 lines (loaded when relevant)
 
 Compatibility symlinks:
-ln -s .cursor/rules/core.md AGENTS.md
+ln -s .cursor/rules/core.mdc AGENTS.md
 ln -s AGENTS.md CLAUDE.md
 
 Suggested progressive disclosure:
 - docs/architecture.md (detailed service map)
 - docs/testing.md (integration test examples)
 
-Quality: ✓ Under 200 lines total, focused files, cross-referenced, agents.md compliant
+Quality: ✓ Intelligent loading, appropriate frontmatter, focused content, agents.md compliant
+```
+
+### For Individual .mdc Rule Pattern
+
+Show the user:
+1. Generated filename with line count
+2. Frontmatter type and reasoning
+3. Content summary
+4. Loading behavior
+5. Quality assessment
+
+Example (already shown in Step 3C, repeated here for reference):
+```
+✓ Generated .cursor/rules/python-conventions.mdc (18 lines)
+
+Frontmatter: globs: "*.py,*.pyi"
+Content: Python tool preferences (uv), type hints, format/lint commands
+Auto-attaches when editing Python files
+
+Quality: ✓ File-type specific, clear patterns, file references
 ```
 
 ## Reference

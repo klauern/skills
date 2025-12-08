@@ -246,6 +246,435 @@ Built on Radix primitives to ensure WCAG 2.1 AA compliance.
 
 **Lines**: ~40
 
+## Cursor .mdc Templates
+
+When using `.cursor/rules/` with frontmatter, each file needs appropriate YAML frontmatter. See [cursor-mdc-format.md](cursor-mdc-format.md) for complete guide.
+
+### Individual .mdc Rule Templates
+
+#### Always Applied Rule Template
+
+Use for universal, minimal context that applies to EVERY task.
+
+```markdown
+---
+alwaysApply: true
+---
+# [Domain] Core
+
+## [Key Section]
+
+[Brief, universally applicable content]
+
+**Key Points**:
+- [Essential command or pattern]
+- [Critical tool preference]
+- [File reference for examples]
+
+### [Optional Section]
+
+[More essential info if needed]
+```
+
+**Target**: <30 lines
+**Use for**: Project structure, essential commands, tool preferences
+**Example**: `core.mdc` with project overview and workflow
+
+#### File-Type Specific Rule Template
+
+Use for language or framework-specific conventions.
+
+```markdown
+---
+globs: *.ext,*.ext2
+---
+# [Language/Framework] Conventions
+
+## Style
+
+- Format: `[command]`
+- Lint: `[command]`
+- [Tool preferences]
+
+## Patterns
+
+[File references to examples]
+- Pattern 1: [file](mdc:path/file.ext:line)
+- Pattern 2: [file](mdc:path/file.ext:line)
+
+## [Optional Section]
+
+[Additional conventions if needed]
+```
+
+**Target**: 15-25 lines
+**Use for**: Python conventions, React patterns, TypeScript rules
+**Glob syntax**: Comma-separated, no spaces: `*.py`, `*.tsx,*.jsx`, `*.go`
+
+#### Task-Specific Rule Template
+
+Use for specialized workflows loaded on demand.
+
+```markdown
+---
+description: [Clear description of when to use this rule]
+---
+# [Task/Domain] Guide
+
+## [Main Section]
+
+[Detailed guidance for this specific task]
+
+### [Subsection]
+
+[Step-by-step procedures or detailed patterns]
+
+## [Additional Section]
+
+[More task-specific info]
+
+### [Safety Checks / Best Practices]
+
+- [ ] Checklist item
+- [ ] Checklist item
+
+## [Optional: Common Patterns]
+
+[Detailed examples or procedures]
+```
+
+**Target**: 30-50+ lines (can be longer since it's loaded on demand)
+**Use for**: Deployment procedures, database migrations, testing setup, CI/CD
+**Description tips**: Be specific about when this rule is relevant
+
+### .mdc Examples by Project Type
+
+#### Python CLI Project
+
+**`core.mdc`** (alwaysApply):
+```markdown
+---
+alwaysApply: true
+---
+# Project Core
+
+## What This Is
+
+CLI tool for analyzing Python dependencies.
+
+**Tech**: Python 3.11+, Click, uv
+**Entry**: [main.py](mdc:src/main.py)
+
+## Commands
+
+- Run: `uv run depcheck [cmd]`
+- Test: `uv run pytest`
+- Build: `uv build`
+
+## Tools
+
+Use `uv`, not pip for all dependency management.
+```
+
+**`python.mdc`** (globs):
+```markdown
+---
+globs: *.py,*.pyi
+---
+# Python Conventions
+
+## Dependencies
+
+Use `uv` with inline script dependencies:
+```python
+# /// script
+# dependencies = ["requests"]
+# ///
+```
+
+## Format & Lint
+
+- Format: `uv run ruff format`
+- Lint: `uv run ruff check`
+- Types: `uv run mypy src/`
+
+## Patterns
+
+Type hints required (see [api.py](mdc:src/api.py:10))
+```
+
+**`testing.mdc`** (description):
+```markdown
+---
+description: Testing patterns, fixtures, and integration test setup
+---
+# Testing Guide
+
+## Organization
+
+- Unit: Colocated `*_test.py`
+- Integration: `tests/integration/`
+- Fixtures: `tests/fixtures/`
+
+## Running Tests
+
+- All: `uv run pytest`
+- With coverage: `uv run pytest --cov`
+- Specific: `uv run pytest tests/unit/test_analyzer.py`
+
+## Patterns
+
+### Test Factories
+
+Use factories for test data (see [factories.py](mdc:tests/factories.py:1))
+
+### Mocking
+
+Mock external services (see [test_api.py](mdc:tests/unit/test_api.py:15))
+
+### Integration Tests
+
+Require running dependencies:
+```bash
+docker-compose -f tests/docker-compose.yml up -d
+uv run pytest tests/integration/
+```
+```
+
+#### TypeScript Monorepo
+
+**`core.mdc`** (alwaysApply):
+```markdown
+---
+alwaysApply: true
+---
+# Monorepo Core
+
+## Structure
+
+**Apps**: web, admin, mobile
+**Packages**: ui, api, types, utils
+
+## Commands
+
+- Dev: `bun dev:[app]`
+- Test: `bun test`
+- Build: `bun build`
+
+## Tools
+
+Use `bun`, not npm or yarn.
+```
+
+**`typescript.mdc`** (globs):
+```markdown
+---
+globs: *.ts,*.tsx
+---
+# TypeScript Conventions
+
+## Types
+
+- Shared: `packages/types/src/`
+- Local: Colocated in same file
+- No `any` (use `unknown`)
+
+## Naming
+
+- Interfaces: `PascalCase`
+- Types: `PascalCase`
+- Props: `ComponentNameProps`
+
+## Patterns
+
+Strict mode enabled (see [tsconfig.json](mdc:tsconfig.json:5))
+```
+
+**`react.mdc`** (globs):
+```markdown
+---
+globs: *.tsx,*.jsx
+---
+# React Patterns
+
+## Components
+
+Prefer server components (see [Button.tsx](mdc:packages/ui/Button.tsx:1))
+
+Client components only for:
+- Event handlers
+- Browser APIs
+- React hooks
+
+## Structure
+
+- Props: `ComponentNameProps` interface
+- Tests: Colocated `ComponentName.test.tsx`
+- Styles: Tailwind classes
+
+## State
+
+- Server state: tRPC
+- Client state: React Context
+```
+
+**`testing.mdc`** (description):
+```markdown
+---
+description: Testing patterns for unit, integration, and E2E tests
+---
+# Testing Guide
+
+## Organization
+
+- Unit: Colocated `*.test.ts`
+- Integration: `apps/[app]/tests/integration/`
+- E2E: `apps/[app]/tests/e2e/`
+
+## Running Tests
+
+- All: `bun test`
+- App-specific: `bun test:[app]`
+- E2E: `bun test:e2e` (requires dev server)
+- Coverage: `bun test --coverage`
+
+## Unit Testing
+
+### React Testing Library
+
+See [Button.test.tsx](mdc:packages/ui/Button.test.tsx:1) for pattern
+
+### Test Factories
+
+Use factories in `tests/factories/` (see [user.factory.ts](mdc:tests/factories/user.factory.ts:1))
+
+## Integration Testing
+
+Requires running services:
+```bash
+docker-compose up -d
+bun test:integration
+```
+
+## E2E Testing
+
+Uses Playwright. See [e2e.config.ts](mdc:tests/e2e.config.ts:1) for setup.
+```
+
+#### Go Microservices
+
+**`core.mdc`** (alwaysApply):
+```markdown
+---
+alwaysApply: true
+---
+# Services Core
+
+## Structure
+
+**Services**: auth, api, worker, gateway
+**Shared**: `pkg/` packages
+
+## Commands
+
+- Run: `make run-[service]`
+- Test: `make test`
+- Build: `make build`
+
+## Tools
+
+Use standard lib over frameworks where possible.
+```
+
+**`go.mdc`** (globs):
+```markdown
+---
+globs: *.go
+---
+# Go Conventions
+
+## Style
+
+- Format: `gofumpt -w .`
+- Lint: `golangci-lint run`
+
+## Patterns
+
+- Errors: Return, don't panic
+- Context: First param (see [handler.go](mdc:services/api/handler.go:15))
+- Interfaces: Small, focused (see [storage.go](mdc:pkg/storage/storage.go:10))
+
+## Structure
+
+- `cmd/` - Entry points
+- `pkg/` - Reusable packages
+- `internal/` - Private code
+```
+
+**`api.mdc`** (description):
+```markdown
+---
+description: API conventions, HTTP handlers, and service communication patterns
+---
+# API Patterns
+
+## HTTP Handlers
+
+### Structure
+
+```go
+func (h *Handler) HandleResource(w http.ResponseWriter, r *http.Request) {
+    ctx := r.Context()
+    // handler logic
+}
+```
+
+See [handler.go](mdc:services/api/handler.go:25) for full pattern
+
+### Error Handling
+
+Use `pkg/errors` for structured errors (see [errors.go](mdc:pkg/errors/errors.go:1))
+
+## Service Communication
+
+### Internal APIs
+
+Use gRPC for service-to-service (see [proto/](mdc:proto/))
+
+### Event-Driven
+
+Kafka for async communication (see [events.go](mdc:pkg/events/events.go:1))
+
+## Middleware
+
+Auth, logging, tracing (see [middleware.go](mdc:services/gateway/middleware.go:1))
+```
+
+### Frontmatter Decision Guide
+
+Use this to decide which frontmatter type for your .mdc file:
+
+```
+Is this relevant to EVERY task?
+  YES → Is it <30 lines?
+    YES → alwaysApply: true
+    NO  → Too long, use description instead
+
+  NO  → Is it specific to file types?
+    YES → globs: "*.ext,*.ext2"
+
+    NO  → Is it specific to tasks?
+      YES → description: "Clear task description"
+
+      NO  → Probably doesn't belong in rules
+```
+
+**Budget Check**:
+- All `alwaysApply` files combined: <50 lines total
+- Each `globs` file: 15-25 lines
+- Each `description` file: 30-50+ lines (can be longer)
+- Total all files: <200 lines
+
 ## Filling Out the Template
 
 ### 1. Start with WHAT

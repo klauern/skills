@@ -1,6 +1,6 @@
 ---
 name: claude-md-generator
-description: Generate high-quality AGENTS.md files for projects following agents.md spec and humanlayer.dev best practices. Creates lean, focused documentation with WHAT/WHY/HOW structure and progressive disclosure.
+description: Generate high-quality AGENTS.md files and Cursor .mdc rules following agents.md spec. Creates lean, focused documentation with intelligent loading via frontmatter (alwaysApply/description/globs).
 version: 1.0.0
 author: klauern
 ---
@@ -9,11 +9,12 @@ author: klauern
 
 ## Overview
 
-This skill helps generate effective project rules for AI coding agents using either:
-- **Single file**: AGENTS.md (30-60 lines) with CLAUDE.md symlink for Claude Code compatibility
-- **Multiple files**: `.cursor/rules/` (4-8 files, 10-30 lines each)
+This skill helps generate effective project rules for AI coding agents using:
+- **Single file**: AGENTS.md (30-60 lines) with CLAUDE.md symlink
+- **Multiple files**: `.cursor/rules/*.mdc` (4-8 files) with frontmatter
+- **Individual rule**: Single `.cursor/rules/*.mdc` file
 
-Both patterns follow the agents.md specification and research-backed best practices from HumanLayer's guide. Creates lean, focused documentation that helps AI assistants understand your codebase without overwhelming the context window.
+Cursor .mdc format uses YAML frontmatter for intelligent rule loading (alwaysApply, description, globs). All patterns follow the agents.md specification and research-backed best practices from HumanLayer's guide.
 
 ## Key Principles
 
@@ -28,12 +29,18 @@ Both patterns follow the agents.md specification and research-backed best practi
 
 ### Slash Command
 
-- **`/generate-claude-md`**: Interactive wizard to create AGENTS.md (with CLAUDE.md symlink) - see [`../commands/generate-claude-md.md`](../commands/generate-claude-md.md)
+- **`/generate-claude-md`**: Interactive wizard for:
+  - AGENTS.md with symlink
+  - Full `.cursor/rules/` set (.mdc with frontmatter)
+  - Individual `.cursor/rules/*.mdc` rule
+
+  See [`../commands/generate-claude-md.md`](../commands/generate-claude-md.md)
 
 ### Core Documentation
 
 - **[Guidelines](guidelines.md)** - Best practices and what to avoid
 - **[Template](template.md)** - Starting template with examples
+- **[Cursor .mdc Format](cursor-mdc-format.md)** - Frontmatter types and decision tree
 - **[Cursor Rules Pattern](cursor-rules-pattern.md)** - .cursor/rules/ multi-file approach
 - **[Progressive Disclosure](progressive-disclosure.md)** - How to structure supporting docs
 
@@ -43,21 +50,52 @@ Use this skill when:
 
 - Setting up a new project that will use AI coding assistants (Claude Code, Cursor, etc.)
 - Improving an existing CLAUDE.md or AGENTS.md that's too long or unfocused
-- User asks to "create project rules", "setup AGENTS.md", or "setup Claude documentation"
+- User asks to "create project rules", "setup AGENTS.md", "setup Cursor rules", or "add a rule"
 - Converting single AGENTS.md to .cursor/rules/ (or vice versa)
 - Converting legacy CLAUDE.md to standards-compliant AGENTS.md
+- Adding individual .mdc rules to existing setup
 - Multi-technology projects that benefit from domain-specific rule files
 
-## Workflow Overview
+## Workflow Types
 
-### Interactive Generation Process
+### 1. Full AGENTS.md Generation
 
-1. **Choose pattern** → Single AGENTS.md OR .cursor/rules/ (multi-file)
-2. **Analyze codebase** → Detect project type, tech stack, technology domains
-3. **Ask key questions** → Purpose, monorepo structure, special workflows
-4. **Generate files** → AGENTS.md (single) OR .cursor/rules/*.md (multi)
-5. **Create symlinks** → CLAUDE.md → AGENTS.md for Claude Code compatibility
-6. **Suggest progressive disclosure** → Identify topics for separate docs
+Single file at root with CLAUDE.md symlink.
+
+**Use when**: Simple project, unified conventions, want to minimize auto-loaded content
+
+**Process**:
+1. Analyze codebase → Detect project type and tech stack
+2. Ask key questions → Purpose, workflows, tool preferences
+3. Generate AGENTS.md → WHAT/WHY/HOW structure (30-60 lines)
+4. Create symlink → `CLAUDE.md → AGENTS.md`
+5. Suggest progressive disclosure → Identify topics for separate docs
+
+### 2. Full .cursor/rules/ Generation
+
+Multiple .mdc files with frontmatter for intelligent loading.
+
+**Use when**: Multi-tech stack, domain-specific organization, want granular control
+
+**Process**:
+1. Analyze codebase → Detect tech stack and domains
+2. Ask key questions → Purpose, workflows, special conventions
+3. Generate .mdc files → core.mdc, language.mdc, task.mdc (4-8 files)
+4. Add frontmatter → alwaysApply, globs, or description per file
+5. Create symlinks → `AGENTS.md → core.mdc`, `CLAUDE.md → AGENTS.md`
+6. Suggest progressive disclosure → Identify topics for separate docs
+
+### 3. Individual .mdc Rule Generation
+
+Single .mdc file with appropriate frontmatter.
+
+**Use when**: Adding to existing setup, task-specific guidance, new domain
+
+**Process**:
+1. Ask about rule → Purpose, scope (universal/file-type/task), filename
+2. Determine frontmatter → alwaysApply, globs, or description based on scope
+3. Generate .mdc file → With correct frontmatter and focused content
+4. Quality check → Frontmatter matches scope, appropriate line count
 
 ### Quality Checks
 

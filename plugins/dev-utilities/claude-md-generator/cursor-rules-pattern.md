@@ -35,6 +35,32 @@ Use `CLAUDE.md` when:
 
 **Claude Code Compatibility**: Claude Code also reads `.cursor/rules/` - no separate `.claude/rules/` needed.
 
+## File Format: .md vs .mdc
+
+`.cursor/rules/` files can use two formats:
+
+### .md (Plain Markdown)
+- All files auto-load into every conversation
+- No frontmatter control
+- Simpler format
+- Good for small rule sets (<5 files)
+
+### .mdc (Markdown with Frontmatter)
+- **Intelligent loading** with YAML frontmatter
+- Control when rules load (alwaysApply, description, globs)
+- File-type-specific rules auto-attach
+- Task-specific rules loaded on demand
+- More efficient instruction budget usage
+
+**Cursor `.mdc` advantages**:
+- **alwaysApply: true** - Universal rules (<30 lines each)
+- **globs: "*.py"** - Auto-attach to file types
+- **description: "..."** - Load only when task-relevant
+
+See **[cursor-mdc-format.md](cursor-mdc-format.md)** for complete frontmatter guide, decision tree, and examples.
+
+**Recommendation**: Use `.mdc` with frontmatter for better control over rule loading and instruction budget management.
+
 ## File Guidelines
 
 ### Line Limits
@@ -61,9 +87,12 @@ Each file should cover **one technology or domain**:
 
 ## Core File Template
 
-Every `.cursor/rules/` setup should have a `core.md` file:
+Every `.cursor/rules/` setup should have a `core.mdc` file (with frontmatter):
 
 ```markdown
+---
+alwaysApply: true
+---
 # Project Core
 
 ## What This Is
@@ -93,12 +122,16 @@ Every `.cursor/rules/` setup should have a `core.md` file:
 ```
 
 **Lines**: 20-30
+**Frontmatter**: `alwaysApply: true` (universal, always needed)
 
 ## Domain File Templates
 
-### React (`react.md`)
+### React (`react.mdc`)
 
 ```markdown
+---
+globs: *.tsx,*.jsx
+---
 # React Patterns
 
 ## Component Structure
@@ -124,10 +157,14 @@ Client components only when needed:
 ```
 
 **Lines**: 15-20
+**Frontmatter**: `globs: *.tsx,*.jsx` (auto-attach to React files)
 
-### TypeScript (`typescript.md`)
+### TypeScript (`typescript.mdc`)
 
 ```markdown
+---
+globs: *.ts,*.tsx
+---
 # TypeScript Conventions
 
 ## Type Definitions
@@ -150,10 +187,14 @@ Client components only when needed:
 ```
 
 **Lines**: 15-18
+**Frontmatter**: `globs: *.ts,*.tsx` (auto-attach to TypeScript files)
 
-### Testing (`testing.md`)
+### Testing (`testing.mdc`)
 
 ```markdown
+---
+description: Testing patterns and integration test setup
+---
 # Testing Patterns
 
 ## Organization
@@ -178,6 +219,7 @@ See docs/testing.md for detailed patterns
 ```
 
 **Lines**: 18-20
+**Frontmatter**: `description: "..."` (load when testing is relevant)
 
 ### API (`api.md`)
 
