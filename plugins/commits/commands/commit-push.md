@@ -5,19 +5,31 @@ description: Commit and Push with Conventional Commits
 
 Create a well-formatted commit using the Conventional Commits specification and push it to the remote repository.
 
+## Arguments
+
+- `$ARGUMENTS` - Optional: target branch name (e.g., `main`, `master`, or a feature branch name)
+  - If provided, commits directly to the specified branch (skips feature branch creation)
+  - If omitted, follows the default branch safety check behavior
+
 ## Context
 
 - Current git status: !`git status`
 - Current git diff (staged and unstaged changes): !`git diff HEAD`
 - Current branch: !`git branch --show-current`
+- Target branch argument: `$ARGUMENTS`
 
 ## Instructions
 
 1. **Branch Safety Check**:
-   - If current branch is `main` or `master`, create a new feature branch first
-   - Use a descriptive branch name based on the changes being committed
-   - Examples: `git checkout -b feature/add-user-auth`, `git checkout -b fix/memory-leak`, `git checkout -b chore/update-deps`
-   - If already on a feature branch, proceed to next step
+   - **If `$ARGUMENTS` is provided**: Skip branch creation and commit directly to current branch
+     - If argument is `main` or `master` and you're not on that branch, checkout to it first
+     - If argument matches current branch, proceed directly to commit
+     - If argument is a different branch name, checkout to it (create if needed)
+   - **If `$ARGUMENTS` is empty/not provided** (default behavior):
+     - If current branch is `main` or `master`, create a new feature branch first
+     - Use a descriptive branch name based on the changes being committed
+     - Examples: `git checkout -b feature/add-user-auth`, `git checkout -b fix/memory-leak`, `git checkout -b chore/update-deps`
+     - If already on a feature branch, proceed to next step
 
 2. Follow all instructions from [`commit.md`](commit.md) to create the commit(s)
    - Analyze the changes and create appropriate conventional commit message(s)
@@ -40,7 +52,8 @@ Create a well-formatted commit using the Conventional Commits specification and 
 ## Important
 
 - See [`commit.md`](commit.md) for detailed commit creation instructions
-- Never commit directly to `main` or `master` - always create a feature branch
+- By default, never commit directly to `main` or `master` - create a feature branch
+- **Exception**: If user explicitly provides `main` or `master` as the `$ARGUMENTS`, commit directly to that branch
 - Follow the repository's existing commit style based on recent commit history
 - Use heredoc for multi-line commit messages
 - Verify the push succeeded by checking the output
