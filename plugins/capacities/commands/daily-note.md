@@ -22,7 +22,7 @@ Append markdown content to today's daily note in a Capacities space.
 ## Behavior
 
 ### With all required arguments:
-1. Append the markdown text to today's daily note
+1. Append the Markdown text to today's daily note
 2. By default, adds a timestamp before the content
 3. Creates the daily note if it doesn't exist
 

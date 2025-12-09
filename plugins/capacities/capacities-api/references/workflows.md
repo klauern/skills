@@ -12,7 +12,7 @@ Common usage patterns and workflows for the Capacities API skill.
 3. Append to daily note
 
 **Example:**
-```
+```text
 User: "Remember to review the API design tomorrow"
 
 Claude executes:
@@ -36,7 +36,7 @@ Claude executes:
 3. Save with any additional notes
 
 **Example:**
-```
+```text
 User: "Save this article about Rust async: https://tokio.rs/blog/post"
 
 Claude executes:
@@ -64,7 +64,7 @@ Claude executes:
 4. Present results with context
 
 **Example:**
-```
+```text
 User: "What did I write about project planning last month?"
 
 Claude executes:
@@ -88,7 +88,7 @@ Claude executes:
 3. Explore structures and collections
 
 **Example:**
-```
+```text
 User: "What kinds of things are in my Work space?"
 
 Claude executes:
@@ -113,7 +113,7 @@ Claude executes:
 3. Append to daily note (with or without timestamp)
 
 **Example:**
-```
+```text
 User: "We just finished the standup. Discussed blockers on the auth feature,
        and John will handle the code review by EOD."
 
@@ -139,7 +139,7 @@ Claude formats and executes:
 3. Search later by tag or content
 
 **Example:**
-```
+```text
 User: "I'm researching database optimization. Save these links..."
 
 Claude executes (for each URL):
@@ -157,7 +157,7 @@ Claude executes (for each URL):
 **Goal:** Use Capacities as part of daily workflow.
 
 **Morning:**
-```
+```bash
 /capacities:search "today" --space-ids <work-space> --mode title
 # See what's scheduled
 
@@ -166,13 +166,13 @@ Claude executes (for each URL):
 ```
 
 **Throughout Day:**
-```
+```bash
 /capacities:daily-note --text "- Completed: <task>"
 # Log progress
 ```
 
 **End of Day:**
-```
+```bash
 /capacities:daily-note --text "## Wrap-up\n- Accomplishments: ...\n- Tomorrow: ..."
 # Reflect and plan
 ```
@@ -184,19 +184,19 @@ Claude executes (for each URL):
 Most users have multiple spaces (Personal, Work, Projects, etc.).
 
 **Strategy 1: Explicit Selection**
-```
+```text
 User: "Save to my Work space"
 Claude: Uses work space ID directly
 ```
 
 **Strategy 2: Context-Based Selection**
-```
+```text
 User: "Save this meeting notes article"
 Claude: Infers Work space from "meeting"
 ```
 
 **Strategy 3: Interactive Selection**
-```
+```text
 User: "Save this article"
 Claude: "Which space? You have: Personal, Work, Reading"
 User: "Reading"
@@ -227,7 +227,7 @@ The API has strict rate limits. Handle gracefully:
 ## Error Recovery
 
 ### Token Issues
-```
+```text
 Error: 401 Unauthorized
 
 Recovery:
@@ -237,7 +237,7 @@ Recovery:
 ```
 
 ### Space Not Found
-```
+```text
 Error: 404 Not Found (space)
 
 Recovery:
@@ -247,7 +247,7 @@ Recovery:
 ```
 
 ### Content Too Long
-```
+```text
 Error: 400 Bad Request (mdText exceeds limit)
 
 Recovery:

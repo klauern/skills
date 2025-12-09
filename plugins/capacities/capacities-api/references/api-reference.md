@@ -4,7 +4,7 @@ Complete specification for the Capacities REST API (Beta).
 
 ## Base URL
 
-```
+```text
 https://api.capacities.io
 ```
 
@@ -12,7 +12,7 @@ https://api.capacities.io
 
 All requests require a Bearer token in the Authorization header:
 
-```
+```text
 Authorization: Bearer <your-api-token>
 ```
 
@@ -221,7 +221,7 @@ curl -X POST "https://api.capacities.io/save-weblink" \
 
 ### POST /save-to-daily-note
 
-Append markdown text to today's daily note.
+Append Markdown text to today's daily note.
 
 **Rate Limit:** 5 requests per 60 seconds
 
@@ -246,7 +246,7 @@ curl -X POST "https://api.capacities.io/save-to-daily-note" \
 ```
 
 **Response:**
-```
+```text
 200 OK
 ```
 

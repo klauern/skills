@@ -15,7 +15,7 @@ uv run plugins/capacities/scripts/capacities.py spaces --json
 ```
 
 **Output:**
-```
+```text
 Your Capacities Spaces:
 --------------------------------------------------
 📝 Personal Notes
@@ -42,7 +42,7 @@ uv run plugins/capacities/scripts/capacities.py space-info \
 ```
 
 **Output:**
-```
+```text
 Space Structures:
 --------------------------------------------------
 
@@ -74,7 +74,7 @@ Weblink (Weblinks)
 ```
 
 **Output:**
-```
+```text
 Found 3 results:
 --------------------------------------------------
 
@@ -211,7 +211,7 @@ uv run plugins/capacities/scripts/capacities.py save-weblink \
 ```
 
 **Result in Capacities:**
-```
+```text
 12:34 PM - Idea: Create a CLI tool for batch API testing
 ```
 

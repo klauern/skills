@@ -112,10 +112,10 @@ def load_cache(key: str) -> CacheEntry | None:
         ttl = CACHE_TTL.get(base_key, 300)
         if time.time() - entry.timestamp > ttl:
             return None
-
-        return entry
     except (json.JSONDecodeError, KeyError):
         return None
+    else:
+        return entry
 
 
 def save_cache(key: str, data: Any) -> None:
@@ -139,8 +139,12 @@ def handle_response(response: httpx.Response, operation: str) -> dict | list | N
     """Handle API response with error checking."""
     # Check rate limit headers
     remaining = response.headers.get("RateLimit-Remaining")
-    if remaining and int(remaining) <= 1:
-        print(f"Warning: Rate limit nearly exhausted ({remaining} remaining)", file=sys.stderr)
+    if remaining:
+        try:
+            if int(remaining) <= 1:
+                print(f"Warning: Rate limit nearly exhausted ({remaining} remaining)", file=sys.stderr)
+        except ValueError:
+            pass  # Ignore malformed header
 
     if response.status_code == 200:
         if response.text:

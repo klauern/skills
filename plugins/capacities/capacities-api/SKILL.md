@@ -117,7 +117,7 @@ Cache is automatically invalidated on write operations (save-weblink, daily-note
 
 ### Save an interesting article
 
-```
+```text
 User: Save this article to my Capacities: https://example.com/good-article
 Claude: I'll save that to your Capacities. Which space should I use?
 [Lists spaces]
@@ -127,14 +127,14 @@ Claude: [Saves weblink to Reading space]
 
 ### Quick note capture
 
-```
+```text
 User: Add to my daily notes: Had a great idea about improving the search algorithm
 Claude: [Appends to daily note with timestamp]
 ```
 
 ### Search knowledge base
 
-```
+```text
 User: Search my notes for anything about "project planning"
 Claude: [Searches across spaces, returns results with highlights]
 ```
