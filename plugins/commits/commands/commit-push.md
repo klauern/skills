@@ -16,9 +16,11 @@ Create a well-formatted commit using the Conventional Commits specification and 
 - Current git status: !`git status`
 - Current git diff (staged and unstaged changes): !`git diff HEAD`
 - Current branch: !`git branch --show-current`
-- Target branch argument: `$ARGUMENTS`
+- **Target branch argument: `$ARGUMENTS`**
 
 ## Instructions
+
+> **CRITICAL**: Check the "Target branch argument" above FIRST. If it contains a value (e.g., `main`), you MUST commit directly to that branch. Do NOT create a new feature branch when `$ARGUMENTS` is provided.
 
 1. **Branch Safety Check**:
    - **If `$ARGUMENTS` is provided**: Skip branch creation and commit directly to current branch
@@ -51,8 +53,9 @@ Create a well-formatted commit using the Conventional Commits specification and 
 
 ## Important
 
+- **RESPECT `$ARGUMENTS`**: If the user provided a branch name in `$ARGUMENTS`, use it exactly as specified. Do NOT override with a feature branch.
 - See [`commit.md`](commit.md) for detailed commit creation instructions
-- By default, never commit directly to `main` or `master` - create a feature branch
+- By default (when `$ARGUMENTS` is empty), never commit directly to `main` or `master` - create a feature branch
 - **Exception**: If user explicitly provides `main` or `master` as the `$ARGUMENTS`, commit directly to that branch
 - Follow the repository's existing commit style based on recent commit history
 - Use heredoc for multi-line commit messages
