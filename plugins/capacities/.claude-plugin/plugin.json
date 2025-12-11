@@ -1,0 +1,9 @@
+{
+  "author": {
+    "email": "klauer@gmail.com",
+    "name": "klauern"
+  },
+  "description": "Capacities knowledge management API integration",
+  "name": "capacities",
+  "version": "1.0.0"
+}
