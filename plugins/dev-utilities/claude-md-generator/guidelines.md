@@ -1,21 +1,21 @@
-# CLAUDE.md Guidelines
+# AGENTS.md Guidelines
 
 ## Core Principles
 
 ### 1. LLMs Are Stateless
 
-Every conversation starts fresh. CLAUDE.md is your **only** persistent context mechanism. Make every word count.
+Every conversation starts fresh. `AGENTS.md` is your **primary** persistent context mechanism. Make every word count.
 
 ### 2. Instruction Budget
 
-- **Total capacity**: ~150-200 instructions
-- **Claude Code system**: ~50 instructions used
-- **Your budget**: ~100-150 instructions remaining
+- **Total capacity**: Varies by tool/model
+- **Tool/system prompts**: Consume part of the budget
+- **Your budget**: The remainder for project rules
 - **Target**: Under 60 lines (much less than max)
 
 ### 3. Universal Applicability
 
-Claude ignores content it deems irrelevant. Task-specific instructions often get dropped. Keep everything universally applicable.
+Agents ignore content they deem irrelevant. Task-specific instructions often get dropped. Keep everything universally applicable.
 
 ## The WHAT/WHY/HOW Structure
 
@@ -123,7 +123,7 @@ docs/
 
 ### How to Reference
 
-In CLAUDE.md:
+In `AGENTS.md`:
 ```markdown
 ### Testing
 `bun test` - See docs/testing.md for integration test patterns
@@ -132,7 +132,7 @@ In CLAUDE.md:
 Monorepo with 3 apps and 5 packages - see docs/architecture.md
 ```
 
-Claude will read these files when relevant to the current task.
+Agents will read these files when relevant to the current task.
 
 ## Quality Checklist
 
@@ -328,7 +328,7 @@ POST /api/users
 ### ✅ Just Right (45 lines)
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -376,7 +376,7 @@ Install dependencies: `bun install` (use bun, not npm)
 
 ### When to Update
 
-Update CLAUDE.md when:
+Update `AGENTS.md` when:
 - Tech stack changes (new framework, language)
 - Architecture changes (monorepo split, new service)
 - Build/test commands change

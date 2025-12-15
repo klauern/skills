@@ -5,6 +5,8 @@ description: Interactive wizard to generate AGENTS.md, full .cursor/rules/ set, 
 
 ## Instructions
 
+Note: Prefer running `/generate-agents-md` for the same wizard under a tool-agnostic name. This command remains for backwards compatibility.
+
 Generate lean, effective project rules using:
 - **Single file**: AGENTS.md (30-60 lines) with CLAUDE.md symlink
 - **Multiple files**: `.cursor/rules/*.mdc` (4-8 files) with frontmatter
@@ -315,20 +317,23 @@ Skip to Step 5.
 
 ### Step 4: Create Symlinks (for .cursor/rules only)
 
-If using `.cursor/rules/`, create compatibility symlinks:
+Always keep `AGENTS.md` as the cross-tool entrypoint, and create compatibility symlinks as needed.
 
 ```bash
-ln -s .cursor/rules/core.md AGENTS.md
 ln -s AGENTS.md CLAUDE.md
 ```
 
 This ensures:
-- AGENTS.md → core.md (agents.md spec compliance)
 - CLAUDE.md → AGENTS.md (Claude Code compatibility)
+
+If you want Cursor to load the same content as `AGENTS.md` (single source of truth) and you don't need `.mdc` frontmatter, you can also symlink:
+```bash
+ln -s ../../AGENTS.md .cursor/rules/core.md
+```
 
 ### Step 5: Suggest Progressive Disclosure
 
-If any topics would make CLAUDE.md too long (>60 lines), suggest creating:
+If any topics would make AGENTS.md too long (>60 lines), suggest creating:
 
 ```
 docs/
@@ -344,7 +349,7 @@ Provide brief templates for suggested files.
 ## Important Guidelines
 
 ### DO:
-- ✅ Keep CLAUDE.md under 60 lines if possible
+- ✅ Keep AGENTS.md under 60 lines if possible
 - ✅ Use WHAT/WHY/HOW structure
 - ✅ Reference code with file:line format
 - ✅ Link to progressive disclosure for details
@@ -406,7 +411,6 @@ Always-applied: 25 lines (core.mdc only)
 On-demand: 70 lines (loaded when relevant)
 
 Compatibility symlinks:
-ln -s .cursor/rules/core.mdc AGENTS.md
 ln -s AGENTS.md CLAUDE.md
 
 Suggested progressive disclosure:
@@ -444,7 +448,7 @@ Based on:
 
 Key insights:
 - LLMs can follow ~150-200 instructions
-- Claude Code uses ~50, leaving ~100-150 for your rules
+- Most harnesses/tools consume a chunk of that via system prompts and policies
 - Single AGENTS.md: Keep under 60 lines
 - .cursor/rules/: Keep total under 200 lines
 - Both patterns use progressive disclosure for deep topics

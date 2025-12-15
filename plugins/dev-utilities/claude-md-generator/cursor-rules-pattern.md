@@ -4,8 +4,8 @@
 
 The `.cursor/rules/` pattern breaks project rules into multiple small, focused files that all auto-load. Each file covers a specific domain (framework, language, testing, etc.) and stays under 30 lines.
 
-**Key Difference from CLAUDE.md**:
-- **CLAUDE.md**: Single file (30-60 lines) with progressive disclosure
+**Key Difference from AGENTS.md**:
+- **AGENTS.md**: Single file (30-60 lines) with progressive disclosure
 - **`.cursor/rules/`**: Multiple files (10-30 lines each) that all auto-load
 
 ## When to Use This Pattern
@@ -16,7 +16,7 @@ Use `.cursor/rules/` when:
 - You want all rules loaded automatically
 - You prefer focused, single-topic files
 
-Use `CLAUDE.md` when:
+Use `AGENTS.md` when:
 - Simpler project with unified conventions
 - Want to minimize auto-loaded content
 - Prefer progressive disclosure for deep topics
@@ -445,11 +445,11 @@ See docs/api.md for:
 - Error handling details
 ```
 
-## Migration from CLAUDE.md
+## Migration from AGENTS.md / CLAUDE.md
 
-### If You Have CLAUDE.md
+### If You Have AGENTS.md (or legacy CLAUDE.md)
 
-You can convert a CLAUDE.md to `.cursor/rules/`:
+You can convert an `AGENTS.md` (or `CLAUDE.md`) to `.cursor/rules/`:
 
 1. **Extract sections by domain**:
    - WHAT/WHY → `core.md`
@@ -461,16 +461,20 @@ You can convert a CLAUDE.md to `.cursor/rules/`:
    - Still use `docs/` for deep topics
    - Rules reference these docs
 
-3. **Create symlink** (optional):
+3. **Decide on a source of truth**:
+   - **Single source of truth** (simpler, but no `.mdc` frontmatter): keep `AGENTS.md` authoritative and symlink `.cursor/rules/core.md` → `AGENTS.md`.
+   - **Frontmatter-based loading** (more control): keep `.cursor/rules/*.mdc` as separate files and keep `AGENTS.md` as the cross-tool baseline.
+
+   For Claude Code compatibility, always ensure `CLAUDE.md → AGENTS.md`:
    ```bash
-   ln -s .cursor/rules/core.md CLAUDE.md
+   ln -s AGENTS.md CLAUDE.md
    ```
 
 ### Example Conversion
 
-**Original CLAUDE.md** (60 lines):
+**Original AGENTS.md** (60 lines):
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 [10 lines - project overview]
@@ -556,9 +560,9 @@ Check:
 - [ ] File references still accurate
 - [ ] All domains represented
 
-## Comparison: CLAUDE.md vs .cursor/rules
+## Comparison: AGENTS.md vs .cursor/rules
 
-| Aspect | CLAUDE.md | .cursor/rules |
+| Aspect | AGENTS.md | .cursor/rules |
 |--------|-----------|---------------|
 | **Files** | 1 main file | 4-8 focused files |
 | **Lines** | 30-60 target | 10-30 per file |

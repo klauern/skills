@@ -29,12 +29,14 @@ Cursor .mdc format uses YAML frontmatter for intelligent rule loading (alwaysApp
 
 ### Slash Command
 
-- **`/generate-claude-md`**: Interactive wizard for:
+- **`/generate-agents-md`**: Interactive wizard for:
   - AGENTS.md with symlink
   - Full `.cursor/rules/` set (.mdc with frontmatter)
   - Individual `.cursor/rules/*.mdc` rule
 
-  See [`../commands/generate-claude-md.md`](../commands/generate-claude-md.md)
+- Back-compat: **`/generate-claude-md`** (same wizard)
+
+  See [`../commands/generate-agents-md.md`](../commands/generate-agents-md.md)
 
 ### Core Documentation
 
@@ -82,7 +84,7 @@ Multiple .mdc files with frontmatter for intelligent loading.
 2. Ask key questions → Purpose, workflows, special conventions
 3. Generate .mdc files → core.mdc, language.mdc, task.mdc (4-8 files)
 4. Add frontmatter → alwaysApply, globs, or description per file
-5. Create symlinks → `AGENTS.md → core.mdc`, `CLAUDE.md → AGENTS.md`
+5. Create/verify cross-tool entrypoint → `CLAUDE.md → AGENTS.md` (and optional other compatibility symlinks)
 6. Suggest progressive disclosure → Identify topics for separate docs
 
 ### 3. Individual .mdc Rule Generation
@@ -111,7 +113,7 @@ Single .mdc file with appropriate frontmatter.
 - Total all files <200 lines
 - No duplicate content across files
 - Cross-references between related files
-- AGENTS.md → core.md, CLAUDE.md → AGENTS.md
+- `CLAUDE.md → AGENTS.md` (AGENTS.md remains the cross-tool baseline)
 
 **See [guidelines.md](guidelines.md) and [cursor-rules-pattern.md](cursor-rules-pattern.md) for detailed criteria.**
 
@@ -184,21 +186,21 @@ Single .mdc file with appropriate frontmatter.
 
 ### Core Guides
 
-- **[guidelines.md](guidelines.md)** - Best practices, anti-patterns, quality criteria for CLAUDE.md
-- **[template.md](template.md)** - Complete CLAUDE.md template with real-world examples
+- **[guidelines.md](guidelines.md)** - Best practices, anti-patterns, quality criteria for AGENTS.md
+- **[template.md](template.md)** - Complete AGENTS.md template with real-world examples
 - **[cursor-rules-pattern.md](cursor-rules-pattern.md)** - .cursor/rules/ multi-file pattern guide
 - **[progressive-disclosure.md](progressive-disclosure.md)** - How to structure supporting docs
 
 ### Command Documentation
 
-- **[generate-claude-md.md](../commands/generate-claude-md.md)** - Interactive generation command
+- **[generate-agents-md.md](../commands/generate-agents-md.md)** - Interactive generation command
 
 ## References
 
 Based on:
 - **AGENTS.md specification**: [agents.md](https://agents.md/) - Universal format for AI coding agents
-- **HumanLayer best practices**: [Writing a Good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
+- **HumanLayer best practices**: [Writing a Good CLAUDE.md / AGENTS.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
 
-Key research insight: Frontier LLMs can follow ~150-200 instructions consistently. Claude Code's system prompt uses ~50, leaving ~100-150 for your project rules.
+Key research insight: Frontier LLMs can follow ~150-200 instructions consistently, and many harnesses/tools consume a chunk of that via system prompts and policies.
 
 **Symlink direction**: Always `CLAUDE.md → AGENTS.md` (AGENTS.md is primary per spec)

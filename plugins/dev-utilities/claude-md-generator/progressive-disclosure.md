@@ -1,25 +1,25 @@
-# Progressive Disclosure for CLAUDE.md
+# Progressive Disclosure for AGENTS.md
 
 ## Core Concept
 
-**Progressive disclosure**: Keep CLAUDE.md lean by linking to separate, focused documentation files. Claude will read these files **when relevant to the current task**.
+**Progressive disclosure**: Keep `AGENTS.md` lean by linking to separate, focused documentation files. Agents will read these files **when relevant to the current task**.
 
-**Key insight**: Claude ignores content deemed irrelevant. By moving detailed content to separate files, you:
-1. Keep CLAUDE.md under the instruction budget
-2. Allow Claude to load details only when needed
+**Key insight**: Agents ignore content deemed irrelevant. By moving detailed content to separate files, you:
+1. Keep `AGENTS.md` under the instruction budget
+2. Allow agents to load details only when needed
 3. Maintain detailed documentation for complex topics
 
 ## When to Use Progressive Disclosure
 
 ### Move to Separate Files When:
 
-- **Topic is >10 lines** of explanation in CLAUDE.md
+- **Topic is >10 lines** of explanation in `AGENTS.md`
 - **Only relevant for specific tasks** (not universally applicable)
 - **Requires code examples** or detailed procedures
-- **Changes frequently** (isolate churn from stable CLAUDE.md)
+- **Changes frequently** (isolate churn from stable `AGENTS.md`)
 - **Deep technical detail** (database schemas, API specs)
 
-### Keep in CLAUDE.md When:
+### Keep in AGENTS.md When:
 
 - **Universal workflow** (build, test commands)
 - **Tool preferences** (bun vs npm, uv vs pip)
@@ -30,8 +30,8 @@
 
 ```
 your-repo/
-├── CLAUDE.md              # Main file (30-60 lines)
-├── AGENTS.md → CLAUDE.md  # Symlink for compatibility
+├── AGENTS.md              # Main file (30-60 lines)
+├── CLAUDE.md → AGENTS.md  # Symlink for Claude Code compatibility
 └── docs/
     ├── architecture.md    # Deep dive on system design
     ├── testing.md         # Testing patterns and examples
@@ -48,7 +48,7 @@ your-repo/
 
 **Recommendation**: Use existing `docs/` directory if present, otherwise create it.
 
-## How to Reference in CLAUDE.md
+## How to Reference in AGENTS.md
 
 ### Pattern 1: In Context
 
@@ -563,17 +563,17 @@ Quarterly review:
 
 If content appears in multiple places:
 
-- **CLAUDE.md**: One-line summary + link
+- **AGENTS.md**: One-line summary + link
 - **Progressive disclosure**: Full details
 
 Never duplicate full explanations.
 
 ## Example: Full Progressive Disclosure Setup
 
-### CLAUDE.md (42 lines)
+### AGENTS.md (42 lines)
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -631,21 +631,21 @@ docs/
 ```
 
 **Total**:
-- CLAUDE.md: 42 lines (well under budget)
+- AGENTS.md: 42 lines (well under budget)
 - Progressive docs: 450 lines (loaded on-demand)
 - **Effective context**: 42 lines default, up to 492 when all topics relevant
 
 **Without progressive disclosure**:
-- Single CLAUDE.md: 492 lines (exceeds budget, wastes context)
+- Single AGENTS.md: 492 lines (exceeds budget, wastes context)
 
 ## Summary
 
 Progressive disclosure allows you to:
 
-- ✅ Keep CLAUDE.md under 60 lines
+- ✅ Keep AGENTS.md under 60 lines
 - ✅ Maintain detailed documentation
 - ✅ Load context only when relevant
 - ✅ Stay within instruction budget
 - ✅ Provide comprehensive guidance
 
-**Rule of thumb**: If it's >10 lines in CLAUDE.md, it belongs in progressive disclosure.
+**Rule of thumb**: If it's >10 lines in AGENTS.md, it belongs in progressive disclosure.

@@ -1,9 +1,9 @@
-# CLAUDE.md Template
+# AGENTS.md Template
 
 ## Basic Template
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -47,7 +47,7 @@
 ### Example 1: Next.js Monorepo
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -98,7 +98,7 @@ Monorepo ensures shared auth, product types, and API client across all platforms
 ### Example 2: Python CLI Tool
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -147,7 +147,7 @@ Uses uv for fast, reliable dependency resolution.
 ### Example 3: Microservices Project
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -199,7 +199,7 @@ Service-per-function design allows independent scaling and deployment.
 ### Example 4: React Component Library
 
 ```markdown
-# CLAUDE.md
+# AGENTS.md
 
 ## What This Is
 
@@ -828,11 +828,11 @@ This template assumes:
 
 ### File Location
 
-**Standard**: Put at repository root as `CLAUDE.md`
+**Standard**: Put at repository root as `AGENTS.md`
 
 **Symlink for compatibility**: Create `AGENTS.md` symlink:
 ```bash
-ln -s CLAUDE.md AGENTS.md
+ln -s AGENTS.md CLAUDE.md
 ```
 
 This ensures compatibility with tools that look for either name.

@@ -505,8 +505,8 @@ If AGENTS.md is >60 lines, split into:
 ## References
 
 Based on:
-- **HumanLayer best practices**: [Writing a Good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
+- **HumanLayer best practices**: [Writing a Good CLAUDE.md / AGENTS.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md)
 - **agents.md specification**: [agents.md](https://agents.md/) - Universal format for AI coding agents
 - **Cursor documentation**: Frontmatter types and loading behavior
 
-Key research insight: Frontier LLMs can follow ~150-200 instructions consistently. Claude Code's system prompt uses ~50, leaving ~100-150 for your project rules. Budget wisely.
+Key research insight: Frontier LLMs can follow ~150-200 instructions consistently, and many harnesses/tools consume a chunk of that via system prompts and policies. Budget wisely.
