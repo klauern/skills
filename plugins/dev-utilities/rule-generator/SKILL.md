@@ -1,11 +1,11 @@
 ---
-name: claude-md-generator
-description: Generate high-quality AGENTS.md files and Cursor .mdc rules following agents.md spec. Creates lean, focused documentation with intelligent loading via frontmatter (alwaysApply/description/globs).
-version: 1.0.0
+name: rule-generator
+description: Generate AI coding assistant rules for Cursor, Claude Code, and other tools. Creates AGENTS.md, .cursor/rules/*.mdc, and individual rules following agents.md spec and HumanLayer best practices.
+version: 2.0.0
 author: klauern
 ---
 
-# AGENTS.md Generator
+# Rule Generator
 
 ## Overview
 
@@ -15,6 +15,27 @@ This skill helps generate effective project rules for AI coding agents using:
 - **Individual rule**: Single `.cursor/rules/*.mdc` file
 
 Cursor .mdc format uses YAML frontmatter for intelligent rule loading (alwaysApply, description, globs). All patterns follow the agents.md specification and research-backed best practices from HumanLayer's guide.
+
+## Supported Tools
+
+### Currently Supported
+- **Cursor** - `.cursor/rules/*.mdc` with YAML frontmatter (alwaysApply, globs, description)
+- **Claude Code** - `AGENTS.md` with `CLAUDE.md` symlink for backwards compatibility
+
+### Cross-Tool Compatibility
+- AGENTS.md serves as the universal source of truth following the [agents.md specification](https://agents.md/)
+- Tool-specific symlinks created as needed (`CLAUDE.md → AGENTS.md`)
+- Progressive disclosure patterns work across all tools
+- Cursor automatically reads `.cursor/rules/` files, Claude Code supports both AGENTS.md and .cursor/rules/
+
+### Future Support (Planned)
+- **Windsurf** - `.windsurfrules` file
+- **Cline** - `.clinerules` or `.clinerules/*.md` files
+- **RooCode** - `.roomodes` + `.roo/rules-{mode}/` directories
+- **GitHub Copilot** - `.github/copilot-instructions.md` files
+- **Replit** - `.replit.md` file
+
+See [references/format-specs/README.md](references/format-specs/README.md) for details on adding support for additional tools.
 
 ## Key Principles
 
@@ -27,24 +48,32 @@ Cursor .mdc format uses YAML frontmatter for intelligent rule loading (alwaysApp
 
 ## Quick Start
 
-### Slash Command
+### Slash Commands
 
-- **`/generate-agents-md`**: Interactive wizard for:
-  - AGENTS.md with symlink
-  - Full `.cursor/rules/` set (.mdc with frontmatter)
-  - Individual `.cursor/rules/*.mdc` rule
+- **`/generate-rules`**: Primary interactive wizard (recommended)
+  - Choose target: AGENTS.md, .cursor/rules/, or individual rule
+  - Auto-detects tech stack and existing setup
+  - Offers progressive disclosure suggestions
 
-- Back-compat: **`/generate-claude-md`** (same wizard)
+- **`/generate-agents-md`**: Same wizard, tool-agnostic name
+- **`/generate-claude-md`**: Same wizard, backwards compatibility
 
-  See [`../commands/generate-agents-md.md`](../commands/generate-agents-md.md)
+**Note**: `/agents-md` is a separate command for **migration only** (CLAUDE.md to AGENTS.md).
+
+See [`../commands/generate-rules.md`](../commands/generate-rules.md)
 
 ### Core Documentation
 
-- **[Guidelines](guidelines.md)** - Best practices and what to avoid
-- **[Template](template.md)** - Starting template with examples
-- **[Cursor .mdc Format](cursor-mdc-format.md)** - Frontmatter types and decision tree
-- **[Cursor Rules Pattern](cursor-rules-pattern.md)** - .cursor/rules/ multi-file approach
-- **[Progressive Disclosure](progressive-disclosure.md)** - How to structure supporting docs
+- **[Guidelines](references/guidelines.md)** - Best practices and what to avoid
+- **[Templates](references/templates.md)** - Starting templates with real-world examples
+- **[Progressive Disclosure](references/progressive-disclosure.md)** - How to structure supporting docs
+
+### Format Specifications
+
+- **[Cursor .mdc Format](references/format-specs/cursor-mdc.md)** - Frontmatter types and decision tree
+- **[Cursor Rules Pattern](references/format-specs/cursor-rules.md)** - .cursor/rules/ multi-file approach
+- **[Claude Code Format](references/format-specs/claude-code.md)** - CLAUDE.md symlink and integration
+- **[AGENTS.md Spec](references/format-specs/agents-md-spec.md)** - Universal specification reference
 
 ## When to Use This Skill
 
@@ -115,7 +144,7 @@ Single .mdc file with appropriate frontmatter.
 - Cross-references between related files
 - `CLAUDE.md → AGENTS.md` (AGENTS.md remains the cross-tool baseline)
 
-**See [guidelines.md](guidelines.md) and [cursor-rules-pattern.md](cursor-rules-pattern.md) for detailed criteria.**
+**See [references/guidelines.md](references/guidelines.md) and [references/format-specs/cursor-rules.md](references/format-specs/cursor-rules.md) for detailed criteria.**
 
 ## Anti-Patterns to Avoid
 
@@ -127,7 +156,35 @@ Single .mdc file with appropriate frontmatter.
 - ❌ Auto-generation without review (manual crafting required)
 - ❌ Making AGENTS.md a symlink to CLAUDE.md (reverse is correct)
 
-**See [guidelines.md](guidelines.md) for complete anti-patterns list.**
+**See [references/guidelines.md](references/guidelines.md) for complete anti-patterns list.**
+
+## Extensibility Architecture
+
+This skill is designed to support additional AI coding tools without major restructuring.
+
+### Adding New Tool Support
+
+1. Create format spec in `references/format-specs/[tool-name].md`
+2. Define:
+   - File location(s) and naming convention
+   - Format syntax (YAML frontmatter, plain markdown, etc.)
+   - Loading behavior (alwaysApply equivalent, globs, task-specific triggers)
+   - Symlink strategy for AGENTS.md compatibility
+3. Update SKILL.md "Supported Tools" section
+4. Update wizard in `generate-rules.md` to offer new format option
+
+### Tool Abstraction Model
+
+All AI coding tools can be mapped to these common concepts:
+
+| Concept | Description | Example (Cursor) | Example (Future: Windsurf) |
+|---------|-------------|------------------|----------------------------|
+| **Universal rules** | Load for every task | `alwaysApply: true` | `.windsurfrules` (always loaded) |
+| **File-type rules** | Load for specific file extensions | `globs: "*.ts"` | Future: file-type triggers |
+| **Task-specific rules** | Load on-demand based on context | `description: "..."` | Future: context-aware loading |
+| **Source of truth** | Primary reference file | AGENTS.md | AGENTS.md (with symlink) |
+
+All formats should support or symlink to AGENTS.md as the universal baseline.
 
 ## Sub-Agent Strategy
 
@@ -178,22 +235,31 @@ Single .mdc file with appropriate frontmatter.
 
 **Don't forget**: `ln -s AGENTS.md CLAUDE.md` for Claude Code compatibility
 
-**For complete template with examples**, see [`template.md`](template.md)
+**For complete templates with examples**, see [`references/templates.md`](references/templates.md)
 
-**For progressive disclosure patterns**, see [`progressive-disclosure.md`](progressive-disclosure.md)
+**For progressive disclosure patterns**, see [`references/progressive-disclosure.md`](references/progressive-disclosure.md)
 
 ## Documentation Index
 
 ### Core Guides
 
-- **[guidelines.md](guidelines.md)** - Best practices, anti-patterns, quality criteria for AGENTS.md
-- **[template.md](template.md)** - Complete AGENTS.md template with real-world examples
-- **[cursor-rules-pattern.md](cursor-rules-pattern.md)** - .cursor/rules/ multi-file pattern guide
-- **[progressive-disclosure.md](progressive-disclosure.md)** - How to structure supporting docs
+- **[references/guidelines.md](references/guidelines.md)** - Best practices, anti-patterns, quality criteria
+- **[references/templates.md](references/templates.md)** - Complete templates with real-world examples
+- **[references/progressive-disclosure.md](references/progressive-disclosure.md)** - How to structure supporting docs
+
+### Format Specifications
+
+- **[references/format-specs/cursor-mdc.md](references/format-specs/cursor-mdc.md)** - Cursor .mdc frontmatter format
+- **[references/format-specs/cursor-rules.md](references/format-specs/cursor-rules.md)** - .cursor/rules/ multi-file pattern
+- **[references/format-specs/claude-code.md](references/format-specs/claude-code.md)** - Claude Code specifics
+- **[references/format-specs/agents-md-spec.md](references/format-specs/agents-md-spec.md)** - AGENTS.md specification
 
 ### Command Documentation
 
-- **[generate-agents-md.md](../commands/generate-agents-md.md)** - Interactive generation command
+- **[generate-rules.md](../commands/generate-rules.md)** - Primary interactive generation command (recommended)
+- **[generate-agents-md.md](../commands/generate-agents-md.md)** - Tool-agnostic alias
+- **[generate-claude-md.md](../commands/generate-claude-md.md)** - Backwards compatibility alias
+- **[agents-md.md](../commands/agents-md.md)** - Migration-only command (separate from generation)
 
 ## References
 
