@@ -5,7 +5,7 @@ description: Interactive wizard to generate AI coding assistant rules (AGENTS.md
 
 ## Instructions
 
-Primary interactive wizard for generating AI coding assistant rules. Also available as `/generate-agents-md` (tool-agnostic name) and `/generate-claude-md` (backwards compatibility).
+Primary interactive wizard for generating AI coding assistant rules.
 
 **Note**: `/agents-md` is a separate command for migration only (CLAUDE.md to AGENTS.md).
 

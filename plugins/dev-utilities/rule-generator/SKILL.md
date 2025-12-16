@@ -50,13 +50,10 @@ See [references/format-specs/README.md](references/format-specs/README.md) for d
 
 ### Slash Commands
 
-- **`/generate-rules`**: Primary interactive wizard (recommended)
+- **`/generate-rules`**: Interactive wizard for generating AI coding assistant rules
   - Choose target: AGENTS.md, .cursor/rules/, or individual rule
   - Auto-detects tech stack and existing setup
   - Offers progressive disclosure suggestions
-
-- **`/generate-agents-md`**: Same wizard, tool-agnostic name
-- **`/generate-claude-md`**: Same wizard, backwards compatibility
 
 **Note**: `/agents-md` is a separate command for **migration only** (CLAUDE.md to AGENTS.md).
 
@@ -256,10 +253,8 @@ All formats should support or symlink to AGENTS.md as the universal baseline.
 
 ### Command Documentation
 
-- **[generate-rules.md](../commands/generate-rules.md)** - Primary interactive generation command (recommended)
-- **[generate-agents-md.md](../commands/generate-agents-md.md)** - Tool-agnostic alias
-- **[generate-claude-md.md](../commands/generate-claude-md.md)** - Backwards compatibility alias
-- **[agents-md.md](../commands/agents-md.md)** - Migration-only command (separate from generation)
+- **[generate-rules.md](../commands/generate-rules.md)** - Interactive rule generation command
+- **[agents-md.md](../commands/agents-md.md)** - Migration-only command (CLAUDE.md to AGENTS.md)
 
 ## References
 

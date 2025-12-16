@@ -131,7 +131,7 @@ A skill that generates high-quality AGENTS.md files following the agents.md spec
 - Avoids anti-patterns (style guides, code snippets, task-specific content)
 - Domain-specific files for multi-tech stacks (react.md, typescript.md, testing.md, etc.)
 
-**Usage**: Use `/dev-utilities:generate-agents-md` to launch the interactive wizard (or `/dev-utilities:generate-claude-md` for backwards compatibility).
+**Usage**: Use `/dev-utilities:generate-rules` to launch the interactive wizard.
 
 #### gh-actions-upgrader
 
@@ -299,14 +299,14 @@ This command provides a concise, prescriptive workflow for resolving conflicts b
 
 ### dev-utilities Plugin
 
-#### /dev-utilities:generate-agents-md
+#### /dev-utilities:generate-rules
 
 Generate a high-quality AGENTS.md file for your project using an interactive wizard.
 
 **Usage**:
 
 ```bash
-/dev-utilities:generate-agents-md
+/dev-utilities:generate-rules
 ```
 
 This command will:
@@ -322,10 +322,6 @@ This command will:
 **Based on**:
 - [agents.md specification](https://agents.md/) - Universal format for AI assistants
 - [Writing a Good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md) - Best practices
-
-#### /dev-utilities:generate-claude-md
-
-Backwards-compatible alias of `/dev-utilities:generate-agents-md`.
 
 #### /dev-utilities:agents-md
 
@@ -455,8 +451,7 @@ klauern-skills/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       ├── commands/
-│       │   ├── generate-claude-md.md
-│       │   ├── generate-agents-md.md
+│       │   ├── generate-rules.md
 │       │   ├── agents-md.md
 │       │   ├── gh-actions-upgrade.md
 │       │   ├── gh-checks.md

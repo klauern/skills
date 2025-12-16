@@ -91,7 +91,7 @@ plugins/
     │   └── plugin.json
     ├── commands/
     │   ├── agents-md.md
-    │   ├── generate-claude-md.md
+    │   ├── generate-rules.md
     │   ├── continue.md
     │   ├── worktree.md
     │   ├── gh-actions-upgrade.md
