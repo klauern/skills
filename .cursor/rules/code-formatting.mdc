@@ -1,267 +1,54 @@
 ---
 globs: "*.go,*.py,*.js,*.ts,*.jsx,*.tsx,*.md"
 ---
-# Code Formatting and Style Guidelines
+# Code Formatting Standards
 
-Apply these formatting standards when writing or modifying code in this repository.
+## Go
 
-## Go Code Standards
+- **Formatter**: `gofumpt -w .` (not standard gofmt)
+- **Install**: `go install mvdan.cc/gofumpt@latest`
+- **Line length**: 100 preferred, 120 max
+- **Imports**: stdlib → external → internal (separated by blank lines)
+- **Naming**: `UserProfile` (exported), `userProfile` (internal), `Reader` (interfaces, no "I" prefix)
 
-### Formatting
-- **Always use `gofumpt`** (not just `gofmt`)
-- Run before commits: `gofumpt -w .`
-- Line length: Prefer 100 characters, hard limit at 120
+## Python
 
-### Structure
-```go
-// Package comment
-package main
+- **Runner**: `uv run` with inline dependencies
+- **Style**: PEP 8, Black (88 char lines)
+- **Type hints**: Required for function signatures
+- **Script header**:
+  ```python
+  # /// script
+  # dependencies = ["requests>=2.28.0"]
+  # ///
+  ```
 
-import (
-    // Standard library
-    "fmt"
-    "strings"
+## JavaScript/TypeScript
 
-    // External packages
-    "github.com/user/package"
+- **Prefer**: TypeScript for new files
+- **Semicolons**: Always
+- **Quotes**: Single
+- **Indent**: 2 spaces
+- **Imports**: external → internal → types
 
-    // Internal packages
-    "github.com/klauern/project/internal/pkg"
-)
+## Markdown
 
-// Type definitions
-type Config struct {
-    Name string `json:"name"`
-}
+- **Lists**: Use `-` for unordered
+- **Code blocks**: Include language identifier
+- **Bold**: `**important**` for emphasis
 
-// Functions with clear documentation
-// DoSomething performs an action and returns error if failed.
-func DoSomething(input string) error {
-    // Implementation
-}
-```
+## File Naming
 
-### Naming Conventions
-- Exported: `UserProfile`, `GetUserByID`
-- Unexported: `userProfile`, `getUserByID`
-- Constants: `DefaultTimeout`, `MaxRetries`
-- Interfaces: `Reader`, `UserService` (no "I" prefix)
+| Language | Pattern | Example |
+|----------|---------|---------|
+| Go | snake_case | `user_service.go` |
+| Python | snake_case | `user_service.py` |
+| JS/TS | camelCase | `userService.ts` |
+| React | PascalCase | `UserProfile.tsx` |
+| Tests | suffix | `*_test.go`, `test_*.py`, `*.test.ts` |
 
-## Python Code Standards
+## Commit Integration
 
-### Script Headers for `uv`
-```python
-#!/usr/bin/env python3
-# /// script
-# dependencies = [
-#   "requests>=2.28.0",
-#   "pandas==2.0.0",
-# ]
-# ///
-
-import requests
-import pandas as pd
-```
-
-### Style Guidelines
-- Follow PEP 8
-- Use type hints for function signatures
-- Docstrings for all public functions
-- Line length: 88 characters (Black default)
-
-### Example Structure
-```python
-"""Module description."""
-
-from typing import List, Optional
-
-class UserService:
-    """Handles user-related operations."""
-
-    def get_user(self, user_id: int) -> Optional[dict]:
-        """
-        Retrieve user by ID.
-
-        Args:
-            user_id: The user's ID
-
-        Returns:
-            User data or None if not found
-        """
-        pass
-```
-
-## JavaScript/TypeScript Standards
-
-### General Rules
-- Use TypeScript for new files when possible
-- Semicolons: Always use them
-- Quotes: Single quotes for strings
-- Indentation: 2 spaces
-
-### Import Organization
-```typescript
-// External imports
-import React from 'react';
-import { render } from '@testing-library/react';
-
-// Internal imports
-import { UserProfile } from '@/components/UserProfile';
-import { userService } from '@/services/user';
-
-// Types
-import type { User } from '@/types';
-```
-
-### Function Style
-```typescript
-// Named exports preferred
-export function processUser(user: User): ProcessedUser {
-  // Implementation
-}
-
-// Arrow functions for callbacks
-const users = rawUsers.map((user) => ({
-  ...user,
-  processed: true,
-}));
-```
-
-### React Components
-```tsx
-interface UserCardProps {
-  user: User;
-  onEdit?: (user: User) => void;
-}
-
-export function UserCard({ user, onEdit }: UserCardProps) {
-  return (
-    <div className="user-card">
-      <h2>{user.name}</h2>
-      {onEdit && (
-        <button onClick={() => onEdit(user)}>Edit</button>
-      )}
-    </div>
-  );
-}
-```
-
-## Markdown Standards
-
-### Document Structure
-```markdown
-# Main Title
-
-Brief description of the document.
-
-## Table of Contents
-
-- [Section 1](#section-1)
-- [Section 2](#section-2)
-
-## Section 1
-
-Content here...
-
-### Subsection
-
-More details...
-```
-
-### Code Examples
-- Use language identifiers: ` ```python`, ` ```bash`
-- Include context for code blocks
-- Keep examples concise and focused
-
-### Lists and Formatting
-- Use `-` for unordered lists
-- Use `1.` for ordered lists
-- Bold for emphasis: `**important**`
-- Code for technical terms: `` `variable` ``
-
-## File Naming Conventions
-
-### General Rules
-- Lowercase with hyphens: `user-service.go`
-- Test files: `user-service_test.go`
-- Documentation: `README.md`, `SKILL.md`
-
-### Language Specific
-- Go: `user_service.go` (snake_case)
-- Python: `user_service.py` (snake_case)
-- JS/TS: `userService.js` (camelCase)
-- React: `UserProfile.tsx` (PascalCase for components)
-
-## Documentation Comments
-
-### Go
-```go
-// UserService manages user data operations.
-// It provides methods for CRUD operations and authentication.
-type UserService struct {
-    db Database
-}
-```
-
-### Python
-```python
-def process_data(input_data: List[dict]) -> pd.DataFrame:
-    """
-    Process raw data into a DataFrame.
-
-    Args:
-        input_data: List of dictionaries containing raw data
-
-    Returns:
-        Processed data as a pandas DataFrame
-
-    Raises:
-        ValueError: If input_data is empty
-    """
-```
-
-### TypeScript
-```typescript
-/**
- * Processes user data and returns formatted result
- * @param userData - Raw user data from API
- * @returns Formatted user object
- * @throws {ValidationError} If required fields are missing
- */
-function processUserData(userData: RawUser): User {
-  // Implementation
-}
-```
-
-## Testing Standards
-
-### Test File Location
-- Go: Same directory as source, `_test.go` suffix
-- Python: `tests/` directory or `test_*.py`
-- JS/TS: `__tests__/` directory or `*.test.ts`
-
-### Test Structure
-```go
-func TestUserService_GetUser(t *testing.T) {
-    t.Run("returns user when exists", func(t *testing.T) {
-        // Arrange
-        service := NewUserService(mockDB)
-
-        // Act
-        user, err := service.GetUser(123)
-
-        // Assert
-        assert.NoError(t, err)
-        assert.Equal(t, "John", user.Name)
-    })
-}
-```
-
-## Commit Message Integration
-
-When making code changes:
-- Group related formatting changes
-- Use appropriate commit types:
-  - `style:` for formatting only
-  - `refactor:` for code structure changes
-  - `fix:` if fixing style issues that cause bugs
+- `style:` for formatting-only changes
+- `refactor:` for structural changes
+- `fix:` if formatting fixes bugs

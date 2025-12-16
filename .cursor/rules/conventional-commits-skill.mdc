@@ -75,12 +75,12 @@ Two ways to indicate:
 
 ### Sub-Agent Strategy
 
-- **Use Haiku 3.5** for:
+- **Use Haiku 4.5** for:
   - Quick diff analysis
   - File categorization
   - Simple message drafting
 
-- **Use Sonnet 3.5** for:
+- **Use Sonnet 4.5** for:
   - Complex commit planning
   - Scope identification
   - Multi-commit strategies

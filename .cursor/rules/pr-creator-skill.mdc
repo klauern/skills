@@ -80,14 +80,14 @@ gh pr create \
 
 ## Model Usage Strategy
 
-### Use Haiku 3.5 for:
+### Use Haiku 4.5 for:
 - File system operations
 - Template discovery
 - Git command execution
 - Pattern matching
 - Simple text extraction
 
-### Use Sonnet 3.5 for:
+### Use Sonnet 4.5 for:
 - Commit intent analysis
 - PR description generation
 - Gap detection logic
