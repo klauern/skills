@@ -8,7 +8,7 @@ This file provides guidance to AI coding assistants (Claude Code, Cursor, Windsu
 
 This is a Claude Code plugin marketplace containing three plugins that automate Git and PR workflows:
 
-1. **commits** - Conventional commit message creation following conventionalcommits.org
+1. **commits** - Comprehensive conventional commits toolkit (creation, splitting, linting, changelog generation)
 2. **pull-requests** - Intelligent PR creation with template-based field extraction
 3. **dev-utilities** - Development workflow utilities (agents-md migration, worktrees, GH Actions upgrades)
 
@@ -58,18 +58,22 @@ Each plugin is self-contained in its own directory under `plugins/`:
 
 ```
 plugins/
-├── commits/                      → Conventional commit creation
+├── commits/                      → Conventional commits toolkit
 │   ├── .claude-plugin/
 │   │   └── plugin.json
 │   ├── commands/
-│   │   ├── commit.md
-│   │   └── commit-push.md
-│   └── conventional-commits/     → Skill with docs
+│   │   ├── commit.md (unified: creation + split + push)
+│   │   ├── commit-lint.md
+│   │   └── commit-fix.md
+│   ├── conventional-commits/     → Commit message creation skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── commit-splitter/          → Atomic commit splitting skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── commit-message-linter/    → Message validation skill
 │       ├── SKILL.md
-│       ├── workflows.md
-│       ├── examples.md
-│       ├── best-practices.md
-│       └── format-reference.md
+│       └── references/
 │
 ├── pull-requests/                → PR creation and management
 │   ├── .claude-plugin/
@@ -228,7 +232,9 @@ bd create "Title" -t task -p 2        # Create issue
 - `.cursor/rules/project-overview.mdc` - Repository structure (always active)
 
 **Skill References**:
-- `plugins/commits/conventional-commits/SKILL.md` - Commit message standards
+- `plugins/commits/conventional-commits/SKILL.md` - Commit message creation standards
+- `plugins/commits/commit-splitter/SKILL.md` - Atomic commit splitting strategies (accessed via `/commits:commit`)
+- `plugins/commits/commit-message-linter/SKILL.md` - Commit message validation and fixing
 - `plugins/pull-requests/pr-creator/SKILL.md` - PR creation with template inference
 - `plugins/dev-utilities/gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
 

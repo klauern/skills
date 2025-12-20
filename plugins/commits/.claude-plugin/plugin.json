@@ -3,7 +3,7 @@
     "email": "klauer@gmail.com",
     "name": "klauern"
   },
-  "description": "Conventional commit message creation skill",
+  "description": "Conventional commits toolkit with smart commit creation (split detection, branch safety, auto-push), message linting, and auto-fixing",
   "name": "commits",
-  "version": "1.0.0"
+  "version": "3.0.0"
 }
