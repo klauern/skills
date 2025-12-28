@@ -1,3 +1,5 @@
 !/.claude
 # Ignore local settings (user-specific paths)
 .claude/*.local.json
+
+!.beads/
