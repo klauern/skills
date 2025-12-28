@@ -1,8 +1,6 @@
 ---
 name: conventional-commits
 description: Creates conventional commits following conventionalcommits.org. Analyzes git changes and generates properly formatted commit messages with types (feat, fix, docs, etc.) and scopes. Supports single/multi-commit workflows and commit-and-push operations.
-version: 1.0.0
-author: klauern
 ---
 
 # Conventional Commits
@@ -20,10 +18,10 @@ This skill enables creating well-formatted commit messages following the Convent
 
 ### Core Documentation
 
-- **[Workflows](workflows.md)** - Step-by-step workflows for single and multi-commit scenarios
-- **[Examples](examples.md)** - Real-world commit examples for different scenarios
-- **[Best Practices](best-practices.md)** - Guidelines and common pitfalls to avoid
-- **[Format Reference](format-reference.md)** - Complete specification details
+- **[Workflows](references/workflows.md)** - Step-by-step workflows for single and multi-commit scenarios
+- **[Examples](references/examples.md)** - Real-world commit examples for different scenarios
+- **[Best Practices](references/best-practices.md)** - Guidelines and common pitfalls to avoid
+- **[Format Reference](references/format-reference.md)** - Complete specification details
 
 ## When to Use This Skill
 
@@ -47,7 +45,7 @@ Use this skill when:
 - **Single commit**: Changes already staged for one logical commit
 - **Multi-commit**: Unstaged changes that need to be broken into atomic commits
 
-**See [workflows.md](workflows.md) for detailed step-by-step instructions.**
+**See [workflows.md](references/workflows.md) for detailed step-by-step instructions.**
 
 ## Sub-Agent Strategy
 
@@ -62,7 +60,7 @@ Use this skill when:
 - Scope identification and complex message composition
 - Cross-cutting change analysis
 
-**See [workflows.md](workflows.md) for detailed agent usage examples.**
+**See [workflows.md](references/workflows.md) for detailed agent usage examples.**
 
 ## Quick Format Reference
 
@@ -78,23 +76,23 @@ Use this skill when:
 
 **Breaking changes**: Use '!' after type/scope or `BREAKING CHANGE:` footer
 
-**For complete specification**, see [`format-reference.md`](format-reference.md)
+**For complete specification**, see [`format-reference.md`](references/format-reference.md)
 
-**For practical examples**, see [`examples.md`](examples.md)
+**For practical examples**, see [`examples.md`](references/examples.md)
 
-**For guidelines and tips**, see [`best-practices.md`](best-practices.md)
+**For guidelines and tips**, see [`best-practices.md`](references/best-practices.md)
 
 ## Documentation Index
 
 ### Core Guides
 
-- **[workflows.md](workflows.md)** - Detailed workflows for single and multi-commit scenarios
-- **[examples.md](examples.md)** - Real-world commit examples
-- **[best-practices.md](best-practices.md)** - Guidelines and common pitfalls
+- **[workflows.md](references/workflows.md)** - Detailed workflows for single and multi-commit scenarios
+- **[examples.md](references/examples.md)** - Real-world commit examples
+- **[best-practices.md](references/best-practices.md)** - Guidelines and common pitfalls
 
 ### Reference Materials
 
-- **[format-reference.md](format-reference.md)** - Complete Conventional Commits specification
+- **[format-reference.md](references/format-reference.md)** - Complete Conventional Commits specification
 
 ### Command Documentation
 
