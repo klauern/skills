@@ -3,3 +3,4 @@
 .claude/*.local.json
 
 !.beads/
+.beads/sync-state.json
