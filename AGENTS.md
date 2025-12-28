@@ -6,11 +6,12 @@ This file provides guidance to AI coding assistants (Claude Code, Cursor, Windsu
 
 ## Project Overview
 
-This is a Claude Code plugin marketplace containing three plugins that automate Git and PR workflows:
+This is a Claude Code plugin marketplace containing four plugins that automate Git and PR workflows:
 
 1. **commits** - Conventional commit message creation following conventionalcommits.org
 2. **pull-requests** - Intelligent PR creation with template-based field extraction
 3. **dev-utilities** - Development workflow utilities (agents-md migration, worktrees, GH Actions upgrades)
+4. **capacities** - Capacities knowledge management API integration
 
 **Marketplace Name**: `klauern-skills` (published as "klauern" on GitHub)
 
@@ -20,6 +21,7 @@ This is a Claude Code plugin marketplace containing three plugins that automate 
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills
+/plugin install capacities@klauern-skills
 ```
 
 ## Development Commands
@@ -37,6 +39,14 @@ This is a Claude Code plugin marketplace containing three plugins that automate 
    ---
    ```
 3. Add references documentation in `skill-name/references/`
+
+**Token Budget Guidelines**:
+- **Metadata** (name + description): ~100 tokens - loads at discovery for all skills
+- **SKILL.md body**: <500 lines (~5000 tokens) - loads only when skill activates
+- **Reference files**: <500 lines each - loads on demand when explicitly needed
+- **Progressive disclosure**: Essential instructions in SKILL.md, detailed content in references/
+
+**See [docs/skill-authoring-guidelines.md](docs/skill-authoring-guidelines.md) for comprehensive best practices.**
 
 ### Adding New Commands
 
@@ -66,10 +76,11 @@ plugins/
 │   │   └── commit-push.md
 │   └── conventional-commits/     → Skill with docs
 │       ├── SKILL.md
-│       ├── workflows.md
-│       ├── examples.md
-│       ├── best-practices.md
-│       └── format-reference.md
+│       └── references/
+│           ├── workflows.md
+│           ├── examples.md
+│           ├── best-practices.md
+│           └── format-reference.md
 │
 ├── pull-requests/                → PR creation and management
 │   ├── .claude-plugin/
@@ -80,27 +91,49 @@ plugins/
 │   │   ├── pr-comment-review.md
 │   │   └── merge-conflicts.md
 │   ├── pr-creator/               → PR creation skill
-│   │   ├── SKILL.md
-│   │   └── references/
+│   │   └── SKILL.md
 │   └── pr-conflict-resolver/     → Conflict resolution skill
 │       ├── SKILL.md
 │       └── references/
 │
-└── dev-utilities/                → Development workflow tools
+├── dev-utilities/                → Development workflow tools
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── commands/
+│   │   ├── agents-md.md
+│   │   ├── generate-rules.md
+│   │   ├── continue.md
+│   │   ├── worktree.md
+│   │   ├── gh-actions-upgrade.md
+│   │   ├── gh-checks.md
+│   │   └── git-optimize.md
+│   ├── rule-generator/           → Rule generation skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── gh-actions-upgrader/      → GH Actions upgrade skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── ci-failure-analyzer/      → CI failure analysis skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── git-optimize/             → Git optimization skill
+│       ├── SKILL.md
+│       └── references/
+│
+└── capacities/                   → Capacities knowledge management
     ├── .claude-plugin/
     │   └── plugin.json
     ├── commands/
-    │   ├── agents-md.md
-    │   ├── generate-rules.md
-    │   ├── continue.md
-    │   ├── worktree.md
-    │   ├── gh-actions-upgrade.md
-    │   ├── gh-checks.md
-    │   └── git-optimize.md
-    ├── claude-md-generator/      → CLAUDE.md generation skill
-    ├── gh-actions-upgrader/      → GH Actions upgrade skill
-    ├── ci-failure-analyzer/      → CI failure analysis skill
-    └── git-optimize/             → Git optimization skill
+    │   ├── daily-note.md
+    │   ├── list-spaces.md
+    │   ├── save-weblink.md
+    │   ├── search.md
+    │   └── space-info.md
+    ├── capacities-api/           → Capacities API skill
+    │   ├── SKILL.md
+    │   └── references/
+    └── scripts/
+        └── capacities.py
 
 .claude-plugin/
 └── marketplace.json              → Plugin registry (points to ./plugins/*)
@@ -114,7 +147,7 @@ plugins/
 
 **Command Structure**: Commands are markdown files with frontmatter defining `allowed-tools` and `description`. Commands contain bash scripts and natural language instructions.
 
-**Three-Plugin Architecture**: The marketplace defines three separate plugins, each with distinct responsibilities. Each plugin has its own isolated commands.
+**Four-Plugin Architecture**: The marketplace defines four separate plugins, each with distinct responsibilities. Each plugin has its own isolated commands.
 
 **Model Strategy**: Skills explicitly define when to use Haiku vs Sonnet:
 - **Haiku 4.5**: Fast operations (file I/O, pattern matching, parsing, git commands)
@@ -231,6 +264,10 @@ bd create "Title" -t task -p 2        # Create issue
 - `plugins/commits/conventional-commits/SKILL.md` - Commit message standards
 - `plugins/pull-requests/pr-creator/SKILL.md` - PR creation with template inference
 - `plugins/dev-utilities/gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
+- `plugins/dev-utilities/rule-generator/SKILL.md` - Rule generation for AI assistants
+- `plugins/dev-utilities/ci-failure-analyzer/SKILL.md` - CI failure analysis and debugging
+- `plugins/dev-utilities/git-optimize/SKILL.md` - Git repository optimization
+- `plugins/capacities/capacities-api/SKILL.md` - Capacities knowledge management API integration
 
 ## Versioning
 
