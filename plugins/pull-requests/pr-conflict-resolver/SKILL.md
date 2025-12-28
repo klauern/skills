@@ -1,8 +1,6 @@
 ---
 name: pr-conflict-resolver
 description: Intelligently resolve merge conflicts by analyzing both branches, classifying conflict types, and suggesting or auto-applying resolution strategies.
-version: 1.0.0
-author: klauern
 ---
 
 # PR Conflict Resolver

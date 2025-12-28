@@ -1,8 +1,6 @@
 ---
 name: pr-creator
 description: Intelligent pull request creation with template-based field extraction and commit analysis
-version: 1.1.0
-author: klauern
 ---
 
 # PR Creator
