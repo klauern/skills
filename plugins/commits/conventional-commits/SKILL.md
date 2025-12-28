@@ -7,21 +7,7 @@ description: Creates conventional commits following conventionalcommits.org. Ana
 
 ## Overview
 
-This skill enables creating well-formatted commit messages following the Conventional Commits specification. It analyzes git changes, determines appropriate commit types and scopes, and creates structured commits that support semantic versioning and automated changelog generation.
-
-## Quick Start
-
-### Slash Commands
-
-- **`/commit`**: Create a conventional commit without pushing - see [`../commands/commit.md`](../commands/commit.md)
-- **`/commit-push`**: Create a conventional commit and push to remote - see [`../commands/commit-push.md`](../commands/commit-push.md)
-
-### Core Documentation
-
-- **[Workflows](references/workflows.md)** - Step-by-step workflows for single and multi-commit scenarios
-- **[Examples](references/examples.md)** - Real-world commit examples for different scenarios
-- **[Best Practices](references/best-practices.md)** - Guidelines and common pitfalls to avoid
-- **[Format Reference](references/format-reference.md)** - Complete specification details
+This skill creates well-formatted commit messages following the Conventional Commits specification. It analyzes git changes, determines commit types and scopes, and creates structured commits supporting semantic versioning and automated changelog generation.
 
 ## When to Use This Skill
 
@@ -33,19 +19,29 @@ Use this skill when:
 - Committing and pushing changes with structured messages
 - Working in repositories that enforce commit message conventions
 
-## Workflow Overview
+## Quick Format
 
-### Decision Process
+```text
+<type>[optional scope]: <description>
 
-1. **Staging status** → Staged changes use single commit workflow; unstaged changes use multi-commit workflow
-2. **Push requirement** → Push after committing if user mentions "push"
+[optional body]
 
-### Single vs Multi-Commit
+[optional footer(s)]
+```
 
-- **Single commit**: Changes already staged for one logical commit
-- **Multi-commit**: Unstaged changes that need to be broken into atomic commits
+**Common types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
 
-**See [workflows.md](references/workflows.md) for detailed step-by-step instructions.**
+**Breaking changes**: Use '!' after type/scope or `BREAKING CHANGE:` footer
+
+## Workflow Decision Tree
+
+1. **Check staging status**:
+   - Staged changes → Single commit workflow
+   - Unstaged changes → Multi-commit workflow
+
+2. **Push requirement**:
+   - User mentions "push" → Push after committing
+   - Otherwise → Commit only
 
 ## Sub-Agent Strategy
 
@@ -60,41 +56,59 @@ Use this skill when:
 - Scope identification and complex message composition
 - Cross-cutting change analysis
 
-**See [workflows.md](references/workflows.md) for detailed agent usage examples.**
+## Progressive Disclosure
 
-## Quick Format Reference
+Load additional context only when needed:
 
-```text
-<type>[optional scope]: <description>
+- **@references/workflows.md** - Detailed single/multi-commit workflows with bash commands and staging strategies
+- **@references/examples.md** - Real-world commit examples for features, fixes, breaking changes, and multi-commit scenarios
+- **@references/best-practices.md** - Guidelines, common pitfalls, atomic commit patterns, and scope naming conventions
+- **@references/format-reference.md** - Complete Conventional Commits specification with all types, components, and breaking change syntax
 
-[optional body]
+## Essential Instructions
 
-[optional footer(s)]
-```
+### Single Commit Workflow
 
-**Common types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+When changes are already staged:
 
-**Breaking changes**: Use '!' after type/scope or `BREAKING CHANGE:` footer
+1. Review: `git diff --cached` and `git log -10 --oneline`
+2. Determine type, scope, and breaking change status
+3. Create message following format above
+4. Commit with heredoc:
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   <type>(scope): description
 
-**For complete specification**, see [`format-reference.md`](references/format-reference.md)
+   Optional body explaining rationale.
 
-**For practical examples**, see [`examples.md`](references/examples.md)
+   BREAKING CHANGE: if applicable
+   EOF
+   )"
+   ```
+5. Push if requested: `git push`
 
-**For guidelines and tips**, see [`best-practices.md`](references/best-practices.md)
+**For detailed steps, load @references/workflows.md**
 
-## Documentation Index
+### Multi-Commit Workflow
 
-### Core Guides
+When nothing is staged and changes need splitting:
 
-- **[workflows.md](references/workflows.md)** - Detailed workflows for single and multi-commit scenarios
-- **[examples.md](references/examples.md)** - Real-world commit examples
-- **[best-practices.md](references/best-practices.md)** - Guidelines and common pitfalls
+1. Review: `git status`, `git diff`, `git log -10 --oneline`
+2. Categorize changes by type, scope, and logical boundaries (use Haiku 4.5)
+3. Plan commit breakdown with atomic, self-contained commits (use Sonnet 4.5)
+4. For each commit: stage files, create commit with heredoc
+5. Verify: `git log --oneline -n <count>`
+6. Push if requested: `git push`
 
-### Reference Materials
+**For detailed steps and examples, load @references/workflows.md**
 
-- **[format-reference.md](references/format-reference.md)** - Complete Conventional Commits specification
+## Key Principles
 
-### Command Documentation
+- **Atomic commits**: One logical change per commit
+- **Imperative mood**: "add" not "added", "fix" not "fixed"
+- **Concise descriptions**: ≤72 characters, lowercase, no period
+- **Meaningful bodies**: Explain "why" not "what" (diff shows "what")
+- **Explicit breaking changes**: Always use '!' or `BREAKING CHANGE:` footer
+- **Multiple small commits**: Better than one large mixed commit
 
-- **[commit.md](../commands/commit.md)** - Create commits without pushing
-- **[commit-push.md](../commands/commit-push.md)** - Create commits and push to remote
+**For comprehensive guidelines, load @references/best-practices.md**
