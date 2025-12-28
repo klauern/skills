@@ -1,49 +1,45 @@
 # CI Failure Analyzer Test Matrix
 
-Designs a repeatable test plan so you (or future agents) can validate `/gh-checks` behavior across repositories without touching production workflows.
+Validation scenarios for `/gh-checks` behavior.
 
-## How to Use This Matrix
+## How to Use
 
-1. **Pick a repo** with active GitHub Actions and permission to push throwaway branches. Monorepos work too—focus on a leaf package for deterministic tests.
-2. **Create a feature branch** (`nklauer/ci-failure-matrix-*`) and intentionally introduce one failure category at a time (listed below). Keep changes isolated per commit so fixes are easy to revert.
-3. **Push and wait** for checks to start, then invoke `/gh-checks`. Compare the command’s output with the “Expected Assistant Behavior” column.
-4. **Record observations** (what the command did, where it deviated, log snippets) in a gitignored note or PR comment thread.
-5. **Reset the repo** (revert commit or delete branch) before moving to the next scenario to avoid compounding failures.
+1. Create feature branch (`test/ci-failure-matrix-*`)
+2. Introduce one failure category per commit
+3. Push and run `/gh-checks`
+4. Compare output with expected behavior
+5. Reset before next scenario
 
-> **Tip**: For quick iterations, run two branches in parallel—one for format/lint/deps, another for tests/builds. This keeps each GitHub Actions run short and cheap.
+## Test Scenarios
 
-## Scenario Table
+| # | Scenario | How to Reproduce | Expected Behavior |
+|---|----------|------------------|-------------------|
+| 1 | Formatting | Break prettier/black style | Auto-detect tool, run formatter, show diff |
+| 2 | Lint (auto-fix) | Add unused imports | Run `--fix`, list remaining manual issues |
+| 3 | Type errors | Break TypeScript/mypy types | Summarize errors, offer options, **don't auto-edit** |
+| 4 | Test failure | Change logic to fail assertion | Extract test name, expected vs received, ask before fixing |
+| 5 | Lock mismatch | Edit package.json without npm install | Regenerate lock file, show diff |
+| 6 | Build failure | Remove required import | Identify missing module, suggest fix, ask first |
+| 7 | Missing secret | Remove `secrets.X` reference | Identify secret name, guide to Settings, **no code changes** |
+| 8 | Cache corruption | Break cache key | Advise clearing cache, rerun |
+| 9 | Matrix partial | Break only one Node version | Show failing axis, provide targeted repro, rerun only that axis |
+| 10 | Flaky test | Add random timing | Detect history inconsistency, suggest mocking/retries |
+| 11 | No runs | Use branch without CI trigger | Explain absence, suggest checking workflow filters |
+| 12 | Auth failure | Revoke `gh` auth | Prompt `gh auth login` |
 
-| #   | Scenario                       | How to Reproduce                                                                                                   | GitHub Actions Signals                                                                                                                    | Expected Assistant Behavior                                                                                                                                                             | Guardrails                                                                                              |
-| --- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| 1   | Formatting drift               | Introduce whitespace/quote/style changes violating configured formatter (e.g., run `prettier --write` and revert). | Job named `format`, `lint`, or `Check formatting` fails with Prettier/Black/gofumpt logs that say “Run <tool> to fix”.                    | Auto-detect tool (from workflow or config), run formatter without prompting, show diff summary, and re-run formatter in `--check` mode if quick.                                        | Never edit non-formatting files; warn if >25 files touched before proceeding.                           |
-| 2   | Lint (auto-fix)                | Add unused imports or spacing errors covered by `eslint --fix`, `ruff --fix`, etc.                                 | `gh pr checks` shows `lint` failure with output containing “problems … fixable with the --fix option”.                                    | Run linter with `--fix`, list remaining manual findings (if any), categorize by rule, and stop short of removing unused _variables_ unless the log proves they are safe to delete.      | If `--fix` leaves >0 errors, switch to interactive guidance instead of retrying blindly.                |
-| 3   | Type-check failure             | Break TypeScript/mypy typing with mismatched return types.                                                         | Logs contain `TS####` or `error: Incompatible types`.                                                                                     | Summarize failing symbols, lines, and inferred vs expected types; DO NOT auto-edit code. Offer options (e.g., update annotation vs adjust code) and link to relevant files.             | Never run formatters/linters unless logs flagged them.                                                  |
-| 4   | Unit test assertion            | Change business logic so a Jest/pytest test fails.                                                                 | `FAIL` block with expected/received values.                                                                                               | Extract failing test name, assertion, stack frame, and correlate with recent diff. Describe two hypotheses (test wrong vs logic wrong) and ask before editing.                          | Avoid auto-re-running entire suite locally—surface targeted repro (`npm test -- file`).                 |
-| 5   | Dependency / lockfile mismatch | Edit `package.json` without updating `package-lock.json` (or equivalent).                                          | `npm ci` failure with “package-lock.json … out of sync”.                                                                                  | Regenerate matching lock file, show `git diff --stat`, and suggest `/commit` with conventional message.                                                                                 | If dependency upgrade introduces vulnerable/breaking packages, pause and ask before accepting.          |
-| 6   | Build / bundler failure        | Remove an import or change file extensions so build step fails.                                                    | `npm run build` job fails with “Module not found” or compiler errors.                                                                     | Identify missing import/module, map to file path, and suggest remediations (restore import, add alias). Ask user before editing business logic.                                         | If build is part of a matrix, ensure this job is flagged as root cause before touching downstream jobs. |
-| 7   | Secrets / permission failure   | Remove a `secrets.GITHUB_TOKEN` reference or rename a secret so deployment job fails.                              | Logs contain `Resource not accessible by integration`, `Process completed with exit code 78`, or `##[error]No value for required secret`. | Categorize as “permission/secrets” failure, confirm secret/key names, and recommend verifying repository/org secrets. Provide manual fix steps instead of editing code.                 | Never attempt to print secrets or retry with guessed values.                                            |
-| 8   | Cache / artifact corruption    | Delete `.github/workflows/cache` keys or poison cache with incompatible files.                                     | Job fails with `restore cache` miss or `tar: short read`/`could not download artifact`.                                                   | Advise clearing cache key, re-running workflow, or bumping cache version; indicate this is infra-level and no repo change is needed.                                                    | Do not delete cache via API—leave actionable instructions only.                                         |
-| 9   | Matrix partial failure         | In a matrix job (`node-version: [16,18,20]`), break only Node 18 by locking Node 20-only syntax.                   | `gh pr checks` shows single job failing while others succeed; `gh run view` includes `strategy` metadata.                                 | Parse matrix dimensions, highlight failing combinations, and warn user not to “fix” passing variants. Provide reproduction command (e.g., `nvm use 18 && npm test`).                    | Do not rerun entire matrix unless user asks; focus on failing axis.                                     |
-| 10  | Flaky test                     | Add artificial timing variance (e.g., random `setTimeout`) so runs alternate pass/fail.                            | Run history shows same commit both passing and failing; logs show timeouts or jest retry hints.                                           | Detect historical inconsistency via `gh run list`, mark as flaky, suggest adding retries/mocking/timeouts, and recommend collecting additional data rather than patching logic blindly. | Avoid force-passing tests by muting/skip unless user insists.                                           |
-| 11  | “No runs found”                | Use repo with branch that hasn’t triggered CI yet or disable workflows temporarily.                                | `gh pr checks` empty, `gh run list` returns nothing for branch.                                                                           | Explain absence, list prerequisites (push branch, open PR, ensure workflow filters match), and exit gracefully without error.                                                           | Don’t claim success; highlight verifying `.github/workflows/*` `on:` filters.                           |
-| 12  | `gh` auth failure              | Revoke GH auth locally or use new machine without `gh auth login`.                                                 | `gh pr checks` returns auth error.                                                                                                        | Detect CLI auth failure, prompt user to run `gh auth login`, and pause until resolved.                                                                                                  | Never fall back to unauthenticated API scraping; respect enterprise SSO requirements.                   |
+## Guardrails to Verify
 
-### Execution Tips
+| Scenario | Guardrail |
+|----------|-----------|
+| Formatting | Warn if >25 files |
+| Type errors | Never auto-edit business logic |
+| Secrets | Never print or guess values |
+| Cache | Never delete via API without approval |
+| Matrix | Never rerun entire matrix unnecessarily |
 
-- **Batching**: When testing multiple scenarios, keep each branch to a single failure class so `/gh-checks` output is easy to compare against expectations.
-- **Observability**: Capture the command transcript (especially the summary block) to verify improvements after documentation updates.
-- **Regression Tracking**: After each scenario, append findings to `tmp/ci-failure-matrix-notes.md` (gitignored) so you can refine `failure-patterns.md` later.
+## Execution Tips
 
-## Applying the Matrix to Other Repos
-
-1. **Identify Repo Archetypes**: monorepo, backend-only, frontend-only, infra-heavy. Prioritize one of each to ensure coverage.
-2. **Schedule Runs**: Hook into your existing CI sandbox or practice repo. Keep PRs draft-only so they never reach production.
-3. **Automate Setup (Optional)**: Create helper scripts that toggle common failure states (e.g., `scripts/break-format.sh`, `scripts/break-lockfile.sh`) to reduce manual effort.
-4. **Feed Learnings Back**: Whenever a scenario reveals a documentation gap, update:
-   - `references/failure-patterns.md` with detection signatures.
-   - `references/examples.md` with before/after walkthroughs.
-   - `commands/gh-checks.md` to include any new edge-case handling.
-5. **Audit Quarterly**: Re-run at least the fast scenarios (1,2,5,7,11) each quarter or after significant command changes to ensure regressions are caught early.
-
-> **Next Step**: Use this matrix right after updating the skill docs to make sure the new guidance matches actual `/gh-checks` behavior in the wild. Document any mismatches before rolling changes broadly.
+- **Batch by speed**: Format/lint/deps in one branch, tests/builds in another
+- **Capture output**: Save `/gh-checks` transcript for comparison
+- **Track findings**: Log deviations in gitignored notes
+- **Rerun quarterly**: After major updates, re-test fast scenarios (1,2,5,7,11)
