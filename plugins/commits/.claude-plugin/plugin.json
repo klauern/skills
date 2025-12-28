@@ -3,7 +3,7 @@
     "email": "klauer@gmail.com",
     "name": "klauern"
   },
-  "description": "Conventional commit message creation skill",
+  "description": "Conventional commit creation and commit splitting skills",
   "name": "commits",
-  "version": "1.0.0"
+  "version": "1.1.0"
 }
