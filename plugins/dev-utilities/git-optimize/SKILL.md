@@ -1,8 +1,7 @@
 ---
 name: git-optimize
 description: Git repository optimization including branch cleanup (git-trim, cleanup, sweep), garbage collection, and maintenance
-version: 1.1.0
-author: klauern
+allowed-tools: Bash Read
 ---
 
 # Git Optimize

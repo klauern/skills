@@ -1,8 +1,7 @@
 ---
 name: rule-generator
 description: Generate AI coding assistant rules (AGENTS.md, .cursor/rules/*.mdc). Use when user asks to create project rules, setup AGENTS.md, or add Cursor rules.
-version: 2.0.0
-author: klauern
+allowed-tools: Bash Read Grep Glob Edit Write
 ---
 
 # Rule Generator
