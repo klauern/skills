@@ -21,6 +21,16 @@ This command checks **both** types of PR comments:
 1. **PR Conversation Comments**: General discussion comments on the PR
 2. **PR Review Comments**: Inline code review comments on specific lines/files
 
+### Comment States
+
+Review comments can have different states that affect their relevance:
+
+| State | Description | Default Behavior |
+|-------|-------------|------------------|
+| **Open** | Unresolved, not outdated | Show first - ACTION REQUIRED |
+| **Resolved** | Marked as resolved by someone | Show at bottom - de-prioritized |
+| **Outdated** | Code has changed since comment | Filter out completely |
+
 ### Steps
 
 1. **Determine PR Number**
@@ -31,12 +41,23 @@ This command checks **both** types of PR comments:
    - Run: `gh pr view <number> --json comments -q '.comments[] | "\(.author.login): \(.body)"'`
    - These are general comments on the PR itself
 
-3. **Fetch PR Review Comments**
-   - Run: `gh api repos/{owner}/{repo}/pulls/<number>/comments --jq '.[] | "[\(.path):\(.line)] \(.user.login): \(.body)"'`
-   - These are inline code review comments with file and line references
-   - Alternative: `gh pr view <number> --json reviews -q '.reviews[].body'`
+3. **Fetch PR Review Threads (with state)**
+   Use GraphQL to get review threads with resolution and outdated status:
+   ```bash
+   echo '{"query": "query { repository(owner: \"OWNER\", name: \"REPO\") { pullRequest(number: NUM) { reviewThreads(first: 100) { nodes { isResolved isOutdated path line resolvedBy { login } comments(first: 10) { nodes { author { login } body createdAt } } } } } } }"}' | gh api graphql --input -
+   ```
+
+   Key fields:
+   - `isResolved` - Whether the thread has been resolved
+   - `isOutdated` - Whether the code has changed (thread is stale)
+   - `resolvedBy` - Who resolved it (if resolved)
+   - `path` / `line` - File location
 
 4. **Parse and Categorize**
+   - **Filter by state first:**
+     - Include: `isResolved == false && isOutdated == false` (open, actionable)
+     - De-prioritize: `isResolved == true && isOutdated == false` (resolved)
+     - Exclude: `isOutdated == true` (stale, irrelevant)
    - Identify actionable items (requests for changes, questions, concerns)
    - Group by file/area if applicable
    - Note priority based on keywords (blocking, critical, nit, suggestion)
@@ -44,7 +65,13 @@ This command checks **both** types of PR comments:
 5. **Build Task List**
    - Create organized list of actionable work
    - Include file paths and line numbers for review comments
-   - Prioritize: blocking issues → questions → suggestions → nits
+   - **Prioritize by state and severity:**
+     1. Open blocking issues
+     2. Open questions
+     3. Open suggestions
+     4. Open nits
+     5. Resolved comments (at bottom, for reference)
+   - Note count of filtered outdated comments
 
 6. **Present for Approval**
    - Show the task list to user
@@ -53,14 +80,36 @@ This command checks **both** types of PR comments:
 ## Example Commands
 
 ```bash
+# Get PR number from current branch
+gh pr view --json number -q .number
+
 # View conversation comments
 gh pr view 123 --json comments -q '.comments[] | "\(.author.login): \(.body)"'
 
-# View inline review comments with file context
-gh api repos/klauern/skills/pulls/123/comments --jq '.[] | "[\(.path):\(.line)] \(.user.login): \(.body)"'
+# Get review threads with state (GraphQL)
+echo '{"query": "query { repository(owner: \"myorg\", name: \"myrepo\") { pullRequest(number: 123) { reviewThreads(first: 100) { nodes { isResolved isOutdated path line resolvedBy { login } comments(first: 10) { nodes { author { login } body } } } } } } }"}' | gh api graphql --input -
 
-# Get PR reviews (includes conversation and inline reviews)
-gh pr view 123 --json reviews
+# Filter to only open (unresolved, not outdated) threads with jq
+... | jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false and .isOutdated == false)'
+
+# Count outdated threads that were filtered
+... | jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isOutdated == true)] | length'
+```
+
+## Example Output
+
+```
+## Open Comments (3) - Requires Action
+- [BLOCKING] src/auth.ts:42 - @reviewer: "Missing null check"
+- [SUGGESTION] src/api.ts:15 - @reviewer: "Consider using async/await"
+- [QUESTION] README.md:10 - @reviewer: "Should this include examples?"
+
+---
+## Resolved Comments (2) - Already addressed
+- src/utils.ts:12 - @reviewer: "Add type annotation" (resolved by @klauern)
+- src/config.ts:5 - @reviewer: "Typo in variable name" (resolved by @klauern)
+
+(5 outdated comments filtered)
 ```
 
 ## Notes
@@ -69,3 +118,4 @@ gh pr view 123 --json reviews
 - Some comments may be informational only (thanks, LGTM, etc.)
 - Focus on actionable feedback that requires code changes
 - If unclear about a comment's intent, ask the user for clarification
+- Outdated comments are filtered by default since they often come from automated tools (e.g., `atlantis plan`) and are no longer relevant
