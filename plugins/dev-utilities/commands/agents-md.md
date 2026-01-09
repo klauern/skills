@@ -1,3 +1,7 @@
+---
+description: Migrate CLAUDE.md to AGENTS.md with symlinks for cross-agent compatibility
+---
+
 You will look at the repository and make appropriate changes to CLAUDE.md and AGENTS.md following: https://agents.md/
 
 Per the docs:

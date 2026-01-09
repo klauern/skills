@@ -1,3 +1,7 @@
+---
+description: Automatically detect, analyze, and upgrade GitHub Actions in workflows
+---
+
 # GitHub Actions Upgrade
 
 Automatically detect, analyze, and upgrade GitHub Actions in your repository's workflows.
