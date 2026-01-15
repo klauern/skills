@@ -28,11 +28,6 @@
       "description": "Capacities knowledge management API integration",
       "name": "capacities",
       "source": "./plugins/capacities"
-    },
-    {
-      "description": "Netskope client diagnostics and blocking event analysis",
-      "name": "netskope",
-      "source": "./plugins/netskope"
     }
   ]
 }
