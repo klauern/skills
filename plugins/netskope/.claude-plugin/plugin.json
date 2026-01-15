@@ -1,0 +1,9 @@
+{
+  "author": {
+    "email": "klauer@gmail.com",
+    "name": "klauern"
+  },
+  "description": "Netskope client diagnostics and blocking event analysis",
+  "name": "netskope",
+  "version": "1.0.0"
+}
