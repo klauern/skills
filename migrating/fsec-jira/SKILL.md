@@ -52,10 +52,10 @@ export JIRA_DEFAULT_PROJECT="FSEC"
 | `fetch_ticket.py` | Display ticket details |
 | `update_ticket.py` | Update status, fields, comments |
 | `discover_fields.py` | Find field IDs, list components |
-| `manage_checklist.py` | Manage rich-text checklist field (see note below) |
+| `manage_checklist.py` | Manage HeroCoders Checklist items |
 | `jira_api.py` | JQL search, raw API |
 
-> **Note on Checklists:** `manage_checklist.py` manages a **rich-text bullets field** (`customfield_21607`), NOT the HeroCoders Checklist addon. The HeroCoders addon uses a proprietary REST API that is not currently supported. For interactive HeroCoders checklist management, use the Jira UI directly.
+> **Note on Checklists:** HeroCoders stores checklist data in `customfield_21607` as ADF with `[open]`/`[checked]` markers. The summary field `customfield_21653` shows "Checklist: X/Y" (read-only).
 
 ## Troubleshooting
 

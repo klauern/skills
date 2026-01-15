@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
 """
-Manage Jira rich-text checklist field (customfield_21607).
+Manage HeroCoders Checklist items via the checklist field (customfield_21607).
 
-NOTE: This script manages a RICH TEXT BULLETS field, NOT the HeroCoders Checklist
-addon. The HeroCoders addon uses a proprietary REST API that is not currently
-supported. For HeroCoders checklist management, use the Jira UI.
-
-This field stores checklist-like content as Atlassian Document Format (ADF)
-bullet lists, which renders similarly to a checklist but lacks the interactive
-checkbox functionality of the HeroCoders addon.
+HeroCoders stores checklist data as ADF (Atlassian Document Format) in this field,
+parsing [open] and [checked] markers in the text to determine checkbox state.
+The read-only summary field (customfield_21653) displays "Checklist: X/Y".
 
 Usage:
     # Add checklist items
@@ -184,7 +180,7 @@ def main(
     show: bool,
     replace: Optional[str]
 ):
-    """Manage Jira rich-text checklist field (NOT HeroCoders addon).
+    """Manage HeroCoders Checklist items.
 
     ISSUE_REF can be a full key (FSEC-1234) or just a number (1234).
 

@@ -21,7 +21,7 @@ You are a Jira interaction specialist. This skill covers the `jira` CLI (go-jira
 **When to use Python scripts instead** (see [fsec-jira skill](fsec-jira/SKILL.md)):
 - Setting FSEC custom fields: `--planned`, `--unplanned`, `--work-attribution`, `--points`, `--acceptance-criteria`
 - Creating tickets with FSEC-specific fields
-- Managing rich-text checklist field (note: NOT the HeroCoders Checklist addon)
+- Managing HeroCoders Checklist items
 - Previewing changes with `--dry-run`
 - Working with components programmatically
 

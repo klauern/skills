@@ -220,9 +220,9 @@ uv run scripts/discover_fields.py --list-components FSEC
 
 ## manage_checklist.py
 
-Manage rich-text checklist field (`customfield_21607`).
+Manage HeroCoders Checklist items (`customfield_21607`).
 
-> **Note:** This script manages a **rich-text bullets field**, NOT the HeroCoders Checklist addon. The HeroCoders addon uses a proprietary REST API. For interactive HeroCoders checklist management, use the Jira UI directly.
+HeroCoders stores checklist data as ADF with `[open]`/`[checked]` markers.
 
 ```bash
 # View current checklist

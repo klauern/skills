@@ -12,7 +12,7 @@ Discovered custom field IDs for zendesk.atlassian.net instance.
 | Story Points | `customfield_10004` | number | `3.0` | `--points` |
 | Sprint | `customfield_10009` | array | Sprint names | - |
 | Quarter | `customfield_20016` | string | `2025-Q4` | - |
-| Rich Text Bullets | `customfield_21607` | ADF | Atlassian Document Format | `manage_checklist.py` |
+| HeroCoders Checklist | `customfield_21607` | ADF | `[open]`/`[checked]` markers in ADF | `manage_checklist.py` |
 | HeroCoders Checklist Summary | `customfield_21653` | string | "Checklist: 0/41" | **Read-only** |
 
 ## Field Types and Update Methods
@@ -25,7 +25,7 @@ These fields require special handling - the `jira` CLI `--custom` flag will **ha
 |-------|----------------|---------------|
 | Description | `description` | `jira issue edit -b "text"` (stdin) |
 | Acceptance Criteria | `customfield_19300` | Python script `--acceptance-criteria` |
-| Rich Text Bullets | `customfield_21607` | Python script `manage_checklist.py` |
+| HeroCoders Checklist | `customfield_21607` | Python script `manage_checklist.py` |
 | User Story template | `customfield_21736` | Python script (direct API) |
 | Summary template | `customfield_21581` | Python script (direct API) |
 
@@ -43,17 +43,16 @@ These can be updated with `jira` CLI or Python scripts:
 | Labels | `jira issue edit -l` |
 | Story Points | Python script `--points` |
 
-## HeroCoders Checklist Limitation
+## HeroCoders Checklist
 
-**IMPORTANT:** The HeroCoders Checklist addon (`customfield_21653` displays "Checklist: X/Y") uses a **proprietary REST API**, not a standard Jira custom field.
+HeroCoders stores checklist data in `customfield_21607` as ADF (Atlassian Document Format) with special text markers:
 
-- `customfield_21607` = Rich text bullets field (ADF) - **NOT HeroCoders**
-- `customfield_21653` = HeroCoders summary display (read-only)
-- **Actual HeroCoders checklist data** = Stored via addon API (undocumented)
+- `[open]` - unchecked item
+- `[checked]` - checked item
 
-**For HeroCoders checklist management:** Use the Jira UI directly.
+The summary field `customfield_21653` displays "Checklist: X/Y" and is **read-only**.
 
-The `manage_checklist.py` script manages `customfield_21607` (rich text bullets), which renders similarly but lacks interactive checkbox functionality.
+Use `manage_checklist.py` to programmatically add, check, and manage checklist items.
 
 ## Usage Examples
 
