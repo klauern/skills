@@ -7,9 +7,27 @@ Create a well-formatted commit using the Conventional Commits specification and 
 
 ## Arguments
 
-- `$ARGUMENTS` - Optional: target branch name (e.g., `main`, `master`, or a feature branch name)
-  - If provided, commits directly to the specified branch (skips feature branch creation)
-  - If omitted, follows the default branch safety check behavior
+- `$ARGUMENTS` - Optional: target branch or natural language instruction
+  - Examples: `main`, `to main`, `on master`, `feature/my-branch`, `push to main`
+  - If a branch name is detected, commits directly to that branch (skips feature branch creation)
+  - If omitted or empty, follows the default branch safety check behavior
+
+### Argument Parsing
+
+Extract the target branch from `$ARGUMENTS` by looking for:
+- Direct branch names: `main`, `master`, `develop`, `feature/xyz`
+- Preposition phrases: `to main`, `on main`, `to master`, `on develop`
+- Verbose phrases: `push to main`, `commit to main`, `directly to main`
+
+**Examples**:
+| `$ARGUMENTS` value | Extracted branch |
+|-------------------|------------------|
+| `main` | `main` |
+| `to main` | `main` |
+| `on master` | `master` |
+| `push to main` | `main` |
+| `feature/add-auth` | `feature/add-auth` |
+| *(empty)* | *(none - use default behavior)* |
 
 ## Context
 
@@ -20,29 +38,36 @@ Create a well-formatted commit using the Conventional Commits specification and 
 
 ## Instructions
 
-> **CRITICAL**: Check the "Target branch argument" above FIRST. If it contains a value (e.g., `main`), you MUST commit directly to that branch. Do NOT create a new feature branch when `$ARGUMENTS` is provided.
+> **CRITICAL**: Check the "Target branch argument" above FIRST. If it contains a branch name (directly or in a phrase like "to main"), you MUST commit directly to that branch. Do NOT create a new feature branch when a target branch is specified.
 
-1. **Branch Safety Check**:
-   - **If `$ARGUMENTS` is provided**: Skip branch creation and commit directly to current branch
-     - If argument is `main` or `master` and you're not on that branch, checkout to it first
-     - If argument matches current branch, proceed directly to commit
-     - If argument is a different branch name, checkout to it (create if needed)
+1. **Parse Target Branch from `$ARGUMENTS`**:
+   - If `$ARGUMENTS` contains text, extract the branch name:
+     - Strip prepositions: "to", "on", "push to", "commit to", "directly to"
+     - The remaining word is the branch name (e.g., "to main" → `main`)
+   - Store this as `TARGET_BRANCH` for the next step
+
+2. **Branch Safety Check**:
+   - **If `TARGET_BRANCH` was extracted** (e.g., `main`, `master`, `feature/xyz`):
+     - This is an **explicit user request** - proceed without warnings
+     - If `TARGET_BRANCH` is `main` or `master` and you're not on that branch, checkout to it first
+     - If `TARGET_BRANCH` matches current branch, proceed directly to commit
+     - If `TARGET_BRANCH` is a different branch name, checkout to it (create if needed)
    - **If `$ARGUMENTS` is empty/not provided** (default behavior):
      - If current branch is `main` or `master`, create a new feature branch first
      - Use a descriptive branch name based on the changes being committed
      - Examples: `git checkout -b feature/add-user-auth`, `git checkout -b fix/memory-leak`, `git checkout -b chore/update-deps`
      - If already on a feature branch, proceed to next step
 
-2. Follow all instructions from [`commit.md`](commit.md) to create the commit(s)
+3. Follow all instructions from [`commit.md`](commit.md) to create the commit(s)
    - Analyze the changes and create appropriate conventional commit message(s)
    - Stage relevant untracked files if needed
    - Create commit(s) with well-formatted messages
 
-3. Push the commit(s) to the remote repository:
+4. Push the commit(s) to the remote repository:
    - For existing branches: `git push`
    - For new branches: `git push -u origin <branch-name>`
 
-4. Run `git status` to verify the push succeeded
+5. Run `git status` to verify the push succeeded
 
 ## Execution Strategy
 
@@ -53,10 +78,11 @@ Create a well-formatted commit using the Conventional Commits specification and 
 
 ## Important
 
-- **RESPECT `$ARGUMENTS`**: If the user provided a branch name in `$ARGUMENTS`, use it exactly as specified. Do NOT override with a feature branch.
+- **RESPECT USER'S EXPLICIT INTENT**: When `$ARGUMENTS` contains a branch reference (e.g., "main", "to main", "push to main"), the user is **explicitly requesting** to commit to that branch. Honor this request without creating a feature branch or asking for confirmation.
+- **Argument parsing**: Extract branch names from phrases - "to main" means branch `main`, "on master" means branch `master`
 - See [`commit.md`](commit.md) for detailed commit creation instructions
-- By default (when `$ARGUMENTS` is empty), never commit directly to `main` or `master` - create a feature branch
-- **Exception**: If user explicitly provides `main` or `master` as the `$ARGUMENTS`, commit directly to that branch
+- **Default behavior** (when `$ARGUMENTS` is empty): never commit directly to `main` or `master` - create a feature branch first
+- **Explicit request** (when `$ARGUMENTS` specifies `main`/`master`): commit directly to that branch - this overrides the default safety behavior
 - Follow the repository's existing commit style based on recent commit history
 - Use heredoc for multi-line commit messages
 - Verify the push succeeded by checking the output
