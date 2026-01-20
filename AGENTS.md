@@ -60,6 +60,18 @@ This is a Claude Code plugin marketplace containing four plugins that automate G
 2. Write bash implementation with clear instructions
 3. Test with `/plugin-name:command-name`
 
+### External Scripts
+
+For complex logic or external dependencies, use scripts in `plugins/<plugin-name>/scripts/`:
+
+```bash
+# Standard path resolution pattern (works from source and installed)
+SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
+uv run "$SCRIPT_DIR/my-script.py" [args]
+```
+
+**See [docs/script-development.md](docs/script-development.md) for full guidance.**
+
 ## Architecture
 
 ### Plugin Organization

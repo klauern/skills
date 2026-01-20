@@ -141,6 +141,27 @@ skill-name/
 - Maximum: 500 lines
 - If exceeding 500 lines, split into multiple focused files
 
+### Scripts in Skills and Commands
+
+When skills or commands need complex logic, external dependencies, or reusable functionality, use external scripts in the `scripts/` directory.
+
+**Key requirements:**
+- Use relative path resolution (not hardcoded paths)
+- Python scripts should use uv inline dependencies
+- Keep scripts focused and well-documented
+
+**Standard path resolution pattern:**
+```bash
+SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
+uv run "$SCRIPT_DIR/my-script.py" [args]
+```
+
+**See [script-development.md](script-development.md) for comprehensive guidance on:**
+- When to use external scripts vs inline code
+- Python script template with uv dependencies
+- Path resolution explained
+- Testing strategies
+
 ### When to Split Content
 
 **Keep in SKILL.md** if:
@@ -544,8 +565,8 @@ Use this checklist when authoring or reviewing skills:
 ## Additional Resources
 
 - **Agent Skills Specification**: https://agentskills.io/specification
-- **This Repository's AGENTS.md**: `/Users/nklauer/dev/klauern-skills/AGENTS.md`
-- **Example Skills**: `/Users/nklauer/dev/klauern-skills/plugins/*/*/SKILL.md`
+- **This Repository's AGENTS.md**: `AGENTS.md` (repository root)
+- **Example Skills**: `plugins/*/*/SKILL.md`
 
 ## Summary
 
