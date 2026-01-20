@@ -1,0 +1,17 @@
+{
+  "$schema": "https://cursor.com/schemas/hooks.json",
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/hookify-block-grep-extended.sh \"${command}\"",
+        "description": "\u26a0\ufe0f grep -E blocked! The -E flag doesn't work correctly on macOS systems. Use -e instead: grep -e \"pa"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": ".cursor/hooks/hookify-require-version-bump-before-commit.sh \"${prompt}\"",
+        "description": "\u26a0\ufe0f Version Bump Reminder You're about to commit and push changes. Have you run /version-bump first? "
+      }
+    ]
+  }
+}
