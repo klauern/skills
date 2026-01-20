@@ -8,20 +8,33 @@ Convert Claude Code hookify rules (`.claude/hookify.*.local.md`) to Cursor's hoo
 
 ## Usage
 
-Run the conversion script with the desired options:
+Run the conversion script from the installed plugin location:
 
 ```bash
+# Find the script path (uses latest installed version)
+SCRIPT="$(ls -t ~/.claude/plugins/cache/klauern-skills/dev-utilities/*/scripts/convert-hooks.py 2>/dev/null | head -1)"
+
 # List hookify rules without converting
-uv run plugins/dev-utilities/scripts/convert-hooks.py --list
+uv run "$SCRIPT" --list
 
 # Preview generated files (dry run)
-uv run plugins/dev-utilities/scripts/convert-hooks.py --dry-run
+uv run "$SCRIPT" --dry-run
 
 # Convert and write files
-uv run plugins/dev-utilities/scripts/convert-hooks.py
+uv run "$SCRIPT"
 
 # Force overwrite existing hooks
-uv run plugins/dev-utilities/scripts/convert-hooks.py --force
+uv run "$SCRIPT" --force
+```
+
+Or as one-liners:
+
+```bash
+# List rules
+uv run "$(ls -t ~/.claude/plugins/cache/klauern-skills/dev-utilities/*/scripts/convert-hooks.py | head -1)" --list
+
+# Convert
+uv run "$(ls -t ~/.claude/plugins/cache/klauern-skills/dev-utilities/*/scripts/convert-hooks.py | head -1)"
 ```
 
 ## Workflow
