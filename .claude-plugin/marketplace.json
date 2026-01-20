@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "2.3.0"
+    "version": "2.3.1"
   },
   "name": "klauern-skills",
   "owner": {
