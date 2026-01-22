@@ -4,13 +4,10 @@
 
 ```json
 {
-  "$schema": "https://cursor.com/schemas/hooks.json",
+  "version": 1,
   "hooks": {
     "beforeShellExecution": [
-      {
-        "command": ".cursor/hooks/script-name.sh \"${command}\"",
-        "description": "Description shown to user"
-      }
+      { "command": ".cursor/hooks/script-name.sh \"${command}\"" }
     ],
     "beforeSubmitPrompt": [...],
     "beforeReadFile": [...],
@@ -185,13 +182,10 @@ echo '{"permission": "allow"}'
 
 ```json
 {
-  "$schema": "https://cursor.com/schemas/hooks.json",
+  "version": 1,
   "hooks": {
     "beforeShellExecution": [
-      {
-        "command": ".cursor/hooks/hookify-block-grep-extended.sh \"${command}\"",
-        "description": "Block grep -E usage (macOS compatibility)"
-      }
+      { "command": ".cursor/hooks/hookify-block-grep-extended.sh \"${command}\"" }
     ]
   }
 }

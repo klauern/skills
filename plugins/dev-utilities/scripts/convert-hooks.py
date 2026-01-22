@@ -199,12 +199,27 @@ echo '{{"permission": "allow"}}'
 def generate_hooks_json(rules: list[HookifyRule], existing: dict[str, Any] | None = None) -> dict[str, Any]:
     """Generate hooks.json content."""
     hooks_json: dict[str, Any] = existing or {
-        "$schema": "https://cursor.com/schemas/hooks.json",
+        "version": 1,
         "hooks": {},
     }
 
+    # Migrate from old format: replace $schema with version
+    if "$schema" in hooks_json:
+        del hooks_json["$schema"]
+        hooks_json["version"] = 1
+
+    # Ensure version is present
+    if "version" not in hooks_json:
+        hooks_json["version"] = 1
+
     if "hooks" not in hooks_json:
         hooks_json["hooks"] = {}
+
+    # Migrate existing hooks: remove unsupported "description" field
+    for event_hooks in hooks_json["hooks"].values():
+        for hook in event_hooks:
+            if "description" in hook:
+                del hook["description"]
 
     # Track which hooks we're generating (to avoid duplicates)
     hookify_marker = "hookify-"
@@ -220,7 +235,6 @@ def generate_hooks_json(rules: list[HookifyRule], existing: dict[str, Any] | Non
 
         hook_entry = {
             "command": f'.cursor/hooks/{script_name} "{input_var}"',
-            "description": rule.message[:100] if rule.message else f"Hookify rule: {rule.name}",
         }
 
         # Initialize event array if needed
