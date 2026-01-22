@@ -113,15 +113,11 @@ plugins/
 │   │   └── plugin.json
 │   ├── commands/
 │   │   ├── agents-md.md
-│   │   ├── generate-rules.md
 │   │   ├── continue.md
 │   │   ├── worktree.md
 │   │   ├── gh-actions-upgrade.md
 │   │   ├── gh-checks.md
 │   │   └── git-optimize.md
-│   ├── rule-generator/           → Rule generation skill
-│   │   ├── SKILL.md
-│   │   └── references/
 │   ├── gh-actions-upgrader/      → GH Actions upgrade skill
 │   │   ├── SKILL.md
 │   │   └── references/
@@ -276,7 +272,6 @@ bd create "Title" -t task -p 2        # Create issue
 - `plugins/commits/conventional-commits/SKILL.md` - Commit message standards
 - `plugins/pull-requests/pr-creator/SKILL.md` - PR creation with template inference
 - `plugins/dev-utilities/gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
-- `plugins/dev-utilities/rule-generator/SKILL.md` - Rule generation for AI assistants
 - `plugins/dev-utilities/ci-failure-analyzer/SKILL.md` - CI failure analysis and debugging
 - `plugins/dev-utilities/git-optimize/SKILL.md` - Git repository optimization
 - `plugins/capacities/capacities-api/SKILL.md` - Capacities knowledge management API integration
