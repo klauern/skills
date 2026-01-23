@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
-# install-claude-skills.sh - Install klauern-skills to Claude Code's skills directory
+# install-skills.sh - Install klauern-skills to Claude Code or Cursor skills directory
 #
 # Usage:
-#   ./scripts/install-claude-skills.sh [OPTIONS]
+#   ./scripts/install-skills.sh [OPTIONS]
 #
 # Options:
+#   -t, --target NAME   Target platform: claude (default), cursor
 #   -a, --all           Install all plugins (default if no plugin specified)
 #   -p, --plugin NAME   Install a specific plugin
 #   -c, --copy          Copy files instead of symlinking (default: symlink)
@@ -16,6 +17,7 @@
 #   -h, --help          Show this help message
 #
 # Available plugins: commits, pull-requests, dev-utilities, capacities
+# Available targets: claude (~/.claude/skills/), cursor (~/.cursor/skills/)
 
 set -euo pipefail
 
@@ -31,7 +33,10 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 PLUGINS_DIR="$REPO_ROOT/plugins"
-CLAUDE_SKILLS_DIR="${CLAUDE_HOME:-$HOME/.claude}/skills"
+
+# Target platform configuration
+TARGET="claude"
+SKILLS_DIR=""  # Set based on target
 
 DRY_RUN=false
 FORCE=false
@@ -40,6 +45,23 @@ COPY_MODE=false
 PLUGIN=""
 INSTALL_ALL=false
 LIST_ONLY=false
+
+# Get skills directory for target
+get_skills_dir() {
+    case "$TARGET" in
+        claude)
+            echo "${CLAUDE_HOME:-$HOME/.claude}/skills"
+            ;;
+        cursor)
+            echo "${CURSOR_HOME:-$HOME/.cursor}/skills"
+            ;;
+        *)
+            log_error "Unknown target: $TARGET"
+            echo "Available targets: claude, cursor"
+            exit 1
+            ;;
+    esac
+}
 
 # Logging functions
 log_info() { echo -e "${BLUE}i${NC} $*"; }
@@ -53,9 +75,10 @@ usage() {
     cat <<EOF
 Usage: $(basename "$0") [OPTIONS]
 
-Install klauern-skills to Claude Code's skills directory (~/.claude/skills/)
+Install klauern-skills to Claude Code or Cursor skills directory.
 
 Options:
+  -t, --target NAME   Target platform: claude (default), cursor
   -a, --all           Install all plugins (default if no plugin specified)
   -p, --plugin NAME   Install a specific plugin
   -c, --copy          Copy files instead of symlinking (default: symlink)
@@ -65,6 +88,10 @@ Options:
   -v, --verbose       Detailed output
   -h, --help          Show this help message
 
+Targets:
+  claude          ~/.claude/skills/ (default)
+  cursor          ~/.cursor/skills/
+
 Available plugins:
   commits         Conventional commit creation (conventional-commits, commit-splitter)
   pull-requests   PR creation and conflict resolution (pr-creator, pr-conflict-resolver)
@@ -72,12 +99,13 @@ Available plugins:
   capacities      Capacities knowledge management API
 
 Examples:
-  $(basename "$0")                      # Install all plugins (symlink, default)
-  $(basename "$0") --all                # Explicitly install all plugins
+  $(basename "$0")                      # Install all to Claude (symlink, default)
+  $(basename "$0") -t cursor            # Install all to Cursor
+  $(basename "$0") -t cursor -p commits # Install commits plugin to Cursor
   $(basename "$0") -p commits           # Install only commits plugin
   $(basename "$0") -c                   # Copy files instead of symlink
   $(basename "$0") -d                   # Dry run (preview only)
-  $(basename "$0") -f -p dev-utilities  # Force overwrite dev-utilities
+  $(basename "$0") -f                   # Force overwrite existing
   $(basename "$0") -l                   # List available skills
 EOF
 }
@@ -85,6 +113,10 @@ EOF
 # Parse arguments
 while [[ $# -gt 0 ]]; do
     case "$1" in
+        -t|--target)
+            TARGET="$2"
+            shift 2
+            ;;
         -a|--all)
             INSTALL_ALL=true
             shift
@@ -215,7 +247,7 @@ install_skill() {
     local skill_dir="$1"
     local skill_name
     skill_name=$(basename "$skill_dir")
-    local dest_dir="$CLAUDE_SKILLS_DIR/$skill_name"
+    local dest_dir="$SKILLS_DIR/$skill_name"
     local install_method="symlink"
     [[ "$COPY_MODE" == true ]] && install_method="copy"
 
@@ -282,9 +314,9 @@ list_skills() {
     done
 
     # Show installed status
-    if [[ -d "$CLAUDE_SKILLS_DIR" ]]; then
-        log_info "Currently installed in $CLAUDE_SKILLS_DIR:"
-        for item in "$CLAUDE_SKILLS_DIR"/*/; do
+    if [[ -d "$SKILLS_DIR" ]]; then
+        log_info "Currently installed in $SKILLS_DIR:"
+        for item in "$SKILLS_DIR"/*/; do
             [[ ! -d "$item" ]] && continue
             local name
             name=$(basename "$item")
@@ -301,6 +333,9 @@ list_skills() {
 
 # Main
 main() {
+    # Set skills directory based on target
+    SKILLS_DIR=$(get_skills_dir)
+
     # Handle list mode
     if [[ "$LIST_ONLY" == true ]]; then
         list_skills
@@ -310,9 +345,10 @@ main() {
     local mode_label="symlink"
     [[ "$COPY_MODE" == true ]] && mode_label="copy"
 
-    log_info "Claude Code Skills Installer"
+    log_info "Agent Skills Installer"
+    log_info "Target: $TARGET"
     log_info "Source: $PLUGINS_DIR"
-    log_info "Destination: $CLAUDE_SKILLS_DIR"
+    log_info "Destination: $SKILLS_DIR"
     log_info "Mode: $mode_label"
     [[ "$DRY_RUN" == true ]] && log_warn "DRY RUN MODE - no changes will be made"
     echo
@@ -322,7 +358,7 @@ main() {
 
     # Create destination directory
     if [[ "$DRY_RUN" != true ]]; then
-        mkdir -p "$CLAUDE_SKILLS_DIR"
+        mkdir -p "$SKILLS_DIR"
     fi
 
     # Determine which plugins to process
