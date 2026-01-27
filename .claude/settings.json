@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude plugin list:*)",
+      "Bash(bd:*)",
+      "Skill(commit)",
+      "WebFetch(domain:agentskills.io)",
+      "mcp__exa__get_code_context_exa",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(bunx @owloops/claude-powerline:*)",
+      "Bash(bunx ccstatusline@latest:*)",
+      "Bash(FORCE_COLOR=1 bunx ccstatusline@latest:*)",
+      "WebFetch(domain:developers.openai.com)",
+      "WebFetch(domain:developer.atlassian.com)",
+      "Bash(acli:*)",
+      "Bash(xargs:*)",
+      "WebFetch(domain:herocoders.atlassian.net)",
+      "WebFetch(domain:marketplace.atlassian.com)",
+      "WebFetch(domain:cursor.com)"
+    ],
+    "additionalDirectories": [
+    ]
+  }
+}
