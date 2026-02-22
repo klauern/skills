@@ -1,6 +1,7 @@
 ---
 name: git-optimize
-description: Git repository optimization including branch cleanup (git-trim, cleanup, sweep), garbage collection, and maintenance
+description: This skill should be used when the user asks to "clean up merged git branches", "run git trim/cleanup", "optimize repository size", or "perform git maintenance and garbage collection".
+version: 1.0.0
 allowed-tools: Bash Read
 ---
 

@@ -1,6 +1,7 @@
 ---
 name: commit-splitter
-description: Analyzes large diffs and suggests how to split them into multiple atomic commits. Identifies logical groupings by file, function, or feature, then proposes conventional commit messages for each split. Supports automatic or guided splitting.
+description: This skill should be used when the user asks to "split commits", "break up changes into atomic commits", "separate mixed git changes", or "propose commit groups" from a large diff.
+version: 1.0.0
 ---
 
 # Commit Splitter

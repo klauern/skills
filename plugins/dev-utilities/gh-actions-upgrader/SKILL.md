@@ -1,6 +1,7 @@
 ---
 name: gh-actions-upgrader
-description: Automatically detect, analyze, and upgrade GitHub Actions in workflows. Identifies forked actions and recommends upstream equivalents, handles major version upgrades with breaking change detection.
+description: This skill should be used when the user asks to "upgrade GitHub Actions", "update workflow action versions", "migrate forked actions to upstream", or "review breaking changes in GitHub Actions updates".
+version: 1.0.0
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 

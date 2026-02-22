@@ -1,6 +1,7 @@
 ---
 name: pr-creator
-description: Intelligent pull request creation with template-based field extraction and commit analysis
+description: This skill should be used when the user asks to "create a PR", "open a pull request", "fill a PR template from commits", or "prepare PR metadata automatically" with GitHub CLI.
+version: 1.0.0
 ---
 
 # PR Creator
@@ -15,7 +16,7 @@ User: Create a PR for my changes
 User: /pr
 ```
 
-The skill will: find your PR template → analyze branch commits → infer information → ask only for gaps → create PR with `gh`.
+The skill will: find the PR template → analyze branch commits → infer information → ask only for gaps → create PR with `gh`.
 
 ## Workflow
 
