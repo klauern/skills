@@ -1,6 +1,6 @@
 ---
 name: capacities-api
-description: Interface with Capacities knowledge management app via API. List spaces, search content, save weblinks, and append to daily notes. Use when user mentions Capacities, wants to save information to their knowledge base, or needs to search their notes.
+description: This skill should be used when the user asks to "list Capacities spaces", "search Capacities", "save a weblink to Capacities", "append to a Capacities daily note", or mentions Capacities API workflows.
 version: 1.0.0
 author: klauern
 ---
@@ -27,7 +27,7 @@ Invoke this skill when the user:
 1. Get API token from Capacities desktop app: **Settings > Capacities API**
 2. Set environment variable:
    ```bash
-   export CAPACITIES_API_TOKEN='your-token-here'
+   export CAPACITIES_API_TOKEN='token-here'
    ```
 
 ## Available Commands

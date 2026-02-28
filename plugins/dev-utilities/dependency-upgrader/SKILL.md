@@ -1,6 +1,7 @@
 ---
 name: dependency-upgrader
-description: Analyze package dependencies across npm, poetry, go.mod, cargo. Detects outdated packages, identifies breaking changes via semver analysis and changelogs, suggests migration paths.
+description: This skill should be used when the user asks to "check for outdated dependencies", "upgrade npm/poetry/go/cargo packages", "review breaking dependency updates", or "plan dependency migrations".
+version: 1.0.0
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 

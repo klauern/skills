@@ -1,6 +1,7 @@
 ---
 name: ci-failure-analyzer
-description: Analyze GitHub Actions CI failures, parse logs, identify root causes, and apply fixes. Use when CI checks fail, tests break, or user asks to fix CI, check failures, or debug GitHub Actions.
+description: This skill should be used when the user asks to "fix CI", "debug failing GitHub Actions checks", "analyze CI logs", or reports failing checks/tests in GitHub Actions.
+version: 1.0.0
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 

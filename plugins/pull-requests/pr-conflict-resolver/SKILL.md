@@ -1,6 +1,7 @@
 ---
 name: pr-conflict-resolver
-description: Intelligently resolve merge conflicts by analyzing both branches, classifying conflict types, and suggesting or auto-applying resolution strategies.
+description: This skill should be used when the user asks to "resolve merge conflicts", "fix PR conflicts", "analyze conflict markers", or "apply conflict resolution strategies" during git merge workflows.
+version: 1.0.0
 ---
 
 # PR Conflict Resolver
