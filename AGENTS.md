@@ -286,6 +286,27 @@ Marketplace uses semantic versioning. When adding features:
 
 Current version: 2.0.0
 
+## MCP Server Strategy
+
+This repository deliberately has no `.mcp.json` project configuration:
+
+- **context7** and **exa** are globally configured and available in all projects
+- **gh CLI** is preferred over GitHub MCP server (per Tool Preferences above)
+- **Capacities** has no public MCP server; Python scripts via `uv run` are the correct approach
+
+No project-level MCP servers are needed.
+
+## Claude Code Automation
+
+**Hooks** (`.claude/hooks/`):
+- `block-grep-extended.sh` - PreToolUse: blocks `grep -E` for macOS compatibility
+- `version-bump-reminder.sh` - UserPromptSubmit: reminds to run `/version-bump` before commit-push
+- `dev-context.sh` - SessionStart: injects plugin/skill counts at session start
+
+**Subagents** (`.claude/agents/`):
+- `skill-validator.md` - Validates SKILL.md files against authoring guidelines
+- `release-checker.md` - Pre-publish validation across all plugins
+
 ## Cross-Agent Compatibility
 
 This repository uses `AGENTS.md` following the [agents.md specification](https://agents.md/) for broader AI assistant support across Claude Code, Cursor, Windsurf, Cline, Roo-Cline, and other coding assistants. The `CLAUDE.md` file is a symbolic link to `AGENTS.md` for backward compatibility.
