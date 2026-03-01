@@ -37,6 +37,11 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
 > - `${localEnv:HOME}` is a devcontainer variable resolved on the host. On Windows, use `${localEnv:USERPROFILE}` instead.
 > - The mount is **read-write** — changes inside the container (e.g., new credentials, updated settings) persist to the host.
 >
+> **Windows host notes**:
+> - DevPod on Windows uses Git Bash or WSL2, where `mkdir -p` works as-is.
+> - If using cmd.exe or PowerShell directly, replace `initializeCommand` with: `"powershell -Command \"New-Item -ItemType Directory -Force -Path $env:USERPROFILE\\.claude | Out-Null\""`
+> - Replace the mount source with `${localEnv:USERPROFILE}/.claude`.
+>
 > **Notes on `remoteEnv`**:
 > - `{{ANTHROPIC_AUTH_ENV_VAR}}` is a placeholder — substitute the correct auth env var based on detection:
 >   - If `~/.claude/settings.json` contains any `*_BASE_URL` env (custom API gateway): use `ANTHROPIC_AUTH_TOKEN`

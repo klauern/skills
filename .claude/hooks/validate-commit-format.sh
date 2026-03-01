@@ -4,8 +4,8 @@ input=$(cat)
 command=$(echo "$input" | jq -r '.tool_input.command // empty')
 [[ -z "$command" ]] && exit 0
 
-# Only check git commit commands
-echo "$command" | grep -q 'git commit' || exit 0
+# Only check git commit commands (handles git -C repo commit, git -c key=val commit, etc.)
+echo "$command" | grep -qE '(^|[[:space:]])git([[:space:]]+(-C|--git-dir|--work-tree|-c)([=[:space:]]+[^[:space:]]+))*[[:space:]]+commit([[:space:]]|$)' || exit 0
 
 # Check if message flag is present (-m, --message, or combined flags like -am)
 has_m_flag=false
@@ -35,8 +35,13 @@ else
   fi
 fi
 
-# If we couldn't extract a message, pass through (don't block)
-[[ -z "$msg" ]] && exit 0
+# If -m flag was present but we couldn't extract a message, deny to prevent bypass
+if [[ -z "$msg" ]]; then
+  cat >&2 <<'EOF'
+{"hookSpecificOutput":{"permissionDecision":"deny"},"systemMessage":"Unable to parse commit message from -m/--message. Use a quoted message (e.g., -m \"type(scope): description\")."}
+EOF
+  exit 2
+fi
 
 # Validate conventional commit format
 if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\([a-zA-Z0-9_-]+\))?(!)?: .+'; then
