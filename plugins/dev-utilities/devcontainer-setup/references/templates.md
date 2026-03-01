@@ -11,16 +11,35 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
     "dockerfile": "Dockerfile",
     "context": "."
   },
-  "remoteUser": "node",
-  "mounts": [
-    "source=${localWorkspaceFolder}/.devcontainer-devpod/devpod-data/claude,target=/home/node/.claude,type=bind,consistency=cached"
+  "runArgs": [
+    "--cap-add=NET_ADMIN",
+    "--cap-add=NET_RAW",
+    "--hostname={{project-name}}"
   ],
+  "remoteUser": "node",
+  "initializeCommand": "mkdir -p ~/.claude",
+  "mounts": [
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
+  ],
+  "remoteEnv": {
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "HOST_HOME": "${localEnv:HOME}"
+  },
   "postCreateCommand": "bash .devcontainer-devpod/setup.sh",
-  "postStartCommand": "sudo bash .devcontainer-devpod/init-firewall.sh",
+  "postStartCommand": "sudo .devcontainer-devpod/init-firewall.sh || echo 'WARNING: Firewall init failed (missing NET_ADMIN capability).'",
   "customizations": {},
   "features": {}
 }
 ```
+
+> **Notes on `${localEnv:HOME}`**:
+> - `initializeCommand` runs on the **host shell** (where `~` expands normally) to ensure `~/.claude/` exists before Docker attempts the bind mount.
+> - `${localEnv:HOME}` is a devcontainer variable resolved on the host. On Windows, use `${localEnv:USERPROFILE}` instead.
+> - The mount is **read-write** — changes inside the container (e.g., new credentials, updated settings) persist to the host.
+>
+> **Notes on `remoteEnv`**:
+> - `ANTHROPIC_API_KEY` is forwarded from the host so Claude Code can authenticate without the credentials file.
+> - `HOST_HOME` is used by `setup.sh` to create a symlink from the host's `~/.claude` path to `/home/node/.claude`, so hardcoded plugin paths in `installed_plugins.json` resolve correctly in-container.
 
 ## Dockerfile
 
@@ -36,7 +55,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
     iptables \
-    rsync \
     jq \
     openssh-server \
     ca-certificates \
@@ -55,11 +73,16 @@ COPY init-firewall.sh /usr/local/bin/init-firewall.sh
 RUN chmod +x /usr/local/bin/init-firewall.sh
 
 # Sudoers for firewall (iptables requires root)
-RUN echo "node ALL=(ALL) NOPASSWD: /usr/sbin/iptables, /usr/sbin/ip6tables, /usr/local/bin/init-firewall.sh" >> /etc/sudoers.d/node-firewall \
-    && chmod 0440 /etc/sudoers.d/node-firewall
+RUN echo "node ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers.d/node-nopasswd \
+    && chmod 0440 /etc/sudoers.d/node-nopasswd
 
 # User setup
 RUN usermod -aG sudo node
+
+# Ensure .cache directory exists with correct ownership (for claude install, etc.)
+RUN mkdir -p /home/node/.cache \
+    && chown node:node /home/node/.cache
+
 USER node
 WORKDIR /home/node/workspace
 ```
@@ -75,6 +98,14 @@ WORKDIR /home/node/workspace
 # Run as: sudo bash init-firewall.sh
 
 set -euo pipefail
+
+# Check for required capabilities (NET_ADMIN)
+if ! iptables -L -n >/dev/null 2>&1; then
+  echo "WARNING: iptables not available (missing NET_ADMIN capability)."
+  echo "Container running without network restrictions."
+  echo "To enable firewall, start container with: --cap-add=NET_ADMIN --cap-add=NET_RAW"
+  exit 0
+fi
 
 # Flush existing rules
 iptables -F OUTPUT 2>/dev/null || true
@@ -153,13 +184,21 @@ set -euo pipefail
 
 echo "=== Claude Code Devcontainer Setup ==="
 
-# Fix permissions on mounted directories
-if [ -d "/home/node/.claude" ]; then
-    sudo chown -R node:node /home/node/.claude
-fi
+# Fix ownership on Docker volumes (created as root by default)
+for dir in /home/node/.cache; do
+  if [ -d "$dir" ]; then
+    sudo chown -R node:node "$dir"
+  fi
+done
 
-# Create Claude config directory if not mounted
-mkdir -p /home/node/.claude
+# Symlink host .claude path so hardcoded plugin paths resolve in-container
+# (installed_plugins.json / known_marketplaces.json reference host absolute paths)
+HOST_CLAUDE_DIR="${HOST_HOME:-}/.claude"
+if [ -n "${HOST_HOME:-}" ] && [ "$HOST_CLAUDE_DIR" != "/home/node/.claude" ]; then
+  sudo mkdir -p "$(dirname "$HOST_CLAUDE_DIR")"
+  sudo ln -sfn /home/node/.claude "$HOST_CLAUDE_DIR"
+  echo "  Created symlink: $HOST_CLAUDE_DIR -> /home/node/.claude"
+fi
 
 # Symlink Claude config files if they exist in mounted volume
 if [ -f "/home/node/.claude/.claude.json" ]; then
@@ -177,120 +216,101 @@ echo "=== Setup complete ==="
 echo "Run 'claude' to start Claude Code"
 ```
 
-## sync-claude-config.sh
-
-```bash
-#!/bin/bash
-# Sync Claude config from host into devcontainer
-# Run from HOST before SSH session
-set -euo pipefail
-
-WORKSPACE_NAME="{{project-name}}"
-DEVPOD_DATA=".devcontainer-devpod/devpod-data/claude"
-
-echo "Syncing Claude config to devcontainer..."
-
-# Create target directory
-mkdir -p "$DEVPOD_DATA"
-
-# Files to sync
-SYNC_FILES=(
-    "settings.json"
-    "credentials.json"
-    ".claude.json"
-    ".mcp.json"
-)
-
-for f in "${SYNC_FILES[@]}"; do
-    src="$HOME/.claude/$f"
-    if [ -f "$src" ]; then
-        cp "$src" "$DEVPOD_DATA/$f"
-        echo "  Synced $f"
-    fi
-done
-
-# Sync directories
-SYNC_DIRS=(
-    "plugins"
-)
-
-for d in "${SYNC_DIRS[@]}"; do
-    src="$HOME/.claude/$d"
-    if [ -d "$src" ]; then
-        rsync -a --delete "$src/" "$DEVPOD_DATA/$d/"
-        echo "  Synced $d/"
-    fi
-done
-
-# Sync project-specific settings (filtered to current project)
-PROJECTS_DIR="$HOME/.claude/projects"
-if [ -d "$PROJECTS_DIR" ]; then
-    mkdir -p "$DEVPOD_DATA/projects"
-    rsync -a --delete "$PROJECTS_DIR/" "$DEVPOD_DATA/projects/"
-    echo "  Synced projects/"
-fi
-
-echo "Config sync complete."
-```
-
 ## devcontainer-ssh.sh
 
 ```bash
 #!/bin/bash
 # DevPod + Claude Code entry script
-# Usage: ./devcontainer-ssh.sh [--claude] [--sync-only]
+# Usage: ./devcontainer-ssh.sh [--claude] [--down] [--status] [--rebuild]
 set -euo pipefail
 
+PROJECT_NAME="{{project-name}}"
 DEVCONTAINER_PATH=".devcontainer-devpod/devcontainer.json"
-SYNC_SCRIPT=".devcontainer-devpod/sync-claude-config.sh"
+CONTAINER_LABEL="dev.containers.id=$PROJECT_NAME"
 
-usage() {
-    echo "Usage: $0 [OPTIONS]"
-    echo ""
-    echo "Options:"
-    echo "  --claude       Auto-launch Claude Code after SSH"
-    echo "  --sync-only    Only sync config, don't start container"
-    echo "  --no-sync      Skip config sync"
-    echo "  -h, --help     Show this help"
+# ── Helpers ──────────────────────────────────────────────────────────────────
+get_container_name() {
+  docker ps -q --filter "label=$CONTAINER_LABEL" | head -1
 }
 
-AUTO_CLAUDE=false
-SYNC_ONLY=false
-NO_SYNC=false
+sync_claude_config() {
+  echo "==> Claude config is bind-mounted from host. No sync needed."
 
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        --claude) AUTO_CLAUDE=true; shift ;;
-        --sync-only) SYNC_ONLY=true; shift ;;
-        --no-sync) NO_SYNC=true; shift ;;
-        -h|--help) usage; exit 0 ;;
-        *) echo "Unknown option: $1"; usage; exit 1 ;;
-    esac
-done
+  local container
+  container=$(get_container_name)
+  if [ -z "$container" ]; then
+    echo "  ERROR: Container not running. Start it first."
+    return 1
+  fi
 
-# Step 1: Sync Claude config from host
-if [ "$NO_SYNC" = false ]; then
-    echo ">>> Syncing Claude config..."
-    bash "$SYNC_SCRIPT"
-fi
+  # Verify the bind mount is working
+  if docker exec "$container" test -f /home/node/.claude/settings.json; then
+    echo "  Bind mount verified: /home/node/.claude"
+  else
+    echo "  WARNING: /home/node/.claude/settings.json not found. Check bind mount."
+  fi
+}
 
-if [ "$SYNC_ONLY" = true ]; then
-    echo "Config synced. Exiting."
-    exit 0
-fi
+ensure_running() {
+  local container
+  container=$(get_container_name)
+  if [ -z "$container" ]; then
+    echo "==> Starting container..."
+    devpod up . --devcontainer-path "$DEVCONTAINER_PATH" --id "$PROJECT_NAME" --ide none
+  fi
+}
 
-# Step 2: Start/create DevPod workspace
-echo ">>> Starting DevPod workspace..."
-devpod up . --devcontainer-path "$DEVCONTAINER_PATH" --ide none
+# ── Commands ─────────────────────────────────────────────────────────────────
+case "${1:-}" in
+  --claude)
+    ensure_running
+    sync_claude_config
+    echo "==> Launching Claude Code..."
+    claude_cmd="cd /workspace && claude --dangerously-skip-permissions"
+    if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+      claude_cmd="export ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' && ${claude_cmd}"
+    fi
+    devpod ssh "$PROJECT_NAME" --command "$claude_cmd"
+    ;;
 
-# Step 3: SSH into container
-if [ "$AUTO_CLAUDE" = true ]; then
-    echo ">>> Connecting and launching Claude Code..."
-    devpod ssh . --command "claude --dangerously-skip-permissions"
-else
-    echo ">>> Connecting via SSH..."
-    devpod ssh .
-fi
+  --down)
+    echo "==> Stopping container..."
+    devpod stop "$PROJECT_NAME"
+    ;;
+
+  --status)
+    devpod status "$PROJECT_NAME" 2>/dev/null || echo "Container not found. Run ./devcontainer-ssh.sh to start."
+    ;;
+
+  --rebuild)
+    echo "==> Rebuilding container from scratch..."
+    devpod delete "$PROJECT_NAME" 2>/dev/null || true
+    devpod up . --devcontainer-path "$DEVCONTAINER_PATH" --id "$PROJECT_NAME" --ide none
+    sync_claude_config
+    echo "==> Rebuild complete. Run ./devcontainer-ssh.sh to connect."
+    ;;
+
+  --help|-h)
+    echo "Usage: $0 [OPTION]"
+    echo ""
+    echo "Options:"
+    echo "  (none)      SSH into the devcontainer (default)"
+    echo "  --claude    Launch Claude Code inside the container"
+    echo "  --down      Stop the container"
+    echo "  --status    Show container status"
+    echo "  --rebuild   Delete and rebuild the container"
+    echo "  --help      Show this help"
+    ;;
+
+  "")
+    ensure_running
+    sync_claude_config
+    echo "==> Connecting via SSH..."
+    devpod ssh "$PROJECT_NAME"
+    ;;
+
+  *) echo "Unknown option: $1"; exit 1 ;;
+esac
 ```
 
 ## Taskfile.yml (devcontainer tasks)
@@ -304,20 +324,15 @@ tasks:
   devcontainer:up:
     desc: Start the devcontainer via DevPod
     cmds:
-      - devpod up . --devcontainer-path .devcontainer-devpod/devcontainer.json --ide none
+      - devpod up . --devcontainer-path .devcontainer-devpod/devcontainer.json --id {{project-name}} --ide none
 
   devcontainer:ssh:
     desc: SSH into running container
     cmds:
       - devpod ssh .
 
-  devcontainer:sync:
-    desc: Sync Claude config from host
-    cmds:
-      - bash .devcontainer-devpod/sync-claude-config.sh
-
   devcontainer:claude:
-    desc: "Full workflow: up + sync + ssh + claude"
+    desc: "Full workflow: up + ssh + claude"
     cmds:
       - bash devcontainer-ssh.sh --claude
 
@@ -337,11 +352,3 @@ tasks:
       - devpod status .
 ```
 
-## .gitignore additions
-
-Add to the target project's `.gitignore`:
-
-```
-# DevPod devcontainer data (credentials, local state)
-.devcontainer-devpod/devpod-data/
-```

@@ -1,13 +1,13 @@
 ---
 name: devcontainer-setup
-description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and automatic config mirroring. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
-version: 1.0.0
+description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and direct host ~/.claude/ bind mount. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
+version: 1.2.0
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 
 # Devcontainer Setup for Claude Code + DevPod
 
-Scaffolds a DevPod-compatible devcontainer that runs Claude Code with SSH access, firewall restrictions, and automatic config mirroring from the host.
+Scaffolds a DevPod-compatible devcontainer that runs Claude Code with SSH access, firewall restrictions, and mounts host `~/.claude/` directly into the container.
 
 ## Quick Start
 
@@ -63,49 +63,29 @@ Generate files into the **target project directory** (the project being containe
 ├── devcontainer.json          # DevPod-compatible config
 ├── Dockerfile                 # Official Claude Code base + detected tools
 ├── init-firewall.sh           # Network restrictions (iptables)
-├── setup.sh                   # Post-create: permissions, symlinks, tool setup
-├── sync-claude-config.sh      # Mirror host ~/.claude/ into container
-└── devpod-data/
-    └── .gitkeep               # Persistent config mount point
+└── setup.sh                   # Post-create: symlinks, tool setup
 ```
 
 #### Root-level files
 
 ```
-devcontainer-ssh.sh            # Entry script: up + sync + ssh + claude
+devcontainer-ssh.sh            # Entry script: up + ssh + claude
 ```
 
 If a `Taskfile.yml` exists, append `devcontainer:*` tasks. Otherwise create one.
 
 Use templates from [templates.md](references/templates.md) as the base for each file, substituting detected tools and versions.
 
-### Phase 3: Config Mirroring Setup
-
-The `sync-claude-config.sh` script handles mirroring host `~/.claude/` into the container.
-
-**Files to mirror**:
-- `~/.claude/settings.json` — User settings
-- `~/.claude/credentials.json` — Auth credentials
-- `~/.claude/.claude.json` — Claude state
-- `~/.claude/.mcp.json` — MCP server config
-- `~/.claude/plugins/` — Plugin configurations
-- `~/.claude/projects/` — Project-specific settings (filtered to current project)
-
-**Files to skip**:
-- `~/.claude/cache/` — Transient
-- `~/.claude/logs/` — Transient
-- `~/.claude/teams/` — Session-specific
-- `~/.claude/tasks/` — Session-specific
-
-### Phase 4: Verification
+### Phase 3: Verification
 
 Run these checks after generation:
 
 1. **DevPod installed**: `which devpod` — warn if missing, link to install docs
-2. **Dockerfile syntax**: `docker build --check` or dry-run parse
-3. **File permissions**: Ensure `.sh` files are executable (`chmod +x`)
-4. **devcontainer.json validity**: Parse as JSON to catch syntax errors
-5. **Git integration**: Suggest adding `.devcontainer-devpod/devpod-data/` to `.gitignore`
+2. **DevPod provider config**: Run `devpod provider list` — if it fails with "unknown field", the Docker provider config is corrupted (version mismatch). Fix: `devpod provider delete docker && devpod provider add docker`
+3. **Dockerfile syntax**: `docker build --check` or dry-run parse
+4. **File permissions**: Ensure `.sh` files are executable (`chmod +x`)
+5. **devcontainer.json validity**: Parse as JSON to catch syntax errors
+6. **Bind mount**: Verify `~/.claude/` exists on host (created by `initializeCommand`)
 
 Report results and next steps to the user.
 
@@ -114,8 +94,11 @@ Report results and next steps to the user.
 ### devcontainer.json
 
 - `build.dockerfile` points to local `Dockerfile`
+- `runArgs` includes `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` (required for iptables firewall)
 - Omits `forwardPorts` (DevPod handles port mapping)
-- Mounts `devpod-data/claude/` to `/home/node/.claude` for persistence
+- `initializeCommand` ensures `~/.claude/` exists on host before bind mount
+- Mounts host `~/.claude/` to `/home/node/.claude` via `${localEnv:HOME}` bind mount
+- `remoteEnv` forwards `ANTHROPIC_API_KEY` and `HOST_HOME` from host into container
 - Sets `remoteUser: "node"`
 - `postCreateCommand` runs `setup.sh`
 - `postStartCommand` runs `init-firewall.sh`
@@ -125,11 +108,20 @@ Report results and next steps to the user.
 
 Layered approach:
 1. **Base**: `node:20-bookworm` (matches official Claude Code devcontainer)
-2. **System packages**: git, sudo, fzf, zsh, curl, iptables, rsync, jq, openssh-server
+2. **System packages**: git, sudo, fzf, zsh, curl, iptables, jq, openssh-server
 3. **Claude Code**: `npm install -g @anthropic-ai/claude-code@latest`
 4. **Project tools**: Detected runtimes from Phase 1 (see [tool-detection.md](references/tool-detection.md))
-5. **Firewall**: Copy `init-firewall.sh`, configure sudoers for iptables
-6. **User**: `node` with sudo access
+5. **Firewall**: Copy `init-firewall.sh`, with graceful fallback if `NET_ADMIN` capability unavailable
+6. **Cache directory**: `mkdir -p /home/node/.cache && chown node:node` (prevents EACCES from `claude install`)
+7. **User**: `node` with `NOPASSWD:ALL` sudo access (standard for devcontainers)
+
+### setup.sh
+
+- Fixes ownership on Docker volumes (`.cache`, etc.) that are created as root
+- Creates a symlink from host `~/.claude` path (via `HOST_HOME` env var) to `/home/node/.claude` so hardcoded plugin paths in `installed_plugins.json` resolve in-container
+- Symlinks `.claude.json` to home directory
+- Configures git safe directory
+- Runs project-specific tool setup (inserted from Phase 1 detection)
 
 ### init-firewall.sh
 
@@ -143,13 +135,11 @@ Plus project-specific domains based on detected tools (see [tool-detection.md](r
 
 ### Entry Script (devcontainer-ssh.sh)
 
-```bash
-#!/bin/bash
-# 1. devpod up . --devcontainer-path .devcontainer-devpod/devcontainer.json --ide none
-# 2. Run sync-claude-config.sh to mirror host config
-# 3. devpod ssh . (opens interactive session)
-# 4. Inside container: claude --dangerously-skip-permissions (optional)
-```
+- `--claude`: Starts container, verifies bind mount, forwards `ANTHROPIC_API_KEY`, launches Claude Code
+- `--down`: Stops container
+- `--status`: Shows container status
+- `--rebuild`: Deletes and rebuilds container from scratch
+- `(none)`: Starts container, verifies bind mount, opens interactive SSH session
 
 ### Taskfile.yml Tasks
 
@@ -157,8 +147,7 @@ Plus project-specific domains based on detected tools (see [tool-detection.md](r
 |------|-------------|
 | `devcontainer:up` | Start the devcontainer via DevPod |
 | `devcontainer:ssh` | SSH into running container |
-| `devcontainer:sync` | Sync Claude config from host |
-| `devcontainer:claude` | Full workflow: up + sync + ssh + claude |
+| `devcontainer:claude` | Full workflow: up + ssh + claude |
 | `devcontainer:stop` | Stop the container |
 | `devcontainer:delete` | Delete the workspace |
 | `devcontainer:status` | Show workspace status |
@@ -172,12 +161,7 @@ Prompt the user for these decisions:
    - **Permissive**: Allow all outbound (disable firewall)
    - **Custom**: User provides domain allowlist
 
-2. **Config persistence**: "How should Claude config be persisted?"
-   - **Mount** (recommended): Bind-mount `devpod-data/claude/` for persistence across rebuilds
-   - **Sync-only**: Rsync on each session start, no persistence
-   - **None**: Fresh config each time
-
-3. **Auto-start Claude**: "Should the entry script auto-launch Claude Code?"
+2. **Auto-start Claude**: "Should the entry script auto-launch Claude Code?"
    - **Yes**: SSH in and immediately run `claude`
    - **No** (recommended): SSH in to a shell, run claude manually
 
@@ -193,7 +177,7 @@ Prompt the user for these decisions:
 - Target project directory exists with source code
 - Docker installed on host (for building/testing)
 - DevPod installed on host (for container management)
-- `~/.claude/` exists with valid credentials (for mirroring)
+- `~/.claude/` exists on host with valid credentials (auto-created by `initializeCommand`)
 
 ## Error Handling
 
@@ -203,8 +187,12 @@ Prompt the user for these decisions:
 | No project files found | Generate minimal Dockerfile with just Claude Code |
 | Docker build fails | Check Dockerfile syntax, verify base image availability |
 | Firewall blocks required domain | Add domain to allowlist in `init-firewall.sh` |
-| Config sync fails | Check `~/.claude/` permissions, verify rsync installed |
+| Bind mount fails | Ensure `~/.claude/` exists on host (`initializeCommand` should create it). On Windows, use `${localEnv:USERPROFILE}` instead of `${localEnv:HOME}` |
+| DevPod "unknown field" in provider config | Provider JSON at `~/.devpod/contexts/default/providers/docker/provider.json` has fields from a newer DevPod version. Fix: `devpod provider delete docker && devpod provider add docker` to regenerate a clean config |
+| Firewall script sudo fails | Ensure sudoers grants NOPASSWD for the firewall script path, iptables, ip6tables, and ipset. Do NOT wrap with `sudo bash` — use `sudo /path/to/script` since scripts have shebangs |
 
 ## Version History
 
+- **1.2.0**: Add `runArgs` (NET_ADMIN/NET_RAW), `remoteEnv` (ANTHROPIC_API_KEY, HOST_HOME), `.cache` directory fix, host path symlink in setup.sh, bind mount verification in entry script
+- **1.1.0**: Replace config sync infrastructure with direct `~/.claude/` host bind mount
 - **1.0.0**: Initial release with DevPod + SSH + firewall + config mirroring
