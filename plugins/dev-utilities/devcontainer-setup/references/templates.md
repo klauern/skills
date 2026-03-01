@@ -327,9 +327,9 @@ show_auth_preflight() {
     claude auth status --text || true; \
     echo \"\"; \
     echo \"  MCP server status:\"; \
-    mcp_out=$(claude mcp list 2>&1 || true); \
-    echo \"$mcp_out\"; \
-    if echo \"$mcp_out\" | grep -q 'No MCP servers configured'; then \
+    mcp_out=\$(claude mcp list 2>&1 || true); \
+    echo \"\$mcp_out\"; \
+    if echo \"\$mcp_out\" | grep -q 'No MCP servers configured'; then \
       echo \"  WARNING: No MCP servers configured in-container. Ensure ~/.claude.json is bind-mounted.\"; \
     fi"
 

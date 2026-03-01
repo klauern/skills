@@ -2,6 +2,7 @@
 name: devcontainer-setup
 description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and direct host ~/.claude/ + ~/.claude.json bind mounts. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
 version: 1.4.0
+author: klauern
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 
@@ -209,8 +210,8 @@ Prompt the user for these decisions:
 ## Error Handling
 
 | Issue                                     | Solution                                                                                                                                                                                                             |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| DevPod not installed                      | Provide install link: `brew install devpod` or `curl -fsSL https://get.devpod.sh                                                                                                                                     | bash` |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DevPod not installed                      | Provide install link: `brew install devpod` or `curl -fsSL https://get.devpod.sh \| bash`                                                                                                                           |
 | No project files found                    | Generate minimal Dockerfile with just Claude Code                                                                                                                                                                    |
 | Docker build fails                        | Check Dockerfile syntax, verify base image availability                                                                                                                                                              |
 | Firewall blocks required domain           | Add domain to allowlist in `init-firewall.sh`                                                                                                                                                                        |
