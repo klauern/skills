@@ -1,7 +1,7 @@
 ---
 name: devcontainer-setup
 description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and direct host ~/.claude/ bind mount. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
-version: 1.2.0
+version: 1.3.0
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 
@@ -50,7 +50,17 @@ Detect required tools and runtimes by reading project files. Check sources in pr
 
 For each detected tool, extract version constraints where available. See [tool-detection.md](references/tool-detection.md) for extraction patterns.
 
-**Output**: Present detected tools to user for confirmation before generating files.
+#### API Gateway & MCP Server Detection
+
+Scan `~/.claude/settings.json` and `.mcp.json` files to detect custom domains the firewall must allow:
+
+1. **Custom API gateways**: Read `env` block in `~/.claude/settings.json`. Look for any `*_BASE_URL` keys (e.g., `ANTHROPIC_BASE_URL`, `ANTHROPIC_BEDROCK_BASE_URL`). Extract the hostname from each URL and add it to the firewall allowlist.
+
+2. **Auth token forwarding**: If a custom `*_BASE_URL` is detected, check whether `ANTHROPIC_AUTH_TOKEN` is set on the host (`printenv ANTHROPIC_AUTH_TOKEN`). If so, forward it via `remoteEnv` instead of `ANTHROPIC_API_KEY` — custom gateways typically use `ANTHROPIC_AUTH_TOKEN` for authentication, not the standard API key.
+
+3. **Remote MCP servers**: Scan all `.mcp.json` files (`~/.claude/.mcp.json`, `~/.claude/mcp.json`, project-level `.mcp.json`) for servers with `"type": "sse"`, `"type": "http"`, or `"type": "streamable"`. Extract the hostname from each `"url"` value and add it to the firewall allowlist. Stdio-based MCP servers (those with `"command"`) don't need firewall entries.
+
+**Output**: Present detected tools, gateway domains, and MCP server domains to user for confirmation before generating files.
 
 ### Phase 2: Scaffold Generation
 
@@ -98,7 +108,7 @@ Report results and next steps to the user.
 - Omits `forwardPorts` (DevPod handles port mapping)
 - `initializeCommand` ensures `~/.claude/` exists on host before bind mount
 - Mounts host `~/.claude/` to `/home/node/.claude` via `${localEnv:HOME}` bind mount
-- `remoteEnv` forwards `ANTHROPIC_API_KEY` and `HOST_HOME` from host into container
+- `remoteEnv` forwards auth credentials and `HOST_HOME` from host into container. If a custom API gateway is detected (any `*_BASE_URL` in settings.json), forward `ANTHROPIC_AUTH_TOKEN` instead of `ANTHROPIC_API_KEY`. See Phase 1 "API Gateway & MCP Server Detection"
 - Sets `remoteUser: "node"`
 - `postCreateCommand` runs `setup.sh`
 - `postStartCommand` runs `init-firewall.sh`
@@ -131,11 +141,14 @@ Based on the official Claude Code devcontainer firewall. Restricts outbound traf
 - `sentry.io` — Error reporting
 - `*.githubusercontent.com` — GitHub raw content
 
-Plus project-specific domains based on detected tools (see [tool-detection.md](references/tool-detection.md) for per-ecosystem allowlists).
+Plus dynamically detected domains:
+- **Custom API gateways**: Domains extracted from `*_BASE_URL` env vars in `~/.claude/settings.json`
+- **Remote MCP servers**: Domains extracted from `url` fields in `.mcp.json` files (sse/http/streamable types only)
+- **Project-specific registries**: Domains based on detected tools (see [tool-detection.md](references/tool-detection.md) for per-ecosystem allowlists)
 
 ### Entry Script (devcontainer-ssh.sh)
 
-- `--claude`: Starts container, verifies bind mount, forwards `ANTHROPIC_API_KEY`, launches Claude Code
+- `--claude`: Starts container, verifies bind mount, forwards auth token, launches Claude Code
 - `--down`: Stops container
 - `--status`: Shows container status
 - `--rebuild`: Deletes and rebuilds container from scratch
@@ -193,6 +206,7 @@ Prompt the user for these decisions:
 
 ## Version History
 
+- **1.3.0**: Auto-detect custom API gateways (`*_BASE_URL` in settings.json) and remote MCP servers (sse/http/streamable `.mcp.json` entries) — extract domains for firewall allowlist, forward `ANTHROPIC_AUTH_TOKEN` when custom gateway detected
 - **1.2.0**: Add `runArgs` (NET_ADMIN/NET_RAW), `remoteEnv` (ANTHROPIC_API_KEY, HOST_HOME), `.cache` directory fix, host path symlink in setup.sh, bind mount verification in entry script
 - **1.1.0**: Replace config sync infrastructure with direct `~/.claude/` host bind mount
 - **1.0.0**: Initial release with DevPod + SSH + firewall + config mirroring

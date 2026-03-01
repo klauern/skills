@@ -22,7 +22,7 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
     "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
   ],
   "remoteEnv": {
-    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "{{ANTHROPIC_AUTH_ENV_VAR}}": "${localEnv:{{ANTHROPIC_AUTH_ENV_VAR}}}",
     "HOST_HOME": "${localEnv:HOME}"
   },
   "postCreateCommand": "bash .devcontainer-devpod/setup.sh",
@@ -38,7 +38,9 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
 > - The mount is **read-write** — changes inside the container (e.g., new credentials, updated settings) persist to the host.
 >
 > **Notes on `remoteEnv`**:
-> - `ANTHROPIC_API_KEY` is forwarded from the host so Claude Code can authenticate without the credentials file.
+> - `{{ANTHROPIC_AUTH_ENV_VAR}}` is a placeholder — substitute the correct auth env var based on detection:
+>   - If `~/.claude/settings.json` contains any `*_BASE_URL` env (custom API gateway): use `ANTHROPIC_AUTH_TOKEN`
+>   - Otherwise (direct Anthropic API): use `ANTHROPIC_API_KEY`
 > - `HOST_HOME` is used by `setup.sh` to create a symlink from the host's `~/.claude` path to `/home/node/.claude`, so hardcoded plugin paths in `installed_plugins.json` resolve correctly in-container.
 
 ## Dockerfile
@@ -148,6 +150,16 @@ ALLOWED_DOMAINS=(
     # {{TOOL_DOMAINS}}
     # Project-specific domains added here based on detected tools.
     # See tool-detection.md for per-ecosystem firewall allowlists.
+
+    # {{GATEWAY_DOMAINS}}
+    # Custom API gateway domains extracted from *_BASE_URL env vars
+    # in ~/.claude/settings.json (e.g., ANTHROPIC_BASE_URL, ANTHROPIC_BEDROCK_BASE_URL).
+    # Only the hostname is added — not the full URL.
+
+    # {{MCP_SERVER_DOMAINS}}
+    # Remote MCP server domains extracted from .mcp.json files
+    # (sse/http/streamable types only; stdio servers don't need network access).
+    # Scanned from: ~/.claude/.mcp.json, ~/.claude/mcp.json, project .mcp.json
 )
 
 # Resolve and allow each domain
@@ -267,7 +279,12 @@ case "${1:-}" in
     sync_claude_config
     echo "==> Launching Claude Code..."
     claude_cmd="cd /home/node/workspace && claude --dangerously-skip-permissions"
-    if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+    # Forward the auth token matching the API configuration:
+    #   Custom gateway (*_BASE_URL in settings.json) → ANTHROPIC_AUTH_TOKEN
+    #   Direct Anthropic API                         → ANTHROPIC_API_KEY
+    if [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
+      claude_cmd="export ANTHROPIC_AUTH_TOKEN='${ANTHROPIC_AUTH_TOKEN}' && ${claude_cmd}"
+    elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
       claude_cmd="export ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' && ${claude_cmd}"
     fi
     devpod ssh "$PROJECT_NAME" --command "$claude_cmd"
