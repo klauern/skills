@@ -31,6 +31,38 @@
             "type": "command",
             "command": ".claude/hooks/block-grep-extended.sh",
             "timeout": 5000
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-commit-format.sh",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pr-quality-check.sh",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/workflow-lint.sh",
+            "timeout": 10000
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/auto-validate-skill.sh",
+            "timeout": 5000
           }
         ]
       }
