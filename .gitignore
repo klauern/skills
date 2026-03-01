@@ -4,3 +4,9 @@
 
 !.beads/
 .beads/sync-state.json
+
+# Dolt runtime files (created by dolt sql-server in repo root)
+.dolt/
+.doltcfg/
+beads_ks/
+config.yaml
