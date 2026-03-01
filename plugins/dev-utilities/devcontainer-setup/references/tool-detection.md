@@ -301,6 +301,76 @@ test -f Justfile || test -f justfile
 RUN curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
 ```
 
+## Custom API Gateways
+
+### Detection
+
+```bash
+# Read *_BASE_URL env vars from settings.json
+jq -r '.env // {} | to_entries[] | select(.key | endswith("_BASE_URL")) | .value' ~/.claude/settings.json
+```
+
+### Domain Extraction
+
+```bash
+# Extract hostname from each URL
+echo "https://ai-gateway.example.com/bedrock" | sed 's|https\?://||; s|/.*||'
+# → ai-gateway.example.com
+```
+
+### Auth Token Selection
+
+If **any** `*_BASE_URL` is found in `~/.claude/settings.json`:
+- Use `ANTHROPIC_AUTH_TOKEN` in `remoteEnv` (custom gateways use this for authentication)
+- Verify it's set on the host: `printenv ANTHROPIC_AUTH_TOKEN`
+
+If **no** `*_BASE_URL` is found:
+- Use `ANTHROPIC_API_KEY` in `remoteEnv` (direct Anthropic API)
+
+### Firewall Allowlist
+
+Add the extracted hostnames. Example:
+
+```
+# From ANTHROPIC_BEDROCK_BASE_URL=https://ai-gateway.example.com/bedrock
+ai-gateway.example.com
+```
+
+## Remote MCP Servers
+
+### Detection
+
+```bash
+# Find all .mcp.json files that Claude will load
+# Global: ~/.claude/.mcp.json, ~/.claude/mcp.json
+# Project: ./.mcp.json
+# Scan for remote servers (type: sse, http, or streamable)
+for f in ~/.claude/.mcp.json ~/.claude/mcp.json .mcp.json; do
+  [ -f "$f" ] && jq -r '
+    .mcpServers // {} | to_entries[]
+    | select(.value.type == "sse" or .value.type == "http" or .value.type == "streamable")
+    | .value.url
+  ' "$f" 2>/dev/null
+done
+```
+
+### Domain Extraction
+
+```bash
+# Same as gateway — extract hostname from URL
+echo "https://mcp.slack.com/mcp" | sed 's|https\?://||; s|/.*||'
+# → mcp.slack.com
+```
+
+### Firewall Allowlist
+
+Add each extracted hostname. Stdio-based MCP servers (`"command": "bunx ..."`) don't need firewall entries since they run locally.
+
+```
+# Example: from .mcp.json with type: "http", url: "https://mcp.slack.com/mcp"
+mcp.slack.com
+```
+
 ## Common Firewall Domains (Always Included)
 
 These domains are always allowed regardless of detected tools:
