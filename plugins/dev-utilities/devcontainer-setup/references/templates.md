@@ -17,12 +17,25 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
     "--hostname={{project-name}}"
   ],
   "remoteUser": "node",
-  "initializeCommand": "mkdir -p ~/.claude",
+  "initializeCommand": "mkdir -p ~/.claude && touch ~/.claude.json",
   "mounts": [
-    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind"
+    "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
+    "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind"
   ],
+  "containerEnv": {
+    "HOME": "/home/node",
+    "ANTHROPIC_AUTH_TOKEN": "${localEnv:ANTHROPIC_AUTH_TOKEN}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "ANTHROPIC_CUSTOM_HEADERS": "${localEnv:ANTHROPIC_CUSTOM_HEADERS}",
+    "ANTHROPIC_BEDROCK_BASE_URL": "${localEnv:ANTHROPIC_BEDROCK_BASE_URL}",
+    "CLAUDE_CODE_USE_BEDROCK": "${localEnv:CLAUDE_CODE_USE_BEDROCK}",
+    "CLAUDE_CODE_SKIP_BEDROCK_AUTH": "${localEnv:CLAUDE_CODE_SKIP_BEDROCK_AUTH}",
+    "NODE_USE_SYSTEM_CA": "1"
+  },
   "remoteEnv": {
-    "{{ANTHROPIC_AUTH_ENV_VAR}}": "${localEnv:{{ANTHROPIC_AUTH_ENV_VAR}}}",
+    "ANTHROPIC_AUTH_TOKEN": "${localEnv:ANTHROPIC_AUTH_TOKEN}",
+    "ANTHROPIC_API_KEY": "${localEnv:ANTHROPIC_API_KEY}",
+    "ANTHROPIC_CUSTOM_HEADERS": "${localEnv:ANTHROPIC_CUSTOM_HEADERS}",
     "HOST_HOME": "${localEnv:HOME}"
   },
   "postCreateCommand": "bash .devcontainer-devpod/setup.sh",
@@ -33,20 +46,23 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
 ```
 
 > **Notes on `${localEnv:HOME}`**:
-> - `initializeCommand` runs on the **host shell** (where `~` expands normally) to ensure `~/.claude/` exists before Docker attempts the bind mount.
+>
+> - `initializeCommand` runs on the **host shell** (where `~` expands normally) to ensure `~/.claude/` and `~/.claude.json` exist before Docker attempts bind mounts.
 > - `${localEnv:HOME}` is a devcontainer variable resolved on the host. On Windows, use `${localEnv:USERPROFILE}` instead.
 > - The mount is **read-write** — changes inside the container (e.g., new credentials, updated settings) persist to the host.
 >
 > **Windows host notes**:
+>
 > - DevPod on Windows uses Git Bash or WSL2, where `mkdir -p` works as-is.
-> - If using cmd.exe or PowerShell directly, replace `initializeCommand` with: `"powershell -Command \"New-Item -ItemType Directory -Force -Path $env:USERPROFILE\\.claude | Out-Null\""`
+> - If using cmd.exe or PowerShell directly, replace `initializeCommand` with: `"powershell -Command \"New-Item -ItemType Directory -Force -Path $env:USERPROFILE\\.claude | Out-Null; New-Item -ItemType File -Force -Path $env:USERPROFILE\\.claude.json | Out-Null\""`
 > - Replace the mount source with `${localEnv:USERPROFILE}/.claude`.
 >
-> **Notes on `remoteEnv`**:
-> - `{{ANTHROPIC_AUTH_ENV_VAR}}` is a placeholder — substitute the correct auth env var based on detection:
->   - If `~/.claude/settings.json` contains any `*_BASE_URL` env (custom API gateway): use `ANTHROPIC_AUTH_TOKEN`
->   - Otherwise (direct Anthropic API): use `ANTHROPIC_API_KEY`
-> - `HOST_HOME` is used by `setup.sh` to create a symlink from the host's `~/.claude` path to `/home/node/.claude`, so hardcoded plugin paths in `installed_plugins.json` resolve correctly in-container.
+> **Notes on auth/env forwarding**:
+>
+> - Put auth env in `containerEnv` so values exist in `devpod ssh` sessions (not just IDE-attached sessions).
+> - Keep matching keys in `remoteEnv` for IDE compatibility.
+> - Forward both `ANTHROPIC_AUTH_TOKEN` and `ANTHROPIC_API_KEY`; Claude/gateway settings determine which is used.
+> - `HOST_HOME` is used by `setup.sh` to create symlinks for host-style absolute paths.
 
 ## Dockerfile
 
@@ -162,9 +178,9 @@ ALLOWED_DOMAINS=(
     # Only the hostname is added — not the full URL.
 
     # {{MCP_SERVER_DOMAINS}}
-    # Remote MCP server domains extracted from .mcp.json files
+    # Remote MCP server domains extracted from Claude MCP config files
     # (sse/http/streamable types only; stdio servers don't need network access).
-    # Scanned from: ~/.claude/.mcp.json, ~/.claude/mcp.json, project .mcp.json
+    # Scanned from: ~/.claude.json, ~/.claude/.mcp.json, ~/.claude/mcp.json, project .mcp.json
 )
 
 # Resolve and allow each domain
@@ -217,9 +233,12 @@ if [ -n "${HOST_HOME:-}" ] && [ "$HOST_CLAUDE_DIR" != "/home/node/.claude" ]; th
   echo "  Created symlink: $HOST_CLAUDE_DIR -> /home/node/.claude"
 fi
 
-# Symlink Claude config files if they exist in mounted volume
-if [ -f "/home/node/.claude/.claude.json" ]; then
-    ln -sf /home/node/.claude/.claude.json /home/node/.claude.json 2>/dev/null || true
+# Symlink host .claude.json path so global MCP/user config resolves in-container
+HOST_CLAUDE_STATE="${HOST_HOME:-}/.claude.json"
+if [ -n "${HOST_HOME:-}" ] && [ "$HOST_CLAUDE_STATE" != "/home/node/.claude.json" ]; then
+  sudo mkdir -p "$(dirname "$HOST_CLAUDE_STATE")"
+  sudo ln -sfn /home/node/.claude.json "$HOST_CLAUDE_STATE"
+  echo "  Created symlink: $HOST_CLAUDE_STATE -> /home/node/.claude.json"
 fi
 
 # Configure git to trust workspace
@@ -238,7 +257,7 @@ echo "Run 'claude' to start Claude Code"
 ```bash
 #!/bin/bash
 # DevPod + Claude Code entry script
-# Usage: ./devcontainer-ssh.sh [--claude] [--down] [--status] [--rebuild]
+# Usage: ./devcontainer-ssh.sh [--claude] [--sync] [--doctor|--auth-check] [--down] [--status] [--rebuild]
 set -euo pipefail
 
 PROJECT_NAME="{{project-name}}"
@@ -268,6 +287,59 @@ sync_claude_config() {
   fi
 }
 
+show_auth_preflight() {
+  local container
+  container=$(get_container_name)
+  if [ -z "$container" ]; then
+    echo "  ERROR: Container not running. Start it first."
+    return 1
+  fi
+
+  echo "==> Claude auth preflight (host)"
+  if [ -f "$HOME/.claude.json" ]; then
+    echo "  present: $HOME/.claude.json"
+  else
+    echo "  missing: $HOME/.claude.json"
+  fi
+  if [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
+    echo "  ANTHROPIC_AUTH_TOKEN: set"
+  else
+    echo "  ANTHROPIC_AUTH_TOKEN: unset"
+  fi
+  if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
+    echo "  ANTHROPIC_API_KEY: set"
+  else
+    echo "  ANTHROPIC_API_KEY: unset"
+  fi
+
+  echo "==> Claude auth preflight (container)"
+  devpod ssh "$PROJECT_NAME" --command "set -euo pipefail; \
+    echo \"  HOME=\$HOME\"; \
+    if [ \"\$HOME\" != \"/home/node\" ]; then echo \"  WARNING: HOME is \$HOME (expected /home/node).\"; fi; \
+    for f in /home/node/.claude/settings.json /home/node/.claude/.credentials.json /home/node/.claude.json; do \
+      if [ -f \"\$f\" ]; then echo \"  present: \$f\"; else echo \"  missing: \$f\"; fi; \
+    done; \
+    for v in ANTHROPIC_AUTH_TOKEN ANTHROPIC_API_KEY ANTHROPIC_BEDROCK_BASE_URL CLAUDE_CODE_USE_BEDROCK CLAUDE_CODE_SKIP_BEDROCK_AUTH NODE_USE_SYSTEM_CA; do \
+      if [ -n \"\${!v:-}\" ]; then echo \"  \$v=set\"; else echo \"  \$v=unset\"; fi; \
+    done; \
+    echo \"\"; \
+    echo \"  claude auth status:\"; \
+    claude auth status --text || true; \
+    echo \"\"; \
+    echo \"  MCP server status:\"; \
+    mcp_out=$(claude mcp list 2>&1 || true); \
+    echo \"$mcp_out\"; \
+    if echo \"$mcp_out\" | grep -q 'No MCP servers configured'; then \
+      echo \"  WARNING: No MCP servers configured in-container. Ensure ~/.claude.json is bind-mounted.\"; \
+    fi"
+
+  if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+    echo ""
+    echo "  WARNING: Neither ANTHROPIC_AUTH_TOKEN nor ANTHROPIC_API_KEY is set on host."
+    echo "  Claude may prompt for authentication."
+  fi
+}
+
 ensure_running() {
   local container
   container=$(get_container_name)
@@ -282,17 +354,23 @@ case "${1:-}" in
   --claude)
     ensure_running
     sync_claude_config
+    show_auth_preflight
     echo "==> Launching Claude Code..."
     claude_cmd="cd /home/node/workspace && claude --dangerously-skip-permissions"
-    # Forward the auth token matching the API configuration:
-    #   Custom gateway (*_BASE_URL in settings.json) → ANTHROPIC_AUTH_TOKEN
-    #   Direct Anthropic API                         → ANTHROPIC_API_KEY
-    if [ -n "${ANTHROPIC_AUTH_TOKEN:-}" ]; then
-      claude_cmd="export ANTHROPIC_AUTH_TOKEN='${ANTHROPIC_AUTH_TOKEN}' && ${claude_cmd}"
-    elif [ -n "${ANTHROPIC_API_KEY:-}" ]; then
-      claude_cmd="export ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' && ${claude_cmd}"
-    fi
+    # Auth env is injected by devcontainer.json containerEnv/remoteEnv.
+    # Avoid exporting secrets in this command string.
     devpod ssh "$PROJECT_NAME" --command "$claude_cmd"
+    ;;
+
+  --sync)
+    ensure_running
+    sync_claude_config
+    ;;
+
+  --doctor|--auth-check)
+    ensure_running
+    sync_claude_config
+    show_auth_preflight
     ;;
 
   --down)
@@ -318,6 +396,9 @@ case "${1:-}" in
     echo "Options:"
     echo "  (none)      SSH into the devcontainer (default)"
     echo "  --claude    Launch Claude Code inside the container"
+    echo "  --sync      Verify Claude bind mounts"
+    echo "  --doctor    Run auth + MCP preflight checks"
+    echo "  --auth-check Alias for --doctor"
     echo "  --down      Stop the container"
     echo "  --status    Show container status"
     echo "  --rebuild   Delete and rebuild the container"
@@ -343,34 +424,43 @@ Append these tasks to an existing `Taskfile.yml` or create a new one:
 version: "3"
 
 tasks:
-  devcontainer:up:
-    desc: Start the devcontainer via DevPod
-    cmds:
-      - devpod up . --devcontainer-path .devcontainer-devpod/devcontainer.json --id {{project-name}} --ide none
-
   devcontainer:ssh:
-    desc: SSH into running container
+    desc: SSH into running devcontainer (starts it if needed)
     cmds:
-      - devpod ssh .
+      - bash devcontainer-ssh.sh
 
   devcontainer:claude:
-    desc: "Full workflow: up + ssh + claude"
+    desc: Start devcontainer and launch Claude Code
     cmds:
       - bash devcontainer-ssh.sh --claude
 
-  devcontainer:stop:
+  devcontainer:sync:
+    desc: Verify Claude config bind mounts
+    cmds:
+      - bash devcontainer-ssh.sh --sync
+
+  devcontainer:doctor:
+    desc: Run Claude auth + MCP preflight checks
+    cmds:
+      - bash devcontainer-ssh.sh --doctor
+
+  devcontainer:auth-check:
+    desc: Alias for devcontainer:doctor
+    cmds:
+      - task: devcontainer:doctor
+
+  devcontainer:down:
     desc: Stop the devcontainer
     cmds:
-      - devpod stop .
-
-  devcontainer:delete:
-    desc: Delete the workspace entirely
-    cmds:
-      - devpod delete .
+      - bash devcontainer-ssh.sh --down
 
   devcontainer:status:
-    desc: Show workspace status
+    desc: Show devcontainer status
     cmds:
-      - devpod status .
-```
+      - bash devcontainer-ssh.sh --status
 
+  devcontainer:rebuild:
+    desc: Rebuild devcontainer from scratch
+    cmds:
+      - bash devcontainer-ssh.sh --rebuild
+```

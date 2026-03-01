@@ -4,18 +4,18 @@ Detection patterns for each ecosystem: file markers, version extraction commands
 
 ## Detection Table
 
-| Ecosystem | Marker Files | Version Source | Priority |
-|-----------|-------------|----------------|----------|
-| Node.js | `package.json` | `.node-version`, `engines.node`, `.nvmrc` | High |
-| Bun | `bun.lockb`, `bunfig.toml` | `package.json` engines | High |
-| Go | `go.mod` | `go.mod` go directive | High |
-| Python | `pyproject.toml`, `requirements.txt`, `uv.lock` | `.python-version`, `pyproject.toml` | High |
-| Ruby | `Gemfile`, `.ruby-version` | `.ruby-version` | Medium |
-| Rust | `Cargo.toml` | `rust-toolchain.toml` | Medium |
-| Java/Kotlin | `pom.xml`, `build.gradle`, `build.gradle.kts` | `.java-version`, `pom.xml` | Medium |
-| go-task | `Taskfile.yml` | N/A (latest) | Low |
-| mise/asdf | `.mise.toml`, `.tool-versions` | Inline versions | High |
-| Just | `Justfile` | N/A (latest) | Low |
+| Ecosystem   | Marker Files                                    | Version Source                            | Priority |
+| ----------- | ----------------------------------------------- | ----------------------------------------- | -------- |
+| Node.js     | `package.json`                                  | `.node-version`, `engines.node`, `.nvmrc` | High     |
+| Bun         | `bun.lockb`, `bunfig.toml`                      | `package.json` engines                    | High     |
+| Go          | `go.mod`                                        | `go.mod` go directive                     | High     |
+| Python      | `pyproject.toml`, `requirements.txt`, `uv.lock` | `.python-version`, `pyproject.toml`       | High     |
+| Ruby        | `Gemfile`, `.ruby-version`                      | `.ruby-version`                           | Medium   |
+| Rust        | `Cargo.toml`                                    | `rust-toolchain.toml`                     | Medium   |
+| Java/Kotlin | `pom.xml`, `build.gradle`, `build.gradle.kts`   | `.java-version`, `pom.xml`                | Medium   |
+| go-task     | `Taskfile.yml`                                  | N/A (latest)                              | Low      |
+| mise/asdf   | `.mise.toml`, `.tool-versions`                  | Inline versions                           | High     |
+| Just        | `Justfile`                                      | N/A (latest)                              | Low      |
 
 ## Node.js / Bun
 
@@ -321,11 +321,13 @@ echo "https://ai-gateway.example.com/bedrock" | sed 's|https\?://||; s|/.*||'
 ### Auth Token Selection
 
 If **any** `*_BASE_URL` is found in `~/.claude/settings.json`:
-- Use `ANTHROPIC_AUTH_TOKEN` in `remoteEnv` (custom gateways use this for authentication)
+
+- Ensure `ANTHROPIC_AUTH_TOKEN` is forwarded in `containerEnv` (and optionally `remoteEnv`) since custom gateways commonly use token auth
 - Verify it's set on the host: `printenv ANTHROPIC_AUTH_TOKEN`
 
 If **no** `*_BASE_URL` is found:
-- Use `ANTHROPIC_API_KEY` in `remoteEnv` (direct Anthropic API)
+
+- Ensure `ANTHROPIC_API_KEY` is forwarded in `containerEnv` (and optionally `remoteEnv`) for direct Anthropic API auth
 
 ### Firewall Allowlist
 
@@ -341,13 +343,14 @@ ai-gateway.example.com
 ### Detection
 
 ```bash
-# Find all .mcp.json files that Claude will load
+# Find all MCP config files that Claude may load
+# User config: ~/.claude.json (contains mcpServers from `claude mcp add`)
 # Global: ~/.claude/.mcp.json, ~/.claude/mcp.json
 # Project: ./.mcp.json
 # Scan for remote servers (type: sse, http, or streamable)
-for f in ~/.claude/.mcp.json ~/.claude/mcp.json .mcp.json; do
+for f in ~/.claude.json ~/.claude/.mcp.json ~/.claude/mcp.json .mcp.json; do
   [ -f "$f" ] && jq -r '
-    .mcpServers // {} | to_entries[]
+    (.mcpServers // {}) | to_entries[]
     | select(.value.type == "sse" or .value.type == "http" or .value.type == "streamable")
     | .value.url
   ' "$f" 2>/dev/null
