@@ -7,11 +7,9 @@ command=$(echo "$input" | jq -r '.tool_input.command // empty')
 # Only check git commit commands
 echo "$command" | grep -q 'git commit' || exit 0
 
-# Check if -m flag is present (handles -m "msg", -m 'msg', -m "$(cat ...)")
+# Check if message flag is present (-m, --message, or combined flags like -am)
 has_m_flag=false
-echo "$command" | grep -qE -- '-m[[:space:]]+' && has_m_flag=true
-echo "$command" | grep -qE -- '-m"' && has_m_flag=true
-echo "$command" | grep -qE -- "-m'" && has_m_flag=true
+echo "$command" | grep -qE -- '(^|[[:space:]])(-[a-zA-Z]*m|-m|--message)([=[:space:]]+|"|'"'"')' && has_m_flag=true
 
 # Allow interactive commits and --amend without -m
 if [[ "$has_m_flag" == "false" ]]; then
@@ -23,11 +21,17 @@ fi
 if echo "$command" | grep -q 'cat <<'; then
   msg=$(echo "$command" | sed -n "/cat <</{n;s/^[[:space:]]*//;p;}" | head -1)
 else
-  # Extract message from -m "message" or -m 'message'
-  # Try double quotes first, then single quotes
-  msg=$(echo "$command" | sed -n "s/.*-m[[:space:]]*\"\([^\"]*\)\".*/\1/p")
+  # Extract message from -m "message", --message "message", -am "message", etc.
+  # Try double quotes first, then single quotes, then --message= form
+  msg=$(echo "$command" | sed -n "s/.*\(-[a-zA-Z]*m\|--message\)[[:space:]]*\"\([^\"]*\)\".*/\2/p")
   if [[ -z "$msg" ]]; then
-    msg=$(echo "$command" | sed -n "s/.*-m[[:space:]]*'\([^']*\)'.*/\1/p")
+    msg=$(echo "$command" | sed -n "s/.*\(-[a-zA-Z]*m\|--message\)[[:space:]]*'\([^']*\)'.*/\2/p")
+  fi
+  if [[ -z "$msg" ]]; then
+    msg=$(echo "$command" | sed -n "s/.*--message=\"\([^\"]*\)\".*/\1/p")
+  fi
+  if [[ -z "$msg" ]]; then
+    msg=$(echo "$command" | sed -n "s/.*--message='\([^']*\)'.*/\1/p")
   fi
 fi
 

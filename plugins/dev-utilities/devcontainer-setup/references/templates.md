@@ -266,7 +266,7 @@ case "${1:-}" in
     ensure_running
     sync_claude_config
     echo "==> Launching Claude Code..."
-    claude_cmd="cd /workspace && claude --dangerously-skip-permissions"
+    claude_cmd="cd /home/node/workspace && claude --dangerously-skip-permissions"
     if [ -n "${ANTHROPIC_API_KEY:-}" ]; then
       claude_cmd="export ANTHROPIC_API_KEY='${ANTHROPIC_API_KEY}' && ${claude_cmd}"
     fi

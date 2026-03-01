@@ -11,12 +11,12 @@ list spaces, search content, save weblinks, and append to daily notes.
 
 Usage:
     # Run as MCP server (stdio transport)
-    uv run capacities-mcp-server.py
+    uv run capacities_mcp_server.py
 
     # Add to Claude Code MCP config (~/.claude.json or .mcp.json):
     # "capacities": {
     #   "command": "uv",
-    #   "args": ["run", "/path/to/capacities-mcp-server.py"],
+    #   "args": ["run", "/path/to/capacities_mcp_server.py"],
     #   "env": { "CAPACITIES_API_TOKEN": "your-token" }
     # }
 
@@ -25,7 +25,9 @@ Environment:
 """
 
 import json
+import logging
 import os
+import re
 import time
 from pathlib import Path
 from typing import Any
@@ -71,20 +73,21 @@ def _client() -> httpx.Client:
 
 def _handle_response(response: httpx.Response, operation: str) -> dict | list | None:
     """Handle API response, raising on errors."""
-    remaining = response.headers.get("RateLimit-Remaining")
-    if remaining:
-        try:
-            if int(remaining) <= 1:
-                reset = response.headers.get("RateLimit-Reset", "60")
-                raise RuntimeError(
-                    f"Rate limit nearly exhausted ({remaining} remaining). "
-                    f"Resets in {reset}s."
-                )
-        except ValueError:
-            pass
-
     if response.status_code == 200:
-        return response.json() if response.text else None
+        result = response.json() if response.text else None
+        # Warn but don't fail when rate limit is low on successful responses
+        remaining = response.headers.get("RateLimit-Remaining")
+        if remaining:
+            try:
+                if int(remaining) <= 1:
+                    reset = response.headers.get("RateLimit-Reset", "60")
+                    logging.warning(
+                        "Rate limit nearly exhausted (%s remaining). Resets in %ss.",
+                        remaining, reset,
+                    )
+            except ValueError:
+                pass
+        return result
     elif response.status_code == 401:
         raise RuntimeError("Unauthorized - check your CAPACITIES_API_TOKEN")
     elif response.status_code == 429:
@@ -105,9 +108,15 @@ def _handle_response(response: httpx.Response, operation: str) -> dict | list | 
 
 # --- Cache helpers ---
 
+def _cache_file_path(key: str) -> Path:
+    """Map logical cache key to a safe filename under CACHE_DIR."""
+    safe_key = re.sub(r"[^A-Za-z0-9_.-]", "_", key)
+    return CACHE_DIR / f"{safe_key}.json"
+
+
 def _load_cache(key: str) -> Any | None:
     """Load cached data if still valid."""
-    cache_file = CACHE_DIR / f"{key}.json"
+    cache_file = _cache_file_path(key)
     if not cache_file.exists():
         return None
     try:
@@ -124,7 +133,7 @@ def _load_cache(key: str) -> Any | None:
 def _save_cache(key: str, data: Any) -> None:
     """Save data to file-based cache."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    (CACHE_DIR / f"{key}.json").write_text(
+    _cache_file_path(key).write_text(
         json.dumps({"data": data, "timestamp": time.time()})
     )
 
