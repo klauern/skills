@@ -62,7 +62,7 @@ Scan `~/.claude/settings.json` and Claude MCP config files (`~/.claude.json`, `~
 
 2. **Auth token forwarding**: If a custom `*_BASE_URL` is detected, check whether `ANTHROPIC_AUTH_TOKEN` is set on the host (`printenv ANTHROPIC_AUTH_TOKEN`). Ensure auth env is forwarded via `containerEnv` (and keep in `remoteEnv` for IDE compatibility) so `devpod ssh` sessions see the same credentials.
 
-3. **Remote MCP servers**: Scan MCP config files (`~/.claude.json`, `~/.claude/.mcp.json`, `~/.claude/mcp.json`, project-level `.mcp.json`) for servers with `"type": "sse"`, `"type": "http"`, or `"type": "streamable"`. Extract the hostname from each `"url"` value and add it to the firewall allowlist. Stdio-based MCP servers (those with `"command"`) don't need firewall entries.
+3. **Remote MCP servers**: Scan MCP config files (`~/.claude.json`, `~/.claude/.mcp.json`, `~/.claude/mcp.json`, project-level `.mcp.json`) for servers with `"type": "sse"`, `"type": "http"`, or `"type": "streamable"`. Extract the hostname from each `"url"` value and add it to the firewall allowlist. stdio-based MCP servers (those with `"command"`) don't need firewall entries.
 
 **Output**: Present detected tools, gateway domains, and MCP server domains to user for confirmation before generating files.
 
@@ -221,7 +221,7 @@ Prompt the user for these decisions:
 
 ## Version History
 
-- **1.4.0**: Add runtime-safe auth forwarding (`containerEnv` + `remoteEnv`), mount/symlink host `~/.claude.json`, add `--doctor`/`--auth-check` preflight flow, and align Taskfile tasks with script flags
+- **1.4.0**: Add runtime-safe auth forwarding (`containerEnv` + `remoteEnv`), mount/symlink host `~/.claude.json`, add `--doctor`/`--auth-check` preflight flow, and align Taskfile tasks with script flags. Forward Bedrock env vars (`ANTHROPIC_BEDROCK_BASE_URL`, `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_SKIP_BEDROCK_AUTH`) and `ANTHROPIC_CUSTOM_HEADERS` via `containerEnv`. Hard-code `NODE_USE_SYSTEM_CA=1` for corporate proxy compatibility. **Breaking**: removes `devcontainer:up`, `devcontainer:stop`, and `devcontainer:delete` tasks — replaced by `devcontainer:ssh` (auto-starts), `devcontainer:down`, and `devcontainer:rebuild`. `devcontainer:ssh` now runs `bash devcontainer-ssh.sh` instead of `devpod ssh .` directly.
 - **1.3.0**: Auto-detect custom API gateways (`*_BASE_URL` in settings.json) and remote MCP servers (sse/http/streamable entries from user/project MCP config) — extract domains for firewall allowlist, forward `ANTHROPIC_AUTH_TOKEN` when custom gateway detected
 - **1.2.0**: Add `runArgs` (NET_ADMIN/NET_RAW), `remoteEnv` (ANTHROPIC_API_KEY, HOST_HOME), `.cache` directory fix, host path symlink in setup.sh, bind mount verification in entry script
 - **1.1.0**: Replace config sync infrastructure with direct `~/.claude/` host bind mount

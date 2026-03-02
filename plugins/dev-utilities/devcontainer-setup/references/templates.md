@@ -233,7 +233,12 @@ if [ -n "${HOST_HOME:-}" ] && [ "$HOST_CLAUDE_DIR" != "/home/node/.claude" ]; th
   echo "  Created symlink: $HOST_CLAUDE_DIR -> /home/node/.claude"
 fi
 
-# Symlink host .claude.json path so global MCP/user config resolves in-container
+# Symlink host .claude.json path so global MCP/user config resolves in-container.
+# Claude plugins may reference the host-absolute path (e.g., /Users/alice/.claude.json).
+# The bind mount lands at /home/node/.claude.json, so create a symlink at the host
+# path inside the container so those references resolve.  Requires sudo because
+# the host home prefix (e.g., /Users) doesn't exist in-container — the Dockerfile
+# grants node NOPASSWD:ALL for this purpose.
 HOST_CLAUDE_STATE="${HOST_HOME:-}/.claude.json"
 if [ -n "${HOST_HOME:-}" ] && [ "$HOST_CLAUDE_STATE" != "/home/node/.claude.json" ]; then
   sudo mkdir -p "$(dirname "$HOST_CLAUDE_STATE")"
@@ -313,7 +318,7 @@ show_auth_preflight() {
   fi
 
   echo "==> Claude auth preflight (container)"
-  devpod ssh "$PROJECT_NAME" --command "set -euo pipefail; \
+  devpod ssh "$PROJECT_NAME" --command "bash -lc 'set -euo pipefail; \
     echo \"  HOME=\$HOME\"; \
     if [ \"\$HOME\" != \"/home/node\" ]; then echo \"  WARNING: HOME is \$HOME (expected /home/node).\"; fi; \
     for f in /home/node/.claude/settings.json /home/node/.claude/.credentials.json /home/node/.claude.json; do \
@@ -331,7 +336,7 @@ show_auth_preflight() {
     echo \"\$mcp_out\"; \
     if echo \"\$mcp_out\" | grep -q 'No MCP servers configured'; then \
       echo \"  WARNING: No MCP servers configured in-container. Ensure ~/.claude.json is bind-mounted.\"; \
-    fi"
+    fi'"
 
   if [ -z "${ANTHROPIC_AUTH_TOKEN:-}" ] && [ -z "${ANTHROPIC_API_KEY:-}" ]; then
     echo ""

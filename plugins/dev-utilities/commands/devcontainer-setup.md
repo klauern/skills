@@ -1,4 +1,5 @@
 ---
+allowed-tools: Bash Read Grep Glob Edit Write
 description: Scaffold a DevPod-compatible devcontainer for running Claude Code with SSH access and firewall restrictions
 ---
 
