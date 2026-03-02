@@ -17,7 +17,7 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
     "--hostname={{project-name}}"
   ],
   "remoteUser": "node",
-  "initializeCommand": "mkdir -p ~/.claude && touch ~/.claude.json",
+  "initializeCommand": "mkdir -p ~/.claude && [ -f ~/.claude.json ] || printf '{}\\n' > ~/.claude.json",
   "mounts": [
     "source=${localEnv:HOME}/.claude,target=/home/node/.claude,type=bind",
     "source=${localEnv:HOME}/.claude.json,target=/home/node/.claude.json,type=bind"
@@ -334,7 +334,7 @@ show_auth_preflight() {
     echo \"  MCP server status:\"; \
     mcp_out=\$(claude mcp list 2>&1 || true); \
     echo \"\$mcp_out\"; \
-    if echo \"\$mcp_out\" | grep -q 'No MCP servers configured'; then \
+    if echo \"\$mcp_out\" | grep -q \"No MCP servers configured\"; then \
       echo \"  WARNING: No MCP servers configured in-container. Ensure ~/.claude.json is bind-mounted.\"; \
     fi'"
 

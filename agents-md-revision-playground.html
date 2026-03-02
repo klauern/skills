@@ -335,7 +335,7 @@
 </div>
 
 <script>
-const FILE_PATH = '/Users/nklauer/dev/klauern-skills/AGENTS.md';
+const FILE_PATH = 'AGENTS.md';
 
 const suggestions = [
   {
@@ -628,7 +628,7 @@ const suggestions = [
 const HOOKS_OVERLAP = [5, 8];
 
 function escapeHtml(str) {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
 function computeDiffHtml(current, proposed) {
@@ -788,6 +788,11 @@ function applyPreset(preset) {
 
 function generatePrompt() {
   const approved = suggestions.filter(s => s.status === 'approved');
+  const [hooksBlockId, hooksMatcherId] = HOOKS_OVERLAP;
+  const bothHooksApproved =
+    approved.some(s => s.id === hooksBlockId) &&
+    approved.some(s => s.id === hooksMatcherId);
+  const effectiveCount = approved.length - (bothHooksApproved ? 1 : 0);
   const output = document.getElementById('promptOutput');
 
   if (approved.length === 0) {
@@ -795,20 +800,16 @@ function generatePrompt() {
     return;
   }
 
-  let prompt = `Apply the following ${approved.length} edit(s) to ${FILE_PATH}:\n\n`;
-
-  // Handle hooks overlap: if both 5 and 8 are approved, compose a single edit
-  const both5and8 = approved.some(s => s.id === 5) && approved.some(s => s.id === 8);
-  const skip8IfCombined = both5and8;
+  let prompt = `Apply the following ${effectiveCount} edit(s) to ${FILE_PATH}:\n\n`;
 
   approved.forEach(s => {
-    if (s.id === 8 && skip8IfCombined) return; // handled as part of suggestion 5
+    if (s.id === hooksMatcherId && bothHooksApproved) return; // handled as part of suggestion 5
 
     let oldStr = s.currentText;
     let newStr = s.proposedText;
 
     // If suggestion 5 is approved and 8 is also approved, apply 8's matcher change inside 5's proposed text
-    if (s.id === 5 && skip8IfCombined) {
+    if (s.id === hooksBlockId && bothHooksApproved) {
       newStr = newStr.replace(
         '`block-grep-extended.sh` - PreToolUse: blocks',
         '`block-grep-extended.sh` - PreToolUse(Bash): blocks'
