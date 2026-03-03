@@ -1,6 +1,6 @@
 ---
 name: session-capture
-description: Guidelines for proactively saving session insights to Capacities knowledge base during research, debugging, and development sessions
+description: This skill should be used when the user asks to "capture session notes to Capacities", "save findings to knowledge base", "record debugging insights", or when proactively identifying valuable knowledge artifacts during research and development sessions worth preserving in Capacities.
 version: 1.0.0
 author: klauern
 ---

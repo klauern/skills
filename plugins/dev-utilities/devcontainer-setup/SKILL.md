@@ -1,6 +1,6 @@
 ---
 name: devcontainer-setup
-description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and direct host ~/.claude/ + ~/.claude.json bind mounts. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
+description: This skill should be used when the user asks to "scaffold a devcontainer", "set up Claude Code with DevPod", "create a firewalled development container", "configure devcontainer for SSH access", or mentions DevPod, devcontainer.json, or isolated container development environments. Scaffolds DevPod-compatible devcontainers with SSH access, firewall restrictions, and host ~/.claude/ bind mounts.
 version: 1.4.0
 author: klauern
 allowed-tools: Bash Read Grep Glob Edit Write
