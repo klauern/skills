@@ -10,3 +10,6 @@
 .doltcfg/
 beads_ks/
 config.yaml
+
+# Dolt database files (added by bd init)
+*.db
