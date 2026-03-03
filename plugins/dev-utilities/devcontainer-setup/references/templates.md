@@ -54,7 +54,7 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
 > **Windows host notes**:
 >
 > - DevPod on Windows uses Git Bash or WSL2, where `mkdir -p` works as-is.
-> - If using cmd.exe or PowerShell directly, replace `initializeCommand` with: `"powershell -Command \"New-Item -ItemType Directory -Force -Path $env:USERPROFILE\\.claude | Out-Null; New-Item -ItemType File -Force -Path $env:USERPROFILE\\.claude.json | Out-Null\""`
+> - If using cmd.exe or PowerShell directly, replace `initializeCommand` with: `"powershell -Command \"New-Item -ItemType Directory -Force -Path $env:USERPROFILE\\.claude | Out-Null; if (-not (Test-Path -LiteralPath $env:USERPROFILE\\.claude.json)) { '{}' | Set-Content -LiteralPath $env:USERPROFILE\\.claude.json -Encoding utf8 -NoNewline }\""`
 > - Replace the mount source with `${localEnv:USERPROFILE}/.claude`.
 >
 > **Notes on auth/env forwarding**:

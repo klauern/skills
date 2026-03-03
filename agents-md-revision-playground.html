@@ -843,11 +843,14 @@ function generatePrompt() {
 
 function copyPrompt() {
   const text = document.getElementById('promptOutput').textContent;
+  const btn = document.getElementById('copyBtn');
   navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copyBtn');
     btn.textContent = 'Copied!';
     btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'Copy to Clipboard'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    btn.textContent = 'Copy failed';
+    setTimeout(() => { btn.textContent = 'Copy to Clipboard'; }, 2000);
   });
 }
 
