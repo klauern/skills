@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AGENTS.md Revision Playground</title>
+<style>
+  :root {
+    --bg: #1a1b26;
+    --surface: #24283b;
+    --surface2: #292e42;
+    --border: #3b4261;
+    --text: #c0caf5;
+    --text-dim: #565f89;
+    --green: #9ece6a;
+    --green-bg: rgba(158, 206, 106, 0.12);
+    --red: #f7768e;
+    --red-bg: rgba(247, 118, 142, 0.12);
+    --blue: #7aa2f7;
+    --yellow: #e0af68;
+    --orange: #ff9e64;
+    --purple: #bb9af7;
+    --cyan: #7dcfff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  header h1 { font-size: 18px; font-weight: 600; }
+  header h1 span { color: var(--blue); }
+  .preset-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .preset-bar span { color: var(--text-dim); font-size: 13px; margin-right: 4px; }
+  .preset-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .preset-btn:hover { border-color: var(--blue); color: var(--blue); }
+  .stats-bar {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 24px;
+    display: flex;
+    gap: 24px;
+    font-size: 13px;
+  }
+  .stat { display: flex; align-items: center; gap: 6px; }
+  .stat-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .stat-dot.pending { background: var(--text-dim); }
+  .stat-dot.approved { background: var(--green); }
+  .stat-dot.rejected { background: var(--red); }
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: calc(100vh - 130px);
+    overflow: hidden;
+  }
+  .panel {
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .panel:first-child { border-right: 1px solid var(--border); }
+  .panel-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+  /* Suggestion cards */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .card.approved { border-color: var(--green); }
+  .card.rejected { border-color: var(--red); }
+  .card-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-id {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+  }
+  .card-title { font-size: 14px; font-weight: 600; }
+  .card-badges { display: flex; gap: 6px; }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .badge.category { background: rgba(122, 162, 247, 0.15); color: var(--blue); }
+  .badge.severity-high { background: rgba(247, 118, 142, 0.15); color: var(--red); }
+  .badge.severity-medium { background: rgba(224, 175, 104, 0.15); color: var(--yellow); }
+  .badge.severity-low { background: rgba(86, 95, 137, 0.2); color: var(--text-dim); }
+  .card-body { padding: 16px; }
+  .card-desc { font-size: 13px; color: var(--text-dim); margin-bottom: 12px; }
+  .diff-block {
+    background: var(--bg);
+    border-radius: 6px;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-x: auto;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .diff-line { padding: 1px 12px; white-space: pre; }
+  .diff-line.removed { background: var(--red-bg); color: var(--red); }
+  .diff-line.added { background: var(--green-bg); color: var(--green); }
+  .diff-line.context { color: var(--text-dim); }
+  .card-actions {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-approve { background: rgba(158, 206, 106, 0.15); color: var(--green); border-color: var(--green); }
+  .btn-approve:hover { background: rgba(158, 206, 106, 0.25); }
+  .btn-approve.active { background: var(--green); color: var(--bg); }
+  .btn-reject { background: rgba(247, 118, 142, 0.15); color: var(--red); border-color: var(--red); }
+  .btn-reject:hover { background: rgba(247, 118, 142, 0.25); }
+  .btn-reject.active { background: var(--red); color: var(--bg); }
+  .btn-reset-one { background: transparent; color: var(--text-dim); border-color: var(--border); }
+  .btn-reset-one:hover { color: var(--text); border-color: var(--text-dim); }
+  .card-comment {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .card-comment input {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 4px 8px;
+    font-size: 12px;
+    width: 200px;
+  }
+  .card-comment input:focus { outline: none; border-color: var(--blue); }
+  .card-comment label { font-size: 11px; color: var(--text-dim); }
+  /* Prompt output */
+  .prompt-section {
+    background: var(--surface);
+    border-top: 2px solid var(--border);
+    padding: 20px 24px;
+  }
+  .prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .prompt-header h2 { font-size: 15px; font-weight: 600; }
+  .copy-btn {
+    background: var(--blue);
+    color: var(--bg);
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .copy-btn:hover { opacity: 0.85; }
+  .copy-btn.copied { background: var(--green); }
+  .prompt-output {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    max-height: 400px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+  }
+  .prompt-empty {
+    color: var(--text-dim);
+    font-style: italic;
+    font-family: inherit;
+  }
+  /* Document preview */
+  .doc-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .doc-section-header {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .doc-section-header h3 { font-size: 13px; font-weight: 600; }
+  .doc-section-line {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-family: monospace;
+  }
+  .doc-section-body {
+    padding: 12px 16px;
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 500px;
+    overflow-y: auto;
+    color: var(--text-dim);
+  }
+  .doc-highlight {
+    background: rgba(122, 162, 247, 0.1);
+    border-left: 3px solid var(--blue);
+    padding-left: 8px;
+    margin-left: -11px;
+    color: var(--text);
+  }
+  .doc-section.approved .doc-highlight {
+    border-left-color: var(--green);
+    background: rgba(158, 206, 106, 0.08);
+  }
+  .doc-section.rejected .doc-highlight {
+    border-left-color: var(--red);
+    background: rgba(247, 118, 142, 0.08);
+    text-decoration: line-through;
+    opacity: 0.5;
+  }
+  .doc-suggestion-ids {
+    display: flex; gap: 4px;
+  }
+  .doc-suggestion-id {
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-weight: 700;
+    font-family: monospace;
+    background: rgba(122, 162, 247, 0.15);
+    color: var(--blue);
+  }
+  .doc-suggestion-id.approved { background: rgba(158, 206, 106, 0.15); color: var(--green); }
+  .doc-suggestion-id.rejected { background: rgba(247, 118, 142, 0.15); color: var(--red); }
+</style>
+</head>
+<body>
+<header>
+  <h1><span>AGENTS.md</span> Revision Playground</h1>
+  <div class="preset-bar">
+    <span>Presets:</span>
+    <button class="preset-btn" onclick="applyPreset('all')">Accept All</button>
+    <button class="preset-btn" onclick="applyPreset('metadata')">Metadata Only</button>
+    <button class="preset-btn" onclick="applyPreset('docs')">Documentation Only</button>
+    <button class="preset-btn" onclick="applyPreset('reset')">Reset</button>
+  </div>
+</header>
+<div class="stats-bar" id="statsBar"></div>
+<div class="main">
+  <div class="panel" id="docPanel">
+    <div class="panel-title">Document Preview</div>
+    <div id="docSections"></div>
+  </div>
+  <div class="panel" id="suggestionsPanel">
+    <div class="panel-title">Suggestions (8)</div>
+    <div id="suggestionCards"></div>
+  </div>
+</div>
+<div class="prompt-section">
+  <div class="prompt-header">
+    <h2>Generated Prompt</h2>
+    <button class="copy-btn" id="copyBtn" onclick="copyPrompt()">Copy to Clipboard</button>
+  </div>
+  <div class="prompt-output" id="promptOutput"></div>
+</div>
+
+<script>
+const FILE_PATH = 'AGENTS.md';
+
+const suggestions = [
+  {
+    id: 1,
+    title: 'Update version number',
+    category: 'version',
+    severity: 'medium',
+    lineRef: 'Line 287',
+    description: 'marketplace.json shows v2.4.0 but AGENTS.md still says 2.0.0.',
+    currentText: 'Current version: 2.0.0',
+    proposedText: 'Current version: 2.4.0',
+    section: 'Versioning',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 2,
+    title: 'Fix commits plugin description',
+    category: 'description',
+    severity: 'low',
+    lineRef: 'Line 11',
+    description: 'plugin.json says "Conventional commit creation and commit splitting skills" — description missing "and splitting".',
+    currentText: '1. **commits** - Conventional commit message creation following conventionalcommits.org',
+    proposedText: '1. **commits** - Conventional commit creation and splitting following conventionalcommits.org',
+    section: 'Project Overview',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 3,
+    title: 'Fix typo in path',
+    category: 'typo',
+    severity: 'low',
+    lineRef: 'Line 265',
+    description: 'Extra space in path: `plugins/*/. claude-plugin/` should be `plugins/*/.claude-plugin/`.',
+    currentText: '- `plugins/*/. claude-plugin/plugin.json` - Individual plugin metadata',
+    proposedText: '- `plugins/*/.claude-plugin/plugin.json` - Individual plugin metadata',
+    section: 'Key Files',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 4,
+    title: 'Update architecture tree',
+    category: 'architecture',
+    severity: 'high',
+    lineRef: 'Lines 81-148',
+    description: 'Missing 4 skills (commit-splitter, dependency-upgrader, devcontainer-setup, session-capture), 3 commands (commit-split.md, skill-lint.md, devcontainer-setup.md) from tree diagram.',
+    currentText: `plugins/
+\u251c\u2500\u2500 commits/                      \u2192 Conventional commit creation
+\u2502   \u251c\u2500\u2500 .claude-plugin/
+\u2502   \u2502   \u2514\u2500\u2500 plugin.json
+\u2502   \u251c\u2500\u2500 commands/
+\u2502   \u2502   \u251c\u2500\u2500 commit.md
+\u2502   \u2502   \u2514\u2500\u2500 commit-push.md
+\u2502   \u2514\u2500\u2500 conventional-commits/     \u2192 Skill with docs
+\u2502       \u251c\u2500\u2500 SKILL.md
+\u2502       \u2514\u2500\u2500 references/
+\u2502           \u251c\u2500\u2500 workflows.md
+\u2502           \u251c\u2500\u2500 examples.md
+\u2502           \u251c\u2500\u2500 best-practices.md
+\u2502           \u2514\u2500\u2500 format-reference.md
+\u2502
+\u251c\u2500\u2500 pull-requests/                \u2192 PR creation and management
+\u2502   \u251c\u2500\u2500 .claude-plugin/
+\u2502   \u2502   \u2514\u2500\u2500 plugin.json
+\u2502   \u251c\u2500\u2500 commands/
+\u2502   \u2502   \u251c\u2500\u2500 pr.md
+\u2502   \u2502   \u251c\u2500\u2500 pr-update.md
+\u2502   \u2502   \u251c\u2500\u2500 pr-comment-review.md
+\u2502   \u2502   \u2514\u2500\u2500 merge-conflicts.md
+\u2502   \u251c\u2500\u2500 pr-creator/               \u2192 PR creation skill
+\u2502   \u2502   \u2514\u2500\u2500 SKILL.md
+\u2502   \u2514\u2500\u2500 pr-conflict-resolver/     \u2192 Conflict resolution skill
+\u2502       \u251c\u2500\u2500 SKILL.md
+\u2502       \u2514\u2500\u2500 references/
+\u2502
+\u251c\u2500\u2500 dev-utilities/                \u2192 Development workflow tools
+\u2502   \u251c\u2500\u2500 .claude-plugin/
+\u2502   \u2502   \u2514\u2500\u2500 plugin.json
+\u2502   \u251c\u2500\u2500 commands/
+\u2502   \u2502   \u251c\u2500\u2500 agents-md.md
+\u2502   \u2502   \u251c\u2500\u2500 continue.md
+\u2502   \u2502   \u251c\u2500\u2500 worktree.md
+\u2502   \u2502   \u251c\u2500\u2500 gh-actions-upgrade.md
+\u2502   \u2502   \u251c\u2500\u2500 gh-checks.md
+\u2502   \u2502   \u2514\u2500\u2500 git-optimize.md
+\u2502   \u251c\u2500\u2500 gh-actions-upgrader/      \u2192 GH Actions upgrade skill
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u251c\u2500\u2500 ci-failure-analyzer/      \u2192 CI failure analysis skill
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u2514\u2500\u2500 git-optimize/             \u2192 Git optimization skill
+\u2502       \u251c\u2500\u2500 SKILL.md
+\u2502       \u2514\u2500\u2500 references/
+\u2502
+\u2514\u2500\u2500 capacities/                   \u2192 Capacities knowledge management
+    \u251c\u2500\u2500 .claude-plugin/
+    \u2502   \u2514\u2500\u2500 plugin.json
+    \u251c\u2500\u2500 commands/
+    \u2502   \u251c\u2500\u2500 daily-note.md
+    \u2502   \u251c\u2500\u2500 list-spaces.md
+    \u2502   \u251c\u2500\u2500 save-weblink.md
+    \u2502   \u251c\u2500\u2500 search.md
+    \u2502   \u2514\u2500\u2500 space-info.md
+    \u251c\u2500\u2500 capacities-api/           \u2192 Capacities API skill
+    \u2502   \u251c\u2500\u2500 SKILL.md
+    \u2502   \u2514\u2500\u2500 references/
+    \u2514\u2500\u2500 scripts/
+        \u2514\u2500\u2500 capacities.py
+
+.claude-plugin/
+\u2514\u2500\u2500 marketplace.json              \u2192 Plugin registry (points to ./plugins/*)`,
+    proposedText: `plugins/
+\u251c\u2500\u2500 commits/                      \u2192 Conventional commit creation and splitting
+\u2502   \u251c\u2500\u2500 .claude-plugin/
+\u2502   \u2502   \u2514\u2500\u2500 plugin.json
+\u2502   \u251c\u2500\u2500 commands/
+\u2502   \u2502   \u251c\u2500\u2500 commit.md
+\u2502   \u2502   \u251c\u2500\u2500 commit-push.md
+\u2502   \u2502   \u2514\u2500\u2500 commit-split.md
+\u2502   \u251c\u2500\u2500 conventional-commits/     \u2192 Skill with docs
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u2502       \u251c\u2500\u2500 workflows.md
+\u2502   \u2502       \u251c\u2500\u2500 examples.md
+\u2502   \u2502       \u251c\u2500\u2500 best-practices.md
+\u2502   \u2502       \u2514\u2500\u2500 format-reference.md
+\u2502   \u2514\u2500\u2500 commit-splitter/          \u2192 Commit splitting skill
+\u2502       \u251c\u2500\u2500 SKILL.md
+\u2502       \u2514\u2500\u2500 references/
+\u2502
+\u251c\u2500\u2500 pull-requests/                \u2192 PR creation and management
+\u2502   \u251c\u2500\u2500 .claude-plugin/
+\u2502   \u2502   \u2514\u2500\u2500 plugin.json
+\u2502   \u251c\u2500\u2500 commands/
+\u2502   \u2502   \u251c\u2500\u2500 pr.md
+\u2502   \u2502   \u251c\u2500\u2500 pr-update.md
+\u2502   \u2502   \u251c\u2500\u2500 pr-comment-review.md
+\u2502   \u2502   \u2514\u2500\u2500 merge-conflicts.md
+\u2502   \u251c\u2500\u2500 pr-creator/               \u2192 PR creation skill
+\u2502   \u2502   \u2514\u2500\u2500 SKILL.md
+\u2502   \u2514\u2500\u2500 pr-conflict-resolver/     \u2192 Conflict resolution skill
+\u2502       \u251c\u2500\u2500 SKILL.md
+\u2502       \u2514\u2500\u2500 references/
+\u2502
+\u251c\u2500\u2500 dev-utilities/                \u2192 Development workflow tools
+\u2502   \u251c\u2500\u2500 .claude-plugin/
+\u2502   \u2502   \u2514\u2500\u2500 plugin.json
+\u2502   \u251c\u2500\u2500 commands/
+\u2502   \u2502   \u251c\u2500\u2500 agents-md.md
+\u2502   \u2502   \u251c\u2500\u2500 continue.md
+\u2502   \u2502   \u251c\u2500\u2500 worktree.md
+\u2502   \u2502   \u251c\u2500\u2500 gh-actions-upgrade.md
+\u2502   \u2502   \u251c\u2500\u2500 gh-checks.md
+\u2502   \u2502   \u251c\u2500\u2500 git-optimize.md
+\u2502   \u2502   \u251c\u2500\u2500 skill-lint.md
+\u2502   \u2502   \u2514\u2500\u2500 devcontainer-setup.md
+\u2502   \u251c\u2500\u2500 gh-actions-upgrader/      \u2192 GH Actions upgrade skill
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u251c\u2500\u2500 ci-failure-analyzer/      \u2192 CI failure analysis skill
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u251c\u2500\u2500 git-optimize/             \u2192 Git optimization skill
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u251c\u2500\u2500 dependency-upgrader/      \u2192 Dependency upgrade skill
+\u2502   \u2502   \u251c\u2500\u2500 SKILL.md
+\u2502   \u2502   \u2514\u2500\u2500 references/
+\u2502   \u2514\u2500\u2500 devcontainer-setup/       \u2192 DevContainer scaffolding skill
+\u2502       \u251c\u2500\u2500 SKILL.md
+\u2502       \u2514\u2500\u2500 references/
+\u2502
+\u2514\u2500\u2500 capacities/                   \u2192 Capacities knowledge management
+    \u251c\u2500\u2500 .claude-plugin/
+    \u2502   \u2514\u2500\u2500 plugin.json
+    \u251c\u2500\u2500 commands/
+    \u2502   \u251c\u2500\u2500 daily-note.md
+    \u2502   \u251c\u2500\u2500 list-spaces.md
+    \u2502   \u251c\u2500\u2500 save-weblink.md
+    \u2502   \u251c\u2500\u2500 search.md
+    \u2502   \u2514\u2500\u2500 space-info.md
+    \u251c\u2500\u2500 capacities-api/           \u2192 Capacities API skill
+    \u2502   \u251c\u2500\u2500 SKILL.md
+    \u2502   \u2514\u2500\u2500 references/
+    \u251c\u2500\u2500 session-capture/          \u2192 Session capture skill
+    \u2502   \u2514\u2500\u2500 SKILL.md
+    \u2514\u2500\u2500 scripts/
+        \u2514\u2500\u2500 capacities.py
+
+.claude-plugin/
+\u2514\u2500\u2500 marketplace.json              \u2192 Plugin registry (points to ./plugins/*)`,
+    section: 'Architecture',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 5,
+    title: 'Add 4 undocumented hooks',
+    category: 'documentation',
+    severity: 'medium',
+    lineRef: 'Lines 301-304',
+    description: '4 hooks exist in .claude/settings.json but are not documented: validate-commit-format.sh, pr-quality-check.sh, workflow-lint.sh, auto-validate-skill.sh.',
+    currentText: `**Hooks** (\`.claude/hooks/\`):
+- \`block-grep-extended.sh\` - PreToolUse: blocks \`grep -E\` for macOS compatibility
+- \`version-bump-reminder.sh\` - UserPromptSubmit: reminds to run \`/version-bump\` before commit-push
+- \`dev-context.sh\` - SessionStart: injects plugin/skill counts at session start`,
+    proposedText: `**Hooks** (\`.claude/hooks/\`):
+- \`block-grep-extended.sh\` - PreToolUse: blocks \`grep -E\` for macOS compatibility
+- \`validate-commit-format.sh\` - PreToolUse: validates conventional commit format before \`git commit\`
+- \`version-bump-reminder.sh\` - UserPromptSubmit: reminds to run \`/version-bump\` before commit-push
+- \`dev-context.sh\` - SessionStart: injects plugin/skill counts at session start
+- \`pr-quality-check.sh\` - PostToolUse: validates PR quality after \`gh pr create\`
+- \`workflow-lint.sh\` - PostToolUse: lints GitHub workflow files after edits
+- \`auto-validate-skill.sh\` - PostToolUse: suggests skill-validator agent when SKILL.md is modified`,
+    section: 'Claude Code Automation',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 6,
+    title: 'Add 3 undocumented subagents',
+    category: 'documentation',
+    severity: 'medium',
+    lineRef: 'Lines 306-308',
+    description: '3 subagents exist in .claude/agents/ but are not documented: changelog-detector.md, commit-analyzer.md, pr-preflight-reviewer.md.',
+    currentText: `**Subagents** (\`.claude/agents/\`):
+- \`skill-validator.md\` - Validates SKILL.md files against authoring guidelines
+- \`release-checker.md\` - Pre-publish validation across all plugins`,
+    proposedText: `**Subagents** (\`.claude/agents/\`):
+- \`skill-validator.md\` - Validates SKILL.md files against authoring guidelines
+- \`release-checker.md\` - Pre-publish validation across all plugins
+- \`changelog-detector.md\` - Fetches and summarizes changelogs for dependency and GitHub Actions upgrades, detecting breaking changes
+- \`commit-analyzer.md\` - Analyzes git diffs and recommends atomic commit boundaries for splitting large changes
+- \`pr-preflight-reviewer.md\` - Reviews PR diff against description draft, flagging inconsistencies before submission`,
+    section: 'Claude Code Automation',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 7,
+    title: 'Add 5 missing skill references',
+    category: 'documentation',
+    severity: 'high',
+    lineRef: 'Lines 271-277',
+    description: '5 skills exist on disk but are not listed in the Skill References section: commit-splitter, dependency-upgrader, devcontainer-setup, pr-conflict-resolver, session-capture.',
+    currentText: `**Skill References**:
+- \`plugins/commits/conventional-commits/SKILL.md\` - Commit message standards
+- \`plugins/pull-requests/pr-creator/SKILL.md\` - PR creation with template inference
+- \`plugins/dev-utilities/gh-actions-upgrader/SKILL.md\` - GitHub Actions upgrade automation
+- \`plugins/dev-utilities/ci-failure-analyzer/SKILL.md\` - CI failure analysis and debugging
+- \`plugins/dev-utilities/git-optimize/SKILL.md\` - Git repository optimization
+- \`plugins/capacities/capacities-api/SKILL.md\` - Capacities knowledge management API integration`,
+    proposedText: `**Skill References**:
+- \`plugins/commits/conventional-commits/SKILL.md\` - Commit message standards
+- \`plugins/commits/commit-splitter/SKILL.md\` - Commit splitting into atomic changes
+- \`plugins/pull-requests/pr-creator/SKILL.md\` - PR creation with template inference
+- \`plugins/pull-requests/pr-conflict-resolver/SKILL.md\` - Merge conflict resolution
+- \`plugins/dev-utilities/gh-actions-upgrader/SKILL.md\` - GitHub Actions upgrade automation
+- \`plugins/dev-utilities/ci-failure-analyzer/SKILL.md\` - CI failure analysis and debugging
+- \`plugins/dev-utilities/git-optimize/SKILL.md\` - Git repository optimization
+- \`plugins/dev-utilities/dependency-upgrader/SKILL.md\` - Dependency upgrade automation
+- \`plugins/dev-utilities/devcontainer-setup/SKILL.md\` - DevContainer scaffolding for Claude Code
+- \`plugins/capacities/capacities-api/SKILL.md\` - Capacities knowledge management API integration
+- \`plugins/capacities/session-capture/SKILL.md\` - Session capture for knowledge management`,
+    section: 'Key Files',
+    status: 'pending',
+    userComment: ''
+  },
+  {
+    id: 8,
+    title: 'Add matcher labels to existing hooks',
+    category: 'documentation',
+    severity: 'low',
+    lineRef: 'Lines 302-304',
+    description: 'Existing hooks document the event type (PreToolUse) but not the matcher (Bash). Adding matchers clarifies which tool invocations trigger each hook.',
+    currentText: `- \`block-grep-extended.sh\` - PreToolUse: blocks \`grep -E\` for macOS compatibility`,
+    proposedText: `- \`block-grep-extended.sh\` - PreToolUse(Bash): blocks \`grep -E\` for macOS compatibility`,
+    section: 'Claude Code Automation',
+    status: 'pending',
+    userComment: ''
+  }
+];
+
+// Which suggestions overlap in the file (edit the same block)
+// Suggestions 5 and 8 both modify the hooks block. If both are approved,
+// we compose a single edit. Suggestion 8 is a subset of suggestion 5's proposed text.
+const HOOKS_OVERLAP = [5, 8];
+
+function escapeHtml(str) {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function computeDiffHtml(current, proposed) {
+  const oldLines = current.split('\n');
+  const newLines = proposed.split('\n');
+  const html = [];
+
+  // Simple line-based diff
+  const maxOld = new Set(oldLines);
+  const maxNew = new Set(newLines);
+
+  let oi = 0, ni = 0;
+  while (oi < oldLines.length || ni < newLines.length) {
+    if (oi < oldLines.length && ni < newLines.length && oldLines[oi] === newLines[ni]) {
+      html.push(`<div class="diff-line context"> ${escapeHtml(oldLines[oi])}</div>`);
+      oi++; ni++;
+    } else {
+      // Find how many lines differ
+      let oEnd = oi, nEnd = ni;
+      // Look ahead for next match
+      let foundMatch = false;
+      for (let look = 0; look < 50 && !foundMatch; look++) {
+        for (let j = 0; j <= look; j++) {
+          if (oi + j < oldLines.length && ni + (look - j) < newLines.length &&
+              oldLines[oi + j] === newLines[ni + (look - j)]) {
+            oEnd = oi + j;
+            nEnd = ni + (look - j);
+            foundMatch = true;
+            break;
+          }
+        }
+      }
+      if (!foundMatch) { oEnd = oldLines.length; nEnd = newLines.length; }
+      for (let i = oi; i < oEnd; i++) {
+        html.push(`<div class="diff-line removed">-${escapeHtml(oldLines[i])}</div>`);
+      }
+      for (let i = ni; i < nEnd; i++) {
+        html.push(`<div class="diff-line added">+${escapeHtml(newLines[i])}</div>`);
+      }
+      oi = oEnd; ni = nEnd;
+    }
+  }
+  return html.join('');
+}
+
+function renderStats() {
+  const counts = { pending: 0, approved: 0, rejected: 0 };
+  suggestions.forEach(s => counts[s.status]++);
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat"><div class="stat-dot pending"></div> ${counts.pending} Pending</div>
+    <div class="stat"><div class="stat-dot approved"></div> ${counts.approved} Approved</div>
+    <div class="stat"><div class="stat-dot rejected"></div> ${counts.rejected} Rejected</div>
+    <div class="stat" style="margin-left:auto;color:var(--text-dim)">
+      File: <span style="color:var(--cyan);font-family:monospace;font-size:12px">AGENTS.md</span>
+    </div>
+  `;
+}
+
+function renderDocSections() {
+  // Group by section
+  const sections = {};
+  suggestions.forEach(s => {
+    if (!sections[s.section]) sections[s.section] = [];
+    sections[s.section].push(s);
+  });
+
+  const container = document.getElementById('docSections');
+  container.innerHTML = '';
+
+  for (const [section, items] of Object.entries(sections)) {
+    const worstStatus = items.some(i => i.status === 'approved') ? 'approved' :
+                         items.some(i => i.status === 'rejected') ? 'rejected' : '';
+    const div = document.createElement('div');
+    div.className = `doc-section ${worstStatus}`;
+    div.innerHTML = `
+      <div class="doc-section-header">
+        <h3>${section}</h3>
+        <div class="doc-suggestion-ids">
+          ${items.map(i => `<span class="doc-suggestion-id ${i.status}">#${i.id}</span>`).join('')}
+        </div>
+      </div>
+      <div class="doc-section-body">${items.map(i => {
+        const text = i.status === 'approved' ? i.proposedText : i.currentText;
+        return `<div class="doc-highlight">${escapeHtml(text)}</div>`;
+      }).join('\n')}</div>
+    `;
+    container.appendChild(div);
+  }
+}
+
+function renderCards() {
+  const container = document.getElementById('suggestionCards');
+  container.innerHTML = '';
+
+  suggestions.forEach(s => {
+    const card = document.createElement('div');
+    card.className = `card ${s.status}`;
+    card.id = `card-${s.id}`;
+
+    const severityClass = `severity-${s.severity}`;
+    const diffHtml = computeDiffHtml(s.currentText, s.proposedText);
+
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-header-left">
+          <span class="card-id">#${s.id}</span>
+          <span class="card-title">${s.title}</span>
+        </div>
+        <div class="card-badges">
+          <span class="badge category">${s.category}</span>
+          <span class="badge ${severityClass}">${s.severity}</span>
+          <span style="font-size:11px;color:var(--text-dim);font-family:monospace">${s.lineRef}</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card-desc">${s.description}</div>
+        <div class="diff-block">${diffHtml}</div>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-approve ${s.status === 'approved' ? 'active' : ''}"
+                onclick="setStatus(${s.id}, 'approved')">Approve</button>
+        <button class="btn btn-reject ${s.status === 'rejected' ? 'active' : ''}"
+                onclick="setStatus(${s.id}, 'rejected')">Reject</button>
+        <button class="btn btn-reset-one" onclick="setStatus(${s.id}, 'pending')">Reset</button>
+        <div class="card-comment">
+          <label>Note:</label>
+          <input type="text" value="${escapeHtml(s.userComment)}"
+                 placeholder="Optional comment..."
+                 onchange="setComment(${s.id}, this.value)">
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function setStatus(id, status) {
+  const s = suggestions.find(s => s.id === id);
+  if (s) { s.status = status; render(); }
+}
+
+function setComment(id, comment) {
+  const s = suggestions.find(s => s.id === id);
+  if (s) s.userComment = comment;
+  generatePrompt();
+}
+
+function applyPreset(preset) {
+  suggestions.forEach(s => {
+    if (preset === 'all') s.status = 'approved';
+    else if (preset === 'reset') s.status = 'pending';
+    else if (preset === 'metadata') s.status = [1, 2, 3].includes(s.id) ? 'approved' : 'pending';
+    else if (preset === 'docs') s.status = [4, 5, 6, 7, 8].includes(s.id) ? 'approved' : 'pending';
+  });
+  render();
+}
+
+function generatePrompt() {
+  const approved = suggestions.filter(s => s.status === 'approved');
+  const [hooksBlockId, hooksMatcherId] = HOOKS_OVERLAP;
+  const bothHooksApproved =
+    approved.some(s => s.id === hooksBlockId) &&
+    approved.some(s => s.id === hooksMatcherId);
+  const effectiveCount = approved.length - (bothHooksApproved ? 1 : 0);
+  const output = document.getElementById('promptOutput');
+
+  if (approved.length === 0) {
+    output.innerHTML = '<span class="prompt-empty">No suggestions approved yet. Approve suggestions to generate edit instructions.</span>';
+    return;
+  }
+
+  let prompt = `Apply the following ${effectiveCount} edit(s) to ${FILE_PATH}:\n\n`;
+
+  approved.forEach(s => {
+    if (s.id === hooksMatcherId && bothHooksApproved) return; // handled as part of suggestion 5
+
+    let oldStr = s.currentText;
+    let newStr = s.proposedText;
+
+    // If suggestion 5 is approved and 8 is also approved, apply 8's matcher change inside 5's proposed text
+    if (s.id === hooksBlockId && bothHooksApproved) {
+      newStr = newStr.replace(
+        '`block-grep-extended.sh` - PreToolUse: blocks',
+        '`block-grep-extended.sh` - PreToolUse(Bash): blocks'
+      );
+    }
+
+    // If only 8 is approved (not 5), use its own edit
+    // (this is the default path)
+
+    prompt += `---\n`;
+    prompt += `## Edit #${s.id}: ${s.title}`;
+    if (s.userComment) prompt += ` (${s.userComment})`;
+    prompt += `\n${s.lineRef} | ${s.category} | ${s.severity}\n\n`;
+    prompt += `**old_string:**\n\`\`\`\n${oldStr}\n\`\`\`\n\n`;
+    prompt += `**new_string:**\n\`\`\`\n${newStr}\n\`\`\`\n\n`;
+  });
+
+  const rejected = suggestions.filter(s => s.status === 'rejected');
+  if (rejected.length > 0) {
+    prompt += `---\n## Explicitly Rejected\n`;
+    rejected.forEach(s => {
+      prompt += `- #${s.id}: ${s.title}`;
+      if (s.userComment) prompt += ` \u2014 "${s.userComment}"`;
+      prompt += `\n`;
+    });
+    prompt += '\n';
+  }
+
+  output.textContent = prompt;
+}
+
+function copyPrompt() {
+  const text = document.getElementById('promptOutput').textContent;
+  const btn = document.getElementById('copyBtn');
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy to Clipboard'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => {
+    btn.textContent = 'Copy failed';
+    setTimeout(() => { btn.textContent = 'Copy to Clipboard'; }, 2000);
+  });
+}
+
+function render() {
+  renderStats();
+  renderDocSections();
+  renderCards();
+  generatePrompt();
+}
+
+render();
+</script>
+</body>
+</html>

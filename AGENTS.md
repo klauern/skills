@@ -8,7 +8,7 @@ This file provides guidance to AI coding assistants (Claude Code, Cursor, Windsu
 
 This is a Claude Code plugin marketplace containing four plugins that automate Git and PR workflows:
 
-1. **commits** - Conventional commit message creation following conventionalcommits.org
+1. **commits** - Conventional commit creation and splitting following conventionalcommits.org
 2. **pull-requests** - Intelligent PR creation with template-based field extraction
 3. **dev-utilities** - Development workflow utilities (agents-md migration, worktrees, GH Actions upgrades)
 4. **capacities** - Capacities knowledge management API integration
@@ -80,19 +80,23 @@ Each plugin is self-contained in its own directory under `plugins/`:
 
 ```
 plugins/
-├── commits/                      → Conventional commit creation
+├── commits/                      → Conventional commit creation and splitting
 │   ├── .claude-plugin/
 │   │   └── plugin.json
 │   ├── commands/
 │   │   ├── commit.md
-│   │   └── commit-push.md
-│   └── conventional-commits/     → Skill with docs
+│   │   ├── commit-push.md
+│   │   └── commit-split.md
+│   ├── conventional-commits/     → Skill with docs
+│   │   ├── SKILL.md
+│   │   └── references/
+│   │       ├── workflows.md
+│   │       ├── examples.md
+│   │       ├── best-practices.md
+│   │       └── format-reference.md
+│   └── commit-splitter/          → Commit splitting skill
 │       ├── SKILL.md
 │       └── references/
-│           ├── workflows.md
-│           ├── examples.md
-│           ├── best-practices.md
-│           └── format-reference.md
 │
 ├── pull-requests/                → PR creation and management
 │   ├── .claude-plugin/
@@ -117,14 +121,22 @@ plugins/
 │   │   ├── worktree.md
 │   │   ├── gh-actions-upgrade.md
 │   │   ├── gh-checks.md
-│   │   └── git-optimize.md
+│   │   ├── git-optimize.md
+│   │   ├── skill-lint.md
+│   │   └── devcontainer-setup.md
 │   ├── gh-actions-upgrader/      → GH Actions upgrade skill
 │   │   ├── SKILL.md
 │   │   └── references/
 │   ├── ci-failure-analyzer/      → CI failure analysis skill
 │   │   ├── SKILL.md
 │   │   └── references/
-│   └── git-optimize/             → Git optimization skill
+│   ├── git-optimize/             → Git optimization skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   ├── dependency-upgrader/      → Dependency upgrade skill
+│   │   ├── SKILL.md
+│   │   └── references/
+│   └── devcontainer-setup/       → DevContainer scaffolding skill
 │       ├── SKILL.md
 │       └── references/
 │
@@ -140,6 +152,8 @@ plugins/
     ├── capacities-api/           → Capacities API skill
     │   ├── SKILL.md
     │   └── references/
+    ├── session-capture/          → Session capture skill
+    │   └── SKILL.md
     └── scripts/
         └── capacities.py
 
@@ -262,7 +276,7 @@ bd create "Title" -t task -p 2        # Create issue
 
 **Plugin Configuration**:
 - `.claude-plugin/marketplace.json` - Plugin registry pointing to `./plugins/*`
-- `plugins/*/. claude-plugin/plugin.json` - Individual plugin metadata
+- `plugins/*/.claude-plugin/plugin.json` - Individual plugin metadata
 
 **Development Context**:
 - `.cursor/rules/development-workflow.mdc` - Tool preferences (always active)
@@ -270,11 +284,16 @@ bd create "Title" -t task -p 2        # Create issue
 
 **Skill References**:
 - `plugins/commits/conventional-commits/SKILL.md` - Commit message standards
+- `plugins/commits/commit-splitter/SKILL.md` - Commit splitting into atomic changes
 - `plugins/pull-requests/pr-creator/SKILL.md` - PR creation with template inference
+- `plugins/pull-requests/pr-conflict-resolver/SKILL.md` - Merge conflict resolution
 - `plugins/dev-utilities/gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
 - `plugins/dev-utilities/ci-failure-analyzer/SKILL.md` - CI failure analysis and debugging
 - `plugins/dev-utilities/git-optimize/SKILL.md` - Git repository optimization
+- `plugins/dev-utilities/dependency-upgrader/SKILL.md` - Dependency upgrade automation
+- `plugins/dev-utilities/devcontainer-setup/SKILL.md` - DevContainer scaffolding for Claude Code
 - `plugins/capacities/capacities-api/SKILL.md` - Capacities knowledge management API integration
+- `plugins/capacities/session-capture/SKILL.md` - Session capture for knowledge management
 
 ## Versioning
 
@@ -284,7 +303,7 @@ Marketplace uses semantic versioning. When adding features:
 2. Create conventional commit with `feat(plugin-name):` prefix
 3. Tag release if publishing to marketplace
 
-Current version: 2.0.0
+Current version: 2.4.0
 
 ## MCP Server Strategy
 
@@ -299,13 +318,20 @@ No project-level MCP servers are needed.
 ## Claude Code Automation
 
 **Hooks** (`.claude/hooks/`):
-- `block-grep-extended.sh` - PreToolUse: blocks `grep -E` for macOS compatibility
+- `block-grep-extended.sh` - PreToolUse(Bash): blocks `grep -E` for macOS compatibility
+- `validate-commit-format.sh` - PreToolUse: validates conventional commit format before `git commit`
 - `version-bump-reminder.sh` - UserPromptSubmit: reminds to run `/version-bump` before commit-push
 - `dev-context.sh` - SessionStart: injects plugin/skill counts at session start
+- `pr-quality-check.sh` - PostToolUse: validates PR quality after `gh pr create`
+- `workflow-lint.sh` - PostToolUse: lints GitHub workflow files after edits
+- `auto-validate-skill.sh` - PostToolUse: suggests skill-validator agent when SKILL.md is modified
 
 **Subagents** (`.claude/agents/`):
 - `skill-validator.md` - Validates SKILL.md files against authoring guidelines
 - `release-checker.md` - Pre-publish validation across all plugins
+- `changelog-detector.md` - Fetches and summarizes changelogs for dependency and GitHub Actions upgrades, detecting breaking changes
+- `commit-analyzer.md` - Analyzes git diffs and recommends atomic commit boundaries for splitting large changes
+- `pr-preflight-reviewer.md` - Reviews PR diff against description draft, flagging inconsistencies before submission
 
 ## Cross-Agent Compatibility
 

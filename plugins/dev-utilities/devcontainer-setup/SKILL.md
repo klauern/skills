@@ -1,31 +1,35 @@
 ---
 name: devcontainer-setup
-description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and direct host ~/.claude/ bind mount. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
-version: 1.3.0
+description: Scaffolds DevPod-compatible devcontainers for Claude Code with SSH access, firewall restrictions, and direct host ~/.claude/ + ~/.claude.json bind mounts. Detects project tools and generates Dockerfile, setup scripts, and Taskfile tasks.
+version: 1.4.0
+author: klauern
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 
 # Devcontainer Setup for Claude Code + DevPod
 
-Scaffolds a DevPod-compatible devcontainer that runs Claude Code with SSH access, firewall restrictions, and mounts host `~/.claude/` directly into the container.
+Scaffolds a DevPod-compatible devcontainer that runs Claude Code with SSH access, firewall restrictions, and mounts host `~/.claude/` + `~/.claude.json` directly into the container.
 
 ## Quick Start
 
 **Command**: `/dev-utilities:devcontainer-setup` — Scaffold a devcontainer for Claude Code
 
 **Documentation**:
+
 - [Tool Detection](references/tool-detection.md) — Runtime/tool detection patterns per ecosystem
 - [Templates](references/templates.md) — Base templates for generated files
 
 ## When to Use
 
 **Invoke when**:
+
 - User wants to run Claude Code in an isolated container
 - User mentions DevPod or devcontainer SSH workflow
 - User wants a sandboxed environment for Claude Code with firewall rules
 - User asks for headless Claude Code setup (no IDE)
 
 **Don't use for**:
+
 - Standard VS Code devcontainer setup (no DevPod)
 - Docker Compose-only workflows
 - Claude Code installation on bare metal
@@ -52,13 +56,13 @@ For each detected tool, extract version constraints where available. See [tool-d
 
 #### API Gateway & MCP Server Detection
 
-Scan `~/.claude/settings.json` and `.mcp.json` files to detect custom domains the firewall must allow:
+Scan `~/.claude/settings.json` and Claude MCP config files (`~/.claude.json`, `~/.claude/.mcp.json`, `~/.claude/mcp.json`, project `.mcp.json`) to detect custom domains the firewall must allow:
 
 1. **Custom API gateways**: Read `env` block in `~/.claude/settings.json`. Look for any `*_BASE_URL` keys (e.g., `ANTHROPIC_BASE_URL`, `ANTHROPIC_BEDROCK_BASE_URL`). Extract the hostname from each URL and add it to the firewall allowlist.
 
-2. **Auth token forwarding**: If a custom `*_BASE_URL` is detected, check whether `ANTHROPIC_AUTH_TOKEN` is set on the host (`printenv ANTHROPIC_AUTH_TOKEN`). If so, forward it via `remoteEnv` instead of `ANTHROPIC_API_KEY` — custom gateways typically use `ANTHROPIC_AUTH_TOKEN` for authentication, not the standard API key.
+2. **Auth token forwarding**: If a custom `*_BASE_URL` is detected, check whether `ANTHROPIC_AUTH_TOKEN` is set on the host (`printenv ANTHROPIC_AUTH_TOKEN`). Ensure auth env is forwarded via `containerEnv` (and keep in `remoteEnv` for IDE compatibility) so `devpod ssh` sessions see the same credentials.
 
-3. **Remote MCP servers**: Scan all `.mcp.json` files (`~/.claude/.mcp.json`, `~/.claude/mcp.json`, project-level `.mcp.json`) for servers with `"type": "sse"`, `"type": "http"`, or `"type": "streamable"`. Extract the hostname from each `"url"` value and add it to the firewall allowlist. Stdio-based MCP servers (those with `"command"`) don't need firewall entries.
+3. **Remote MCP servers**: Scan MCP config files (`~/.claude.json`, `~/.claude/.mcp.json`, `~/.claude/mcp.json`, project-level `.mcp.json`) for servers with `"type": "sse"`, `"type": "http"`, or `"type": "streamable"`. Extract the hostname from each `"url"` value and add it to the firewall allowlist. stdio-based MCP servers (those with `"command"`) don't need firewall entries.
 
 **Output**: Present detected tools, gateway domains, and MCP server domains to user for confirmation before generating files.
 
@@ -95,7 +99,7 @@ Run these checks after generation:
 3. **Dockerfile syntax**: `docker build --check` or dry-run parse
 4. **File permissions**: Ensure `.sh` files are executable (`chmod +x`)
 5. **devcontainer.json validity**: Parse as JSON to catch syntax errors
-6. **Bind mount**: Verify `~/.claude/` exists on host (created by `initializeCommand`)
+6. **Bind mounts**: Verify `~/.claude/` and `~/.claude.json` exist on host (created by `initializeCommand`)
 
 Report results and next steps to the user.
 
@@ -106,9 +110,12 @@ Report results and next steps to the user.
 - `build.dockerfile` points to local `Dockerfile`
 - `runArgs` includes `--cap-add=NET_ADMIN` and `--cap-add=NET_RAW` (required for iptables firewall)
 - Omits `forwardPorts` (DevPod handles port mapping)
-- `initializeCommand` ensures `~/.claude/` exists on host before bind mount
-- Mounts host `~/.claude/` to `/home/node/.claude` via `${localEnv:HOME}` bind mount
-- `remoteEnv` forwards auth credentials and `HOST_HOME` from host into container. If a custom API gateway is detected (any `*_BASE_URL` in settings.json), forward `ANTHROPIC_AUTH_TOKEN` instead of `ANTHROPIC_API_KEY`. See Phase 1 "API Gateway & MCP Server Detection"
+- `initializeCommand` ensures `~/.claude/` exists and `~/.claude.json` is present before bind mounts
+- Mounts host `~/.claude/` to `/home/node/.claude` and host `~/.claude.json` to `/home/node/.claude.json`
+- `containerEnv` forwards auth credentials and gateway env for runtime shells (`devpod ssh` sessions included)
+- `remoteEnv` mirrors auth credentials plus `HOST_HOME` for IDE compatibility and host-path symlink setup
+- Sets `HOME=/home/node` in container runtime env so Claude resolves config paths consistently
+- Do not force `CLAUDE_CONFIG_DIR`; rely on `HOME`-based discovery to avoid MCP visibility issues
 - Sets `remoteUser: "node"`
 - `postCreateCommand` runs `setup.sh`
 - `postStartCommand` runs `init-firewall.sh`
@@ -117,6 +124,7 @@ Report results and next steps to the user.
 ### Dockerfile
 
 Layered approach:
+
 1. **Base**: `node:20-bookworm` (matches official Claude Code devcontainer)
 2. **System packages**: git, sudo, fzf, zsh, curl, iptables, jq, openssh-server
 3. **Claude Code**: `npm install -g @anthropic-ai/claude-code@latest`
@@ -129,26 +137,30 @@ Layered approach:
 
 - Fixes ownership on Docker volumes (`.cache`, etc.) that are created as root
 - Creates a symlink from host `~/.claude` path (via `HOST_HOME` env var) to `/home/node/.claude` so hardcoded plugin paths in `installed_plugins.json` resolve in-container
-- Symlinks `.claude.json` to home directory
+- Creates a symlink from host `~/.claude.json` path (via `HOST_HOME`) to `/home/node/.claude.json`
 - Configures git safe directory
 - Runs project-specific tool setup (inserted from Phase 1 detection)
 
 ### init-firewall.sh
 
 Based on the official Claude Code devcontainer firewall. Restricts outbound traffic to:
+
 - `api.anthropic.com` — Claude API
 - `statsig.anthropic.com` — Telemetry
 - `sentry.io` — Error reporting
 - `*.githubusercontent.com` — GitHub raw content
 
 Plus dynamically detected domains:
+
 - **Custom API gateways**: Domains extracted from `*_BASE_URL` env vars in `~/.claude/settings.json`
-- **Remote MCP servers**: Domains extracted from `url` fields in `.mcp.json` files (sse/http/streamable types only)
+- **Remote MCP servers**: Domains extracted from `url` fields in `~/.claude.json` and `.mcp.json` files (sse/http/streamable types only)
 - **Project-specific registries**: Domains based on detected tools (see [tool-detection.md](references/tool-detection.md) for per-ecosystem allowlists)
 
 ### Entry Script (devcontainer-ssh.sh)
 
-- `--claude`: Starts container, verifies bind mount, forwards auth token, launches Claude Code
+- `--claude`: Starts container, verifies bind mounts, runs auth/MCP preflight, launches Claude Code
+- `--sync`: Verifies Claude bind mounts
+- `--doctor` / `--auth-check`: Runs auth + MCP preflight checks without launching Claude
 - `--down`: Stops container
 - `--status`: Shows container status
 - `--rebuild`: Deletes and rebuilds container from scratch
@@ -156,14 +168,16 @@ Plus dynamically detected domains:
 
 ### Taskfile.yml Tasks
 
-| Task | Description |
-|------|-------------|
-| `devcontainer:up` | Start the devcontainer via DevPod |
-| `devcontainer:ssh` | SSH into running container |
-| `devcontainer:claude` | Full workflow: up + ssh + claude |
-| `devcontainer:stop` | Stop the container |
-| `devcontainer:delete` | Delete the workspace |
-| `devcontainer:status` | Show workspace status |
+| Task                      | Description                                         |
+| ------------------------- | --------------------------------------------------- |
+| `devcontainer:ssh`        | SSH into running devcontainer (starts it if needed) |
+| `devcontainer:claude`     | Start devcontainer and launch Claude Code           |
+| `devcontainer:sync`       | Verify Claude config bind mounts                    |
+| `devcontainer:doctor`     | Run Claude auth + MCP preflight checks              |
+| `devcontainer:auth-check` | Alias for `devcontainer:doctor`                     |
+| `devcontainer:down`       | Stop the devcontainer                               |
+| `devcontainer:status`     | Show devcontainer status                            |
+| `devcontainer:rebuild`    | Rebuild devcontainer from scratch                   |
 
 ## Decision Points
 
@@ -180,9 +194,9 @@ Prompt the user for these decisions:
 
 ## Model Strategy
 
-| Task | Model |
-|------|-------|
-| File detection, version parsing, template substitution | Haiku |
+| Task                                                   | Model  |
+| ------------------------------------------------------ | ------ |
+| File detection, version parsing, template substitution | Haiku  |
 | Tool analysis, Dockerfile optimization, user decisions | Sonnet |
 
 ## Requirements
@@ -191,22 +205,24 @@ Prompt the user for these decisions:
 - Docker installed on host (for building/testing)
 - DevPod installed on host (for container management)
 - `~/.claude/` exists on host with valid credentials (auto-created by `initializeCommand`)
+- `~/.claude.json` is readable on host (auto-created by `initializeCommand` if missing)
 
 ## Error Handling
 
-| Issue | Solution |
-|-------|----------|
-| DevPod not installed | Provide install link: `brew install devpod` or `curl -fsSL https://get.devpod.sh | bash` |
-| No project files found | Generate minimal Dockerfile with just Claude Code |
-| Docker build fails | Check Dockerfile syntax, verify base image availability |
-| Firewall blocks required domain | Add domain to allowlist in `init-firewall.sh` |
-| Bind mount fails | Ensure `~/.claude/` exists on host (`initializeCommand` should create it). On Windows, use `${localEnv:USERPROFILE}` instead of `${localEnv:HOME}` |
+| Issue                                     | Solution                                                                                                                                                                                                             |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| DevPod not installed                      | Provide install link: `brew install devpod` or `curl -fsSL https://get.devpod.sh \| bash`                                                                                                                           |
+| No project files found                    | Generate minimal Dockerfile with just Claude Code                                                                                                                                                                    |
+| Docker build fails                        | Check Dockerfile syntax, verify base image availability                                                                                                                                                              |
+| Firewall blocks required domain           | Add domain to allowlist in `init-firewall.sh`                                                                                                                                                                        |
+| Bind mount fails                          | Ensure `~/.claude/` exists on host (`initializeCommand` should create it). On Windows, use `${localEnv:USERPROFILE}` instead of `${localEnv:HOME}`                                                                   |
 | DevPod "unknown field" in provider config | Provider JSON at `~/.devpod/contexts/default/providers/docker/provider.json` has fields from a newer DevPod version. Fix: `devpod provider delete docker && devpod provider add docker` to regenerate a clean config |
-| Firewall script sudo fails | Ensure sudoers grants NOPASSWD for the firewall script path, iptables, ip6tables, and ipset. Do NOT wrap with `sudo bash` — use `sudo /path/to/script` since scripts have shebangs |
+| Firewall script sudo fails                | Ensure sudoers grants NOPASSWD for the firewall script path, iptables, ip6tables, and ipset. Do NOT wrap with `sudo bash` — use `sudo /path/to/script` since scripts have shebangs                                   |
 
 ## Version History
 
-- **1.3.0**: Auto-detect custom API gateways (`*_BASE_URL` in settings.json) and remote MCP servers (sse/http/streamable `.mcp.json` entries) — extract domains for firewall allowlist, forward `ANTHROPIC_AUTH_TOKEN` when custom gateway detected
+- **1.4.0**: Add runtime-safe auth forwarding (`containerEnv` + `remoteEnv`), mount/symlink host `~/.claude.json`, add `--doctor`/`--auth-check` preflight flow, and align Taskfile tasks with script flags. Forward Bedrock env vars (`ANTHROPIC_BEDROCK_BASE_URL`, `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_SKIP_BEDROCK_AUTH`) and `ANTHROPIC_CUSTOM_HEADERS` via `containerEnv`. Hard-code `NODE_USE_SYSTEM_CA=1` for corporate proxy compatibility. **Breaking**: removes `devcontainer:up`, `devcontainer:stop`, and `devcontainer:delete` tasks — replaced by `devcontainer:ssh` (auto-starts), `devcontainer:down`, and `devcontainer:rebuild`. `devcontainer:ssh` now runs `bash devcontainer-ssh.sh` instead of `devpod ssh .` directly.
+- **1.3.0**: Auto-detect custom API gateways (`*_BASE_URL` in settings.json) and remote MCP servers (sse/http/streamable entries from user/project MCP config) — extract domains for firewall allowlist, forward `ANTHROPIC_AUTH_TOKEN` when custom gateway detected
 - **1.2.0**: Add `runArgs` (NET_ADMIN/NET_RAW), `remoteEnv` (ANTHROPIC_API_KEY, HOST_HOME), `.cache` directory fix, host path symlink in setup.sh, bind mount verification in entry script
 - **1.1.0**: Replace config sync infrastructure with direct `~/.claude/` host bind mount
 - **1.0.0**: Initial release with DevPod + SSH + firewall + config mirroring
