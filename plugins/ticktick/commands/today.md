@@ -9,7 +9,7 @@ Display overdue tasks and tasks due today, then offer quick triage actions for e
 
 ## Usage
 
-```
+```bash
 /ticktick:today
 ```
 
@@ -29,7 +29,7 @@ Fetch simultaneously:
 
 Display format:
 
-```
+```text
 OVERDUE (N tasks)
 - [HIGH] Finish quarterly report (Work) — 3 days overdue
 - [MED]  Reply to Alice (Inbox) — 1 day overdue
@@ -51,7 +51,7 @@ After displaying, prompt for actions on each task:
 
 ## Output
 
-```
+```text
 Actions taken:
   Completed:    2 tasks
   Rescheduled:  1 task

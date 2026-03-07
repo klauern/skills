@@ -28,8 +28,8 @@ Walk through the TickTick OAuth flow to generate an access token for the MCP ser
 CLIENT_ID="${TICKTICK_CLIENT_ID:-NOT_SET}"
 CLIENT_SECRET="${TICKTICK_CLIENT_SECRET:-NOT_SET}"
 
-echo "TICKTICK_CLIENT_ID:     $CLIENT_ID"
-echo "TICKTICK_CLIENT_SECRET: $CLIENT_SECRET"
+[ "$CLIENT_ID" = "NOT_SET" ] && echo "TICKTICK_CLIENT_ID:     NOT_SET" || echo "TICKTICK_CLIENT_ID:     [set]"
+[ "$CLIENT_SECRET" = "NOT_SET" ] && echo "TICKTICK_CLIENT_SECRET: NOT_SET" || echo "TICKTICK_CLIENT_SECRET: [set]"
 
 if [ "$CLIENT_ID" = "NOT_SET" ] || [ "$CLIENT_SECRET" = "NOT_SET" ]; then
     echo ""

@@ -9,7 +9,7 @@ Quickly create one or more tasks in TickTick, with optional project, due date, a
 
 ## Usage
 
-```
+```bash
 /ticktick:capture [task description]
 ```
 
@@ -46,7 +46,7 @@ Use `batch_create_tasks` when the input contains multiple tasks (bullet list or 
 
 ## Output
 
-```
+```text
 Created task:
   Title:   Buy milk
   Project: Personal
@@ -56,7 +56,7 @@ Created task:
 
 ## Examples
 
-```
+```bash
 # Single task with natural-language date
 /ticktick:capture Buy milk tomorrow
 
@@ -76,5 +76,5 @@ Created task:
 ## Notes
 
 - Priority mapping: urgent/critical → 5, high → 3, medium → 1 (TickTick scale), low/none → 0
-- Dates are interpreted relative to today (2026-03-06)
+- Dates are interpreted relative to today
 - If no project is chosen, the task lands in the default inbox

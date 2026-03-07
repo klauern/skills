@@ -9,7 +9,7 @@ Full inbox triage across overdue tasks, today's tasks, and the rest of the week.
 
 ## Usage
 
-```
+```bash
 /ticktick:inbox
 ```
 
@@ -30,7 +30,7 @@ Fetch simultaneously:
 
 Display format:
 
-```
+```text
 === OVERDUE (N tasks) ===
 - [HIGH] Finish spec doc (Work) — 4 days overdue
 - [MED]  Book dentist (Personal) — 2 days overdue
@@ -59,7 +59,7 @@ Collect all decisions first, then execute in a single pass to minimize round-tri
 
 ## Output
 
-```
+```text
 Triage complete:
   Completed:    3 tasks
   Rescheduled:  2 tasks
@@ -72,5 +72,5 @@ Triage complete:
 
 - This-week tasks exclude today (avoid duplicating the Today section)
 - Deletion is permanent — confirm before executing `delete_task`
-- Rescheduling to a specific date: ask "Reschedule to? (e.g. Monday, Mar 10)"
+- Rescheduling to a specific date: ask "Reschedule to? (e.g. Tuesday, Mar 10)"
 - If all three fetches return empty, report "Inbox zero — nothing to triage."

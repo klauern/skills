@@ -43,7 +43,7 @@ Always include `get_overdue_tasks`. Add mode-specific tool calls in parallel.
 
 **Phase 3 — Summarize**
 Present grouped sections:
-```
+```text
 OVERDUE (N)  — tasks past due date
 TODAY (N)    — due today
 UPCOMING (N) — later this week (weekly mode only)

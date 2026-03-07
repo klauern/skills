@@ -5,14 +5,14 @@
 | Input | title | dueDate | priority | project hint |
 |-------|-------|---------|----------|-------------|
 | "Buy milk tomorrow" | Buy milk | tomorrow → next day | 0 | — |
-| "Fix login bug - high priority, due Friday" | Fix login bug | next Friday | 5 | — |
+| "Fix login bug - high priority, due Friday" | Fix login bug | next Friday | 3 | — |
 | "Review PR by end of day" | Review PR | today 17:00 | 0 | — |
 | "Call dentist next Monday at 2pm" | Call dentist | next Mon 14:00 | 0 | — |
 | "Urgent: deploy hotfix" | Deploy hotfix | — | 5 | — |
 | "Add dark mode to Work project, low priority" | Add dark mode | — | 1 | Work |
 | "Finish report in 3 days" | Finish report | today + 3d | 0 | — |
-| "Important: renew subscription by end of week" | Renew subscription | Sunday EOD | 3 | — |
-| "Write tests for auth module - medium priority" | Write tests for auth module | — | 3 | — |
+| "Important: renew subscription by end of week" | Renew subscription | Friday EOD | 3 | — |
+| "Write tests for auth module - medium priority" | Write tests for auth module | — | 1 | — |
 | "Buy birthday gift for Sarah, due next Saturday" | Buy birthday gift for Sarah | next Sat | 0 | — |
 
 ## Date Expression → ISO 8601
@@ -82,7 +82,7 @@ When user provides a list, structure as array:
 2. Fuzzy match user's project hint against `name` fields
 3. If single confident match → use that `id`
 4. If multiple matches or no match → present list to user:
-   ```
+   ```text
    Which project?
    1. Work
    2. Personal

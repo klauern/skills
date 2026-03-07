@@ -9,7 +9,7 @@ Clear the due date and start date from a TickTick task. This works around the up
 
 ## Usage
 
-```
+```bash
 /ticktick:clear-dates
 ```
 

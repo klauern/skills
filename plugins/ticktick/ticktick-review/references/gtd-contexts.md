@@ -40,7 +40,7 @@ Run once per week (Friday afternoon or Monday morning):
 
 ## Triage Decision Tree
 
-```
+```text
 Is the task still relevant?
 ├── No → DELETE
 └── Yes → Is it done?
