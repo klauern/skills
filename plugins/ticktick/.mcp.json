@@ -3,7 +3,7 @@
     "command": "uvx",
     "args": [
       "--from", "git+https://github.com/jacepark12/ticktick-mcp",
-      "ticktick-mcp"
+      "ticktick-mcp", "run"
     ],
     "env": {
       "TICKTICK_CLIENT_ID": "${TICKTICK_CLIENT_ID}",
