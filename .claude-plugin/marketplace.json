@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "2.4.0"
+    "version": "2.5.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -28,6 +28,11 @@
       "description": "Capacities knowledge management API integration",
       "name": "capacities",
       "source": "./plugins/capacities"
+    },
+    {
+      "description": "TickTick task management via MCP integration",
+      "name": "ticktick",
+      "source": "./plugins/ticktick"
     }
   ]
 }
