@@ -1,3 +1,10 @@
+---
+name: ticktick-capture-examples
+description: Natural-language capture examples and field reference for the TickTick capture skill
+version: 1.0.0
+author: klauern
+---
+
 # TickTick Capture: Examples and Field Reference
 
 ## Natural Language → Field Mapping

@@ -1,3 +1,10 @@
+---
+name: ticktick-review-gtd-contexts
+description: GTD context mappings and review checklists for the TickTick review skill
+version: 1.0.0
+author: klauern
+---
+
 # TickTick Review: GTD Contexts and Review Checklists
 
 ## GTD Concept → TickTick MCP Tool Mapping

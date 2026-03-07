@@ -16,10 +16,11 @@ Full inbox triage across overdue tasks, today's tasks, and the rest of the week.
 ## Behavior
 
 1. Fetch overdue, today, and this-week tasks in parallel
-2. Present tasks grouped by section: Overdue → Today → This Week
-3. Collect triage decisions for each task
-4. Execute all actions in batch: `complete_task`, `update_task`, or `delete_task`
-5. Print a summary of every action taken
+2. Dedup: before rendering "This Week", remove any tasks whose IDs already appear in the "Today" list (tasks due today will be returned by both fetches)
+3. Present tasks grouped by section: Overdue → Today → This Week
+4. Collect triage decisions for each task
+5. Execute all actions in batch: `complete_task`, `update_task`, or `delete_task`
+6. Print a summary of every action taken
 
 ## Implementation
 
@@ -70,6 +71,7 @@ Triage complete:
 
 ## Notes
 
+- Before rendering the "This Week" section, filter out any tasks whose IDs are already present in the "Today" list — `get_tasks_due_this_week` includes tasks due today, so deduplication by task ID is required to prevent the same task appearing twice
 - This-week tasks exclude today (avoid duplicating the Today section)
 - Deletion is permanent — confirm before executing `delete_task`
 - Rescheduling to a specific date: ask "Reschedule to? (e.g. Tuesday, Mar 10)"
