@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__get_overdue_tasks", "mcp__plugin_ticktick_ticktick__get_tasks_due_today", "mcp__plugin_ticktick_ticktick__get_tasks_due_this_week", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task", "mcp__plugin_ticktick_ticktick__delete_task"]
+allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__get_overdue_tasks", "mcp__plugin_ticktick_ticktick__get_tasks_due_today", "mcp__plugin_ticktick_ticktick__get_tasks_due_this_week", "mcp__plugin_ticktick_ticktick__get_all_tasks", "mcp__plugin_ticktick_ticktick__get_tasks_by_priority", "mcp__plugin_ticktick_ticktick__get_next_tasks", "mcp__plugin_ticktick_ticktick__get_engaged_tasks", "mcp__plugin_ticktick_ticktick__search_tasks", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task", "mcp__plugin_ticktick_ticktick__delete_task"]
 description: Full task triage — overdue, today, and this week
 ---
 

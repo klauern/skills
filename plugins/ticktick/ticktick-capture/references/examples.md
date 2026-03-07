@@ -16,7 +16,7 @@ author: klauern
 | "Review PR by end of day" | Review PR | today 17:00 | 0 | — |
 | "Call dentist next Monday at 2pm" | Call dentist | next Mon 14:00 | 0 | — |
 | "Urgent: deploy hotfix" | Deploy hotfix | — | 5 | — |
-| "Add dark mode to Work project, low priority" | Add dark mode | — | 1 | Work |
+| "Add dark mode to Work project, low priority" | Add dark mode | — | 0 | Work |
 | "Finish report in 3 days" | Finish report | today + 3d | 0 | — |
 | "Important: renew subscription by end of week" | Renew subscription | Friday EOD | 3 | — |
 | "Write tests for auth module - medium priority" | Write tests for auth module | — | 1 | — |
