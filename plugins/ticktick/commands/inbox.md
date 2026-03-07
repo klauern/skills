@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["mcp__plugin_ticktick_ticktick__get_overdue_tasks", "mcp__plugin_ticktick_ticktick__get_tasks_due_today", "mcp__plugin_ticktick_ticktick__get_tasks_due_this_week", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task", "mcp__plugin_ticktick_ticktick__delete_task"]
+allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__get_overdue_tasks", "mcp__plugin_ticktick_ticktick__get_tasks_due_today", "mcp__plugin_ticktick_ticktick__get_tasks_due_this_week", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task", "mcp__plugin_ticktick_ticktick__delete_task"]
 description: Full task triage — overdue, today, and this week
 ---
 
@@ -47,6 +47,11 @@ Display format:
 For each task, the user chooses:
 - **[c]omplete** — mark done via `complete_task`
 - **[r]eschedule** — prompt for new date, then call `update_task`
+- **[n]o date** — clear due/start dates via the `ticktick_dates.py` script:
+  ```bash
+  SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
+  uv run "$SCRIPT_DIR/ticktick_dates.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
+  ```
 - **[d]elete** — permanently remove via `delete_task`
 - **[s]kip** — leave unchanged
 
@@ -58,8 +63,9 @@ Collect all decisions first, then execute in a single pass to minimize round-tri
 Triage complete:
   Completed:    3 tasks
   Rescheduled:  2 tasks
+  Cleared date: 1 task
   Deleted:      1 task
-  Skipped:      4 tasks
+  Skipped:      3 tasks
 ```
 
 ## Notes

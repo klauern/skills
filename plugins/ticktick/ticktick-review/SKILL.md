@@ -54,6 +54,7 @@ Highlight top 3 focus items by priority + urgency.
 For each surfaced task, offer actions:
 - `[c]omplete` → call `complete_task`
 - `[r]eschedule` → call `update_task` with new dueDate
+- `[n]o date` → clear due/start dates via `ticktick_dates.py clear-dates` script (for tasks that shouldn't have a date)
 - `[d]elete` → call `delete_task`
 - `[s]kip` → leave unchanged
 
