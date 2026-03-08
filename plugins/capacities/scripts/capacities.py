@@ -36,6 +36,7 @@ Examples:
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -96,9 +97,14 @@ def request(method: str, path: str, operation: str, **kwargs: Any) -> httpx.Resp
         sys.exit(1)
 
 
+def _cache_file(key: str) -> Path:
+    safe_key = re.sub(r"[^A-Za-z0-9_.-]", "_", key)
+    return CACHE_DIR / f"{safe_key}.json"
+
+
 def load_cache(key: str) -> CacheEntry | None:
     """Load cached data if valid."""
-    cache_file = CACHE_DIR / f"{key}.json"
+    cache_file = _cache_file(key)
     if not cache_file.exists():
         return None
 
@@ -121,7 +127,7 @@ def load_cache(key: str) -> CacheEntry | None:
 def save_cache(key: str, data: Any) -> None:
     """Save data to cache."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache_file = CACHE_DIR / f"{key}.json"
+    cache_file = _cache_file(key)
     cache_file.write_text(json.dumps({
         "data": data,
         "timestamp": time.time(),
