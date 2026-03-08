@@ -40,14 +40,16 @@ TODAY (N tasks)
 ```
 
 After displaying, prompt for actions on each task:
-- **complete** — mark done via `complete_task`
-- **reschedule** — move to tomorrow via `update_task` (set due date to next day)
-- **no date** — clear due/start dates via the `ticktick_dates.py` script:
+- **[c]omplete** — mark done via `complete_task`
+- **[r]eschedule** — move to tomorrow via `update_task` (set due date to next day)
+- **[n]o date** — clear due/start dates via the `ticktick_dates.py` script:
   ```bash
   SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
   uv run "$SCRIPT_DIR/ticktick_dates.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
   ```
-- **skip** — leave unchanged
+- **[s]kip** — leave unchanged
+
+> **Note**: Delete is not offered in the daily view — use `/ticktick:inbox` for full triage including deletion.
 
 ## Output
 

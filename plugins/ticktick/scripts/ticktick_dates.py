@@ -82,8 +82,9 @@ def cmd_clear_dates(args: argparse.Namespace) -> None:
     path = f"/task/{args.task_id}"
     payload = {"id": args.task_id, "projectId": args.project_id, "dueDate": None, "startDate": None}
 
-    response = request("POST", path, f"Clear dates for task {args.task_id}", json=payload)
-    data = handle_response(response, f"Clear dates for task {args.task_id}")
+    operation = f"Clear dates for task {args.task_id}"
+    response = request("POST", path, operation, json=payload)
+    data = handle_response(response, operation)
 
     if args.json:
         print(json.dumps(data or {"success": True, "taskId": args.task_id}, indent=2))
