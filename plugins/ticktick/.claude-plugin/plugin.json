@@ -1,0 +1,9 @@
+{
+  "author": {
+    "email": "klauer@gmail.com",
+    "name": "klauern"
+  },
+  "description": "TickTick task management integration via MCP",
+  "name": "ticktick",
+  "version": "1.0.0"
+}

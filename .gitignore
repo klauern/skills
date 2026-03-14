@@ -4,6 +4,7 @@
 
 !.beads/
 .beads/sync-state.json
+.beads/daemon.pid
 
 # Dolt runtime files (created by dolt sql-server in repo root)
 .dolt/
@@ -13,3 +14,4 @@ config.yaml
 
 # Dolt database files (added by bd init)
 *.db
+.env

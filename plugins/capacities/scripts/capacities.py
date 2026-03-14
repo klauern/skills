@@ -9,6 +9,7 @@ Capacities API client for Claude Code.
 Usage:
     capacities.py spaces [--json] [--no-cache]
     capacities.py space-info <space-id> [--json] [--no-cache]
+    capacities.py lookup <term> --space-id <id> [--json]
     capacities.py search <term> --space-ids <ids> [--mode fullText|title] [--filter <ids>] [--json]
     capacities.py save-weblink --space-id <id> --url <url> [--title <t>] [--description <d>] [--tags <t>] [--content <md>] [--json]
     capacities.py daily-note --space-id <id> --text <md> [--no-timestamp] [--json]
@@ -23,6 +24,9 @@ Examples:
     # Get structures for a space
     capacities.py space-info 12345678-1234-1234-1234-123456789abc
 
+    # Lookup content by title in a space
+    capacities.py lookup "My note" --space-id 12345678-1234-1234-1234-123456789abc
+
     # Search across spaces
     capacities.py search "meeting notes" --space-ids id1,id2 --mode fullText
 
@@ -36,6 +40,7 @@ Examples:
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from dataclasses import dataclass
@@ -96,9 +101,14 @@ def request(method: str, path: str, operation: str, **kwargs: Any) -> httpx.Resp
         sys.exit(1)
 
 
+def _cache_file(key: str) -> Path:
+    safe_key = re.sub(r"[^A-Za-z0-9_.-]", "_", key)
+    return CACHE_DIR / f"{safe_key}.json"
+
+
 def load_cache(key: str) -> CacheEntry | None:
     """Load cached data if valid."""
-    cache_file = CACHE_DIR / f"{key}.json"
+    cache_file = _cache_file(key)
     if not cache_file.exists():
         return None
 
@@ -121,7 +131,7 @@ def load_cache(key: str) -> CacheEntry | None:
 def save_cache(key: str, data: Any) -> None:
     """Save data to cache."""
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    cache_file = CACHE_DIR / f"{key}.json"
+    cache_file = _cache_file(key)
     cache_file.write_text(json.dumps({
         "data": data,
         "timestamp": time.time(),
@@ -241,6 +251,25 @@ def format_search_results(results: dict, as_json: bool) -> None:
                 print(f"  ID: {item['id']}")
 
 
+def format_lookup_results(results: dict, as_json: bool) -> None:
+    """Format and print lookup results."""
+    if as_json:
+        print(json.dumps(results, indent=2))
+    else:
+        items = results.get("results", [])
+        if not items:
+            print("No matches found.")
+            return
+        print(f"Found {len(items)} matches:")
+        print("-" * 50)
+        for item in items:
+            print(f"\n{item.get('title', 'Untitled')}")
+            if item.get("id"):
+                print(f"  ID: {item['id']}")
+            if item.get("structureId"):
+                print(f"  Structure: {item['structureId']}")
+
+
 def format_saved(result: dict, as_json: bool, subject: str) -> None:
     """Format and print save result."""
     if as_json:
@@ -319,6 +348,17 @@ def cmd_search(args: argparse.Namespace) -> None:
     format_search_results(data or {}, args.json)
 
 
+def cmd_lookup(args: argparse.Namespace) -> None:
+    """Lookup content by title within a space."""
+    payload = {
+        "searchTerm": args.term,
+        "spaceId": args.space_id,
+    }
+    response = request("POST", "/lookup", "Lookup", json=payload)
+    data = handle_response(response, "Lookup")
+    format_lookup_results(data or {}, args.json)
+
+
 def cmd_save_weblink(args: argparse.Namespace) -> None:
     """Save a webpage to a space."""
     payload = {
@@ -387,6 +427,13 @@ def main() -> None:
     sp_info.add_argument("--json", action="store_true", help="Output as JSON")
     sp_info.add_argument("--no-cache", action="store_true", help="Skip cache")
     sp_info.set_defaults(func=cmd_space_info)
+
+    # lookup command
+    sp_lookup = subparsers.add_parser("lookup", help="Lookup content by title in a space")
+    sp_lookup.add_argument("term", help="Title search term")
+    sp_lookup.add_argument("--space-id", required=True, help="Target space UUID")
+    sp_lookup.add_argument("--json", action="store_true", help="Output as JSON")
+    sp_lookup.set_defaults(func=cmd_lookup)
 
     # search command
     sp_search = subparsers.add_parser("search", help="Search content")
