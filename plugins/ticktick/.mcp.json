@@ -2,7 +2,7 @@
   "ticktick": {
     "command": "uvx",
     "args": [
-      "--from", "git+https://github.com/jacepark12/ticktick-mcp",
+      "--from", "git+https://github.com/jacepark12/ticktick-mcp@main",
       "ticktick-mcp", "run"
     ],
     "env": {

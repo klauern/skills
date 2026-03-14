@@ -72,7 +72,6 @@ Triage complete:
 ## Notes
 
 - Before rendering the "This Week" section, filter out any tasks whose IDs are already present in the "Today" list — `get_tasks_due_this_week` includes tasks due today, so deduplication by task ID is required to prevent the same task appearing twice
-- This-week tasks exclude today (avoid duplicating the Today section)
 - Deletion is permanent — confirm before executing `delete_task`
 - Rescheduling to a specific date: ask "Reschedule to? (e.g. Tuesday, Mar 10)"
 - If all three fetches return empty, report "Inbox zero — nothing to triage."

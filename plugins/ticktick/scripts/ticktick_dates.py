@@ -21,6 +21,7 @@ import argparse
 import json
 import os
 import sys
+from typing import Any
 
 import httpx
 
@@ -49,7 +50,7 @@ def get_client() -> httpx.Client:
     )
 
 
-def request(method: str, path: str, operation: str, **kwargs) -> httpx.Response:
+def request(method: str, path: str, operation: str, **kwargs: Any) -> httpx.Response:
     """Perform an HTTP request with error handling."""
     try:
         with get_client() as client:

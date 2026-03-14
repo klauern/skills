@@ -264,8 +264,10 @@ def format_lookup_results(results: dict, as_json: bool) -> None:
         print("-" * 50)
         for item in items:
             print(f"\n{item.get('title', 'Untitled')}")
-            print(f"  ID: {item['id']}")
-            print(f"  Structure: {item['structureId']}")
+            if item.get("id"):
+                print(f"  ID: {item['id']}")
+            if item.get("structureId"):
+                print(f"  Structure: {item['structureId']}")
 
 
 def format_saved(result: dict, as_json: bool, subject: str) -> None:
