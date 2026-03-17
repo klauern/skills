@@ -1,6 +1,6 @@
 ---
 name: commit-analyzer
-model: haiku
+model: sonnet
 description: Analyzes git diffs and recommends atomic commit boundaries for splitting large changes into focused commits
 allowedTools:
   - Read

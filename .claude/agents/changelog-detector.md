@@ -1,6 +1,6 @@
 ---
 name: changelog-detector
-model: haiku
+model: sonnet
 description: Fetches and summarizes changelogs for dependency and GitHub Actions upgrades, detecting breaking changes
 allowedTools:
   - Bash
