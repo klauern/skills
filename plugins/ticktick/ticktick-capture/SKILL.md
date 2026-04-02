@@ -1,7 +1,7 @@
 ---
 name: ticktick-capture
 description: This skill should be used when the user asks to "add a task", "capture this", "remind me to", "I need to do", "add to TickTick", "create a ticket", "track this", or mentions capturing or tracking a task or action item in TickTick.
-version: 1.0.0
+version: 1.1.0
 author: klauern
 ---
 
@@ -28,9 +28,9 @@ Converts natural language input into structured TickTick tasks using the MCP ser
 | Field | MCP param | Values |
 |-------|-----------|--------|
 | Title | `title` | Required, plain text |
-| Project | `projectId` | UUID from `get_projects` |
-| Due date | `dueDate` | ISO 8601: `2025-03-07T10:00:00+00:00` |
-| Priority | `priority` | 0=low/none, 1=medium, 3=high, 5=urgent |
+| Project | `projectId` | UUID from `list_projects` |
+| Due date | `dueDate` | ISO 8601: `2026-04-03T10:00:00+00:00` |
+| Priority | `priority` | 0=none, 1=low, 3=medium, 5=high |
 | Tags | `tags` | Array of strings |
 | Notes | `content` | Markdown supported |
 
@@ -40,13 +40,13 @@ Converts natural language input into structured TickTick tasks using the MCP ser
 Extract from user input: title, project hint (name/keyword), due date expression, priority signal, tags, notes/description.
 
 **Phase 2 — Resolve Project**
-- If user specifies a project name → call `get_projects`, match by name → get `projectId`
+- If user specifies a project name → call `list_projects`, match by name → get `projectId`
 - If ambiguous → show project list and ask user to choose
 - If no project mentioned → omit `projectId` (uses TickTick inbox)
 
 **Phase 3 — Create Task(s)**
-- Single task → `create_task` with structured params
-- Multiple tasks (user gave a list) → `batch_create_tasks`
+- Single task → `create_task` with params wrapped in a `task` object
+- Multiple tasks (user gave a list) → `batch_add_tasks` with array of `task` objects
 - Always include `dueDate` if parsed; omit rather than guess
 
 **Phase 4 — Confirm**
@@ -54,7 +54,7 @@ Show: task title, project name (or "Inbox"), due date, priority label, task ID.
 
 ## Sub-Agent Strategy
 
-**Use Haiku for**: `get_projects`, `create_task`, `batch_create_tasks` — fast, deterministic API calls
+**Use Haiku for**: `list_projects`, `create_task`, `batch_add_tasks` — fast, deterministic API calls
 **Use Sonnet for**: NL parsing, date inference from relative expressions, project disambiguation, batch structuring from prose lists
 
 ## Progressive Disclosure
@@ -63,6 +63,5 @@ Show: task title, project name (or "Inbox"), due date, priority label, task ID.
 
 ## Requirements
 
-- `TICKTICK_CLIENT_ID`, `TICKTICK_CLIENT_SECRET`, `TICKTICK_ACCESS_TOKEN` must be set
-- Run `/ticktick:setup` if not configured
-- MCP server must be connected (verify with `/mcp`)
+- MCP server must be connected (verify with `/ticktick:setup`)
+- `TICKTICK_ACCESS_TOKEN` only needed for script-based operations (clear-dates, delete-task)

@@ -1,7 +1,7 @@
 ---
 name: ticktick-capture-examples
 description: Natural-language capture examples and field reference for the TickTick capture skill
-version: 1.0.0
+version: 1.1.0
 author: klauern
 ---
 
@@ -37,7 +37,7 @@ author: klauern
 | "by Friday" | Upcoming Friday |
 | "end of month" | Last day of current month |
 
-Always output ISO 8601 with timezone offset: `2025-03-07T14:00:00+00:00`
+Always output ISO 8601 with timezone offset: `2026-04-03T14:00:00+00:00`
 Use UTC if user timezone is unknown. Omit time component for date-only due dates.
 
 ## Priority Keyword Mapping
@@ -52,32 +52,38 @@ Use UTC if user timezone is unknown. Omit time component for date-only due dates
 
 ## `create_task` MCP Call Shape
 
+The official TickTick MCP wraps task fields in a `task` object:
+
 ```json
 {
-  "title": "Fix login bug",
-  "projectId": "abc123-uuid",
-  "dueDate": "2025-03-07T17:00:00+00:00",
-  "priority": 5,
-  "tags": ["bug", "auth"],
-  "content": "Users can't log in with SSO. Check the OAuth callback handler."
+  "task": {
+    "title": "Fix login bug",
+    "projectId": "abc123-uuid",
+    "dueDate": "2026-04-03T17:00:00+00:00",
+    "priority": 5,
+    "tags": ["bug", "auth"],
+    "content": "Users can't log in with SSO. Check the OAuth callback handler."
+  }
 }
 ```
 
 Minimal (title only):
 ```json
 {
-  "title": "Buy milk"
+  "task": {
+    "title": "Buy milk"
+  }
 }
 ```
 
-## `batch_create_tasks` MCP Call Shape
+## `batch_add_tasks` MCP Call Shape
 
-When user provides a list, structure as array:
+When user provides a list, structure as array of task objects:
 ```json
 {
   "tasks": [
     { "title": "Review PR #42", "priority": 3 },
-    { "title": "Update docs", "dueDate": "2025-03-10T00:00:00+00:00" },
+    { "title": "Update docs", "dueDate": "2026-04-10T00:00:00+00:00" },
     { "title": "Deploy to staging", "priority": 5, "tags": ["deploy"] }
   ]
 }
@@ -85,7 +91,7 @@ When user provides a list, structure as array:
 
 ## Project Resolution Pattern
 
-1. Call `get_projects` → returns array of `{ id, name }` objects
+1. Call `list_projects` → returns array of project objects with `id` and `name`
 2. Fuzzy match user's project hint against `name` fields
 3. If single confident match → use that `id`
 4. If multiple matches or no match → present list to user:

@@ -1,14 +1,6 @@
 {
   "ticktick": {
-    "command": "uvx",
-    "args": [
-      "--from", "git+https://github.com/jacepark12/ticktick-mcp@main",
-      "ticktick-mcp", "run"
-    ],
-    "env": {
-      "TICKTICK_CLIENT_ID": "${TICKTICK_CLIENT_ID}",
-      "TICKTICK_CLIENT_SECRET": "${TICKTICK_CLIENT_SECRET}",
-      "TICKTICK_ACCESS_TOKEN": "${TICKTICK_ACCESS_TOKEN}"
-    }
+    "type": "http",
+    "url": "https://mcp.ticktick.com/"
   }
 }

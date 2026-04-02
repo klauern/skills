@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__get_tasks_due_today", "mcp__plugin_ticktick_ticktick__get_overdue_tasks", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task"]
+allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__list_undone_tasks_by_time_query", "mcp__plugin_ticktick_ticktick__filter_tasks", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task"]
 description: Show today's tasks and overdue items, with triage actions
 ---
 
@@ -24,8 +24,8 @@ Display overdue tasks and tasks due today, then offer quick triage actions for e
 ## Implementation
 
 Fetch simultaneously:
-- `get_overdue_tasks` — tasks past their due date
-- `get_tasks_due_today` — tasks due today
+- `list_undone_tasks_by_time_query` with `query_command: "today"` — tasks due today
+- `filter_tasks` with `endDate` set to the start of today (midnight) — overdue tasks (due before today and still undone)
 
 Display format:
 
@@ -40,12 +40,12 @@ TODAY (N tasks)
 ```
 
 After displaying, prompt for actions on each task:
-- **[c]omplete** — mark done via `complete_task`
+- **[c]omplete** — mark done via `complete_task` (requires `project_id` and `task_id`)
 - **[r]eschedule** — move to tomorrow via `update_task` (set due date to next day)
-- **[n]o date** — clear due/start dates via the `ticktick_dates.py` script:
+- **[n]o date** — clear due/start dates via the `ticktick_api.py` script:
   ```bash
   SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-  uv run "$SCRIPT_DIR/ticktick_dates.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
+  uv run "$SCRIPT_DIR/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
   ```
 - **[s]kip** — leave unchanged
 
@@ -66,3 +66,4 @@ Actions taken:
 - "Days overdue" is calculated from the task's original due date
 - Rescheduling sets the due date to tomorrow at the same time (or all-day if no time was set)
 - If there are no overdue or due tasks, report "All clear — no tasks due today."
+- The `complete_task` and `update_task` tools require both `project_id` and `task_id` — extract `projectId` from the task data returned by the query tools

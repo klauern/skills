@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["mcp__plugin_ticktick_ticktick__create_task", "mcp__plugin_ticktick_ticktick__get_projects", "mcp__plugin_ticktick_ticktick__batch_create_tasks"]
+allowed-tools: ["mcp__plugin_ticktick_ticktick__create_task", "mcp__plugin_ticktick_ticktick__list_projects", "mcp__plugin_ticktick_ticktick__batch_add_tasks"]
 description: Capture a task or list of tasks to TickTick
 ---
 
@@ -21,8 +21,8 @@ Quickly create one or more tasks in TickTick, with optional project, due date, a
 
 ### With a task description:
 1. Parse the input for title, project hint, due date, and priority
-2. If the project is ambiguous, call `get_projects` and ask the user to choose
-3. Call `create_task` (or `batch_create_tasks` for multiple tasks)
+2. If the project is ambiguous, call `list_projects` and ask the user to choose
+3. Call `create_task` (or `batch_add_tasks` for multiple tasks)
 4. Confirm with task title, project name, due date, and task ID
 
 ### Interactive mode (no argument):
@@ -38,11 +38,31 @@ Parse the user-supplied description (or ask for one) and extract:
 - **Due date**: Natural language dates ("tomorrow", "Friday", "next Monday")
 - **Priority**: Keywords like "high priority", "urgent", "low"
 
-Call `get_projects` when:
+Call `list_projects` when:
 - A project hint is present but does not unambiguously match a known project
 - No project is specified and the user may want to choose
 
-Use `batch_create_tasks` when the input contains multiple tasks (bullet list or comma-separated items).
+**Single task** — call `create_task` with the task wrapped in a `task` object:
+```json
+{
+  "task": {
+    "title": "Buy milk",
+    "projectId": "abc123",
+    "dueDate": "2026-04-03T00:00:00+00:00",
+    "priority": 0
+  }
+}
+```
+
+**Multiple tasks** — call `batch_add_tasks` with an array of task objects:
+```json
+{
+  "tasks": [
+    { "title": "Review PR #42", "priority": 3 },
+    { "title": "Update docs" }
+  ]
+}
+```
 
 ## Output
 
@@ -50,7 +70,7 @@ Use `batch_create_tasks` when the input contains multiple tasks (bullet list or 
 Created task:
   Title:   Buy milk
   Project: Personal
-  Due:     2026-03-07
+  Due:     2026-04-03
   ID:      abc123xyz
 ```
 

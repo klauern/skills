@@ -4,14 +4,15 @@
 # dependencies = ["httpx"]
 # ///
 """
-TickTick date management — clear due/start dates from tasks.
+TickTick API helper — operations the MCP server cannot perform.
 
-The upstream ticktick-mcp server skips null values in update_task,
-so there is no way to clear dates via MCP. This script calls the
-TickTick API directly.
+Commands:
+    clear-dates  Clear due/start dates from a task (MCP can't send null values)
+    delete-task  Delete a task (official MCP server lacks this endpoint)
 
 Usage:
-    ticktick_dates.py clear-dates --task-id <id> --project-id <id> [--json]
+    ticktick_api.py clear-dates --task-id <id> --project-id <id> [--json]
+    ticktick_api.py delete-task --task-id <id> --project-id <id> [--json]
 
 Environment:
     TICKTICK_ACCESS_TOKEN - Required OAuth access token
@@ -62,7 +63,7 @@ def request(method: str, path: str, operation: str, **kwargs: Any) -> httpx.Resp
 
 def handle_response(response: httpx.Response, operation: str) -> dict | None:
     """Handle API response with error checking."""
-    if response.status_code == 200:
+    if response.status_code in (200, 204):
         if response.text:
             return response.json()
         return None
@@ -94,10 +95,24 @@ def cmd_clear_dates(args: argparse.Namespace) -> None:
         print(f"Cleared dates for: {title}")
 
 
+def cmd_delete_task(args: argparse.Namespace) -> None:
+    """Delete a task by project ID and task ID."""
+    path = f"/project/{args.project_id}/task/{args.task_id}"
+
+    operation = f"Delete task {args.task_id}"
+    response = request("DELETE", path, operation)
+    handle_response(response, operation)
+
+    if args.json:
+        print(json.dumps({"success": True, "taskId": args.task_id, "deleted": True}, indent=2))
+    else:
+        print(f"Deleted task: {args.task_id}")
+
+
 def main() -> None:
     """Main entry point."""
     parser = argparse.ArgumentParser(
-        description="TickTick date management",
+        description="TickTick API helper — operations the MCP server cannot perform",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -108,6 +123,12 @@ def main() -> None:
     sp_clear.add_argument("--project-id", required=True, help="Project (list) ID")
     sp_clear.add_argument("--json", action="store_true", help="Output as JSON")
     sp_clear.set_defaults(func=cmd_clear_dates)
+
+    sp_delete = subparsers.add_parser("delete-task", help="Delete a task")
+    sp_delete.add_argument("--task-id", required=True, help="Task ID")
+    sp_delete.add_argument("--project-id", required=True, help="Project (list) ID")
+    sp_delete.add_argument("--json", action="store_true", help="Output as JSON")
+    sp_delete.set_defaults(func=cmd_delete_task)
 
     args = parser.parse_args()
     args.func(args)
