@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["mcp__plugin_ticktick_ticktick__create_task", "mcp__plugin_ticktick_ticktick__list_projects", "mcp__plugin_ticktick_ticktick__batch_add_tasks"]
+allowed-tools: ["mcp__ticktick__create_task", "mcp__ticktick__list_projects", "mcp__ticktick__batch_add_tasks"]
 description: Capture a task or list of tasks to TickTick
 ---
 

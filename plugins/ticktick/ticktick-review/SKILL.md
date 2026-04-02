@@ -11,7 +11,7 @@ author: klauern
 
 Surfaces overdue, today, and upcoming tasks from TickTick and guides the user through triage. Supports daily planning, weekly reviews, and GTD-style next-action selection.
 
-**MCP tool prefix**: `mcp__plugin_ticktick_ticktick__`
+**MCP tool prefix**: `mcp__ticktick__`
 
 ## When to Activate
 

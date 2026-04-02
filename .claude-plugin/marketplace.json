@@ -30,19 +30,8 @@
       "source": "./plugins/capacities"
     },
     {
-      "commands": [
-        "./plugins/ticktick/commands/setup.md",
-        "./plugins/ticktick/commands/capture.md",
-        "./plugins/ticktick/commands/today.md",
-        "./plugins/ticktick/commands/inbox.md",
-        "./plugins/ticktick/commands/clear-dates.md"
-      ],
       "description": "TickTick task management via MCP integration",
       "name": "ticktick",
-      "skills": [
-        "./plugins/ticktick/ticktick-capture/SKILL.md",
-        "./plugins/ticktick/ticktick-review/SKILL.md"
-      ],
       "source": "./plugins/ticktick"
     }
   ]

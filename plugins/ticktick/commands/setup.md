@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__list_projects"]
+allowed-tools: ["Bash", "mcp__ticktick__list_projects"]
 description: Verify TickTick MCP connection and list projects
 ---
 
@@ -33,20 +33,20 @@ Projects:
   - Inbox (id: ghi789)
 ```
 
-3. If the call fails, display:
+3. If the MCP tool is not available or the call fails, display:
 
 ```text
 TickTick MCP server is not connected.
 
-Troubleshooting:
-  1. Run: claude mcp list
-  2. Look for "ticktick" — it should show "Connected"
-  3. If missing, the plugin may need reinstalling: /plugin install ticktick@klauern-skills
-  4. If "Needs authentication", restart Claude Code — it will prompt for OAuth
+To add it, run:
+  claude mcp add --transport http ticktick https://mcp.ticktick.com/ -s user
+
+Then restart Claude Code — it will prompt for TickTick OAuth on first use.
 ```
 
 ## Notes
 
-- The official TickTick MCP server at mcp.ticktick.com handles OAuth automatically via Claude's MCP auth flow
-- No environment variables are needed for the MCP connection itself
+- This plugin requires a global `ticktick` MCP server configured via `claude mcp add`
+- The official TickTick MCP server at mcp.ticktick.com handles OAuth automatically
+- No environment variables are needed for the MCP connection
 - `TICKTICK_ACCESS_TOKEN` is only needed for the `ticktick_api.py` script (clear-dates, delete-task)

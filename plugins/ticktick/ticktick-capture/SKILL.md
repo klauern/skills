@@ -11,7 +11,7 @@ author: klauern
 
 Converts natural language input into structured TickTick tasks using the MCP server tools. Handles single tasks, lists of tasks, and tasks with complex metadata (due dates, priorities, projects, tags).
 
-**MCP tool prefix**: `mcp__plugin_ticktick_ticktick__`
+**MCP tool prefix**: `mcp__ticktick__`
 
 ## When to Activate
 

@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["Bash", "mcp__plugin_ticktick_ticktick__list_undone_tasks_by_time_query", "mcp__plugin_ticktick_ticktick__filter_tasks", "mcp__plugin_ticktick_ticktick__complete_task", "mcp__plugin_ticktick_ticktick__update_task"]
+allowed-tools: ["Bash", "mcp__ticktick__list_undone_tasks_by_time_query", "mcp__ticktick__filter_tasks", "mcp__ticktick__complete_task", "mcp__ticktick__update_task"]
 description: Show today's tasks and overdue items, with triage actions
 ---
 
