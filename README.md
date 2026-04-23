@@ -4,12 +4,13 @@ Custom skills and commands for Claude Code.
 
 ## Overview
 
-This is a Claude Code plugin marketplace repository containing three plugins that automate Git workflows, pull request management, and development utilities. The repository is organized similarly to the official [Anthropic skills repository](https://github.com/anthropics/skills).
+This is a Claude Code plugin marketplace repository containing four plugins that automate Git workflows, pull request management, and development utilities. The repository is organized similarly to the official [Anthropic skills repository](https://github.com/anthropics/skills).
 
 **Plugins**:
 - **commits** - Conventional commit message creation following conventionalcommits.org
-- **pull-requests** - Intelligent PR creation, updates, conflict resolution, and comment review
+- **pull-requests** - Intelligent PR assessment, creation, updates, conflict resolution, and comment review
 - **dev-utilities** - Development workflow utilities (AGENTS.md generation, GH Actions upgrades, CI analysis, git optimization, worktrees)
+- **capacities** - Capacities knowledge management API integration
 
 ## Installation
 
@@ -38,10 +39,11 @@ Add the marketplace once (GitHub repo or local path):
 Install one or more plugins from the marketplace:
 
 ```bash
-# Install all three plugins
+# Install all four plugins
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills
+/plugin install capacities@klauern-skills
 
 # Or install selectively
 /plugin install commits@klauern-skills
@@ -70,6 +72,7 @@ git clone https://github.com/klauern/klauern-skills.git
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills
+/plugin install capacities@klauern-skills
 ```
 
 ## Available Skills
@@ -83,6 +86,19 @@ A skill that helps write conventional commit messages following best practices a
 **Usage**: Claude will automatically use this skill when you ask for help with commit messages.
 
 ### pull-requests Plugin
+
+#### pull-requests
+
+An orchestrator skill for pull request workflows. It routes to assessment, creation, update, comment triage, and conflict-resolution flows.
+
+**Features**:
+
+- Assesses PRs end to end and can create or reuse a dedicated worktree
+- Routes to PR creation, update, and comment triage flows
+- Keeps reply/resolve actions separate from assessment
+- Uses the `pull-requests` skill as the top-level entry point for PR work
+
+**Usage**: Claude will automatically use this skill when you ask to inspect or manage a pull request, or use the `/pull-requests:pr-assess` command.
 
 #### pr-creator
 
@@ -216,6 +232,24 @@ This command will:
 - Push to the remote repository
 
 ### pull-requests Plugin
+
+#### /pull-requests:pr-assess
+
+Assess a pull request, triage comments, and create or reuse a dedicated worktree.
+
+**Usage**:
+
+```bash
+/pull-requests:pr-assess [pr-number]
+```
+
+This command will:
+
+- Resolve the target PR from the current branch or an explicit PR number
+- Gather PR metadata, commits, files, comments, and review threads
+- Create or reuse a detached worktree under `.worktrees/`
+- Classify feedback into blocking, actionable, suggestion, nit, and informational items
+- Return a stable assessment report for follow-up work
 
 #### /pull-requests:pr
 
@@ -432,14 +466,20 @@ klauern-skills/
 │   │       ├── format-reference.md
 │   │       └── workflows.md
 │   │
-│   ├── pull-requests/                # PR creation and management plugin
+│   ├── pull-requests/                # PR workflows plugin
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
 │   │   ├── commands/
+│   │   │   ├── pr-assess.md
 │   │   │   ├── pr.md
 │   │   │   ├── pr-update.md
 │   │   │   ├── pr-comment-review.md
 │   │   │   └── merge-conflicts.md
+│   │   ├── SKILL.md
+│   │   ├── references/
+│   │   │   └── assessment.md
+│   │   ├── scripts/
+│   │   │   └── pr_assess.py
 │   │   ├── pr-creator/               # Skill
 │   │   │   ├── SKILL.md
 │   │   │   └── references/
