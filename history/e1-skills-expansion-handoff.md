@@ -150,7 +150,7 @@ git show --stat HEAD                              # spot-check the final tree
 
 ```bash
 # No leftover conflict markers
-grep -rn '<<<<<<< \|=======$\|>>>>>>>' plugins/commits/ AGENTS.md || echo "Clean"
+rg '^(<<<<<<<|=======|>>>>>>>)' plugins/commits/ AGENTS.md || echo "Clean"
 
 # Plugin version is sane
 jq .version plugins/commits/.claude-plugin/plugin.json
