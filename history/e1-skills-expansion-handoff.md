@@ -14,7 +14,7 @@ When the prior session attempted this with a backgrounded `merge-conflict-resolv
 
 ## Source commit
 
-```
+```text
 SHA:    2f87839b85697ceb520eddc99531c5b34882196f
 Author: Nick Klauer <klauer@gmail.com>
 Date:   Sat Dec 20 12:54:23 2025 -0600
@@ -69,7 +69,7 @@ git cherry-pick 2f87839
 
 Expect 5 conflicts (file paths from prior attempt — re-verify in case main has moved):
 
-```
+```text
 AGENTS.md
 plugins/commits/.claude-plugin/plugin.json
 plugins/commits/commands/commit-push.md
@@ -90,7 +90,7 @@ git add AGENTS.md
 
 If `2f87839` adds a *genuinely new* section about the new skills (changelog-generator, commit-message-linter), inspect with:
 ```bash
-git show 2f87839:AGENTS.md | diff main:AGENTS.md - | grep -A3 "changelog-generator\|commit-message-linter"
+git diff main:AGENTS.md 2f87839:AGENTS.md | grep -A3 "changelog-generator\|commit-message-linter"
 ```
 and hand-port any net-new content. Otherwise, just take main verbatim.
 
