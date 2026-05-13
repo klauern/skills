@@ -51,7 +51,7 @@ Use this skill when:
 - Quick diff analysis and file categorization
 - Simple commit message drafting
 
-### Use Sonnet 4.5 for
+### Use Sonnet 4.6 for
 
 - Commit breakpoint determination and multi-commit planning
 - Scope identification and complex message composition
@@ -96,7 +96,7 @@ When nothing is staged and changes need splitting:
 
 1. Review: `git status`, `git diff`, `git log -10 --oneline`
 2. Categorize changes by type, scope, and logical boundaries (use Haiku 4.5)
-3. Plan commit breakdown with atomic, self-contained commits (use Sonnet 4.5)
+3. Plan commit breakdown with atomic, self-contained commits (use Sonnet 4.6)
 4. For each commit: stage files, create commit with heredoc
 5. Verify: `git log --oneline -n <count>`
 6. Push if requested: `git push`

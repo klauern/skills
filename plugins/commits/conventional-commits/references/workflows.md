@@ -88,7 +88,7 @@ Use when nothing is staged and changes need to be broken into logical commits.
    - Documentation updates → `docs`
    - Test additions → `test(auth)`
 
-3. **Plan commit breakdown (Use Sonnet 4.5)**
+3. **Plan commit breakdown (Use Sonnet 4.6)**
 
    Create a list of commits, each representing a single logical change:
    1. `feat(auth): add OAuth2 authentication support`
@@ -135,7 +135,7 @@ Use when nothing is staged and changes need to be broken into logical commits.
 - File categorization by type or component
 - Simple commit message drafting
 
-### Use Sonnet 4.5 for
+### Use Sonnet 4.6 for
 
 - Commit breakpoint determination
 - Multi-commit planning
@@ -143,4 +143,4 @@ Use when nothing is staged and changes need to be broken into logical commits.
 - Complex commit message composition with detailed bodies
 - Cross-cutting change analysis
 
-**Example**: When analyzing unstaged changes, use Haiku 4.5 to categorize files by type, then Sonnet 4.5 to determine optimal commit breakdown considering atomic commits and logical boundaries.
+**Example**: When analyzing unstaged changes, use Haiku 4.5 to categorize files by type, then Sonnet 4.6 to determine optimal commit breakdown considering atomic commits and logical boundaries.

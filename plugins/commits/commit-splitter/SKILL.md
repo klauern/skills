@@ -58,7 +58,7 @@ Use this skill when:
 - Simple hunk parsing
 - Git command execution
 
-### Use Sonnet 4.5 for
+### Use Sonnet 4.6 for
 
 - Commit boundary determination
 - Cross-file dependency analysis

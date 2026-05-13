@@ -173,7 +173,7 @@ plugins/
 
 **Model Strategy**: Skills explicitly define when to use Haiku vs Sonnet:
 - **Haiku 4.5**: Fast operations (file I/O, pattern matching, parsing, git commands)
-- **Sonnet 4.5**: Complex reasoning (analysis, generation, decision-making, natural language synthesis)
+- **Sonnet 4.6**: Complex reasoning (analysis, generation, decision-making, natural language synthesis)
 
 ## Tool Preferences
 
