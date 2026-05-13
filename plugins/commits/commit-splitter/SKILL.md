@@ -52,13 +52,13 @@ Use this skill when:
 
 ## Sub-Agent Strategy
 
-### Use Haiku 4.5 for
+### Use Haiku for
 
 - File listing and categorization
 - Simple hunk parsing
 - Git command execution
 
-### Use Sonnet 4.6 for
+### Use Sonnet for
 
 - Commit boundary determination
 - Cross-file dependency analysis

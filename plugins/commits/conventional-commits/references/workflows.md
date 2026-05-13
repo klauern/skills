@@ -75,7 +75,7 @@ Use when nothing is staged and changes need to be broken into logical commits.
    git log -10 --oneline  # Check recent commit style
    ```
 
-2. **Analyze and categorize (Use Haiku 4.5)**
+2. **Analyze and categorize (Use Haiku)**
 
    Group changes by:
    - **Type**: Features, fixes, documentation, refactoring, etc.
@@ -88,7 +88,7 @@ Use when nothing is staged and changes need to be broken into logical commits.
    - Documentation updates → `docs`
    - Test additions → `test(auth)`
 
-3. **Plan commit breakdown (Use Sonnet 4.6)**
+3. **Plan commit breakdown (Use Sonnet)**
 
    Create a list of commits, each representing a single logical change:
    1. `feat(auth): add OAuth2 authentication support`
@@ -129,13 +129,13 @@ Use when nothing is staged and changes need to be broken into logical commits.
 
 ## Sub-Agent Strategy
 
-### Use Haiku 4.5 for
+### Use Haiku for
 
 - Quick diff analysis
 - File categorization by type or component
 - Simple commit message drafting
 
-### Use Sonnet 4.6 for
+### Use Sonnet for
 
 - Commit breakpoint determination
 - Multi-commit planning
@@ -143,4 +143,4 @@ Use when nothing is staged and changes need to be broken into logical commits.
 - Complex commit message composition with detailed bodies
 - Cross-cutting change analysis
 
-**Example**: When analyzing unstaged changes, use Haiku 4.5 to categorize files by type, then Sonnet 4.6 to determine optimal commit breakdown considering atomic commits and logical boundaries.
+**Example**: When analyzing unstaged changes, use Haiku to categorize files by type, then Sonnet to determine optimal commit breakdown considering atomic commits and logical boundaries.
