@@ -1,0 +1,28 @@
+{
+  "eval_id": 3,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Recommends at least one Python-specific sandbox option (FastMCP CodeMode transform, RestrictedPython, pyodide, or E2B)",
+      "passed": true,
+      "evidence": "Recommends FastMCP CodeMode with MontySandboxProvider as default path; E2B for stronger isolation; comparison table includes RestrictedPython/pyodide and Modal"
+    },
+    {
+      "text": "Explains the auth boundary pattern: tokens/credentials live on the host, not in the sandbox",
+      "passed": true,
+      "evidence": "'The sandbox must never see OAuth tokens, API keys, or refresh tokens. Ever.' with implementation item R.04 called out explicitly"
+    },
+    {
+      "text": "Explains that the sandbox receives pre-authorized client objects (not raw tokens/keys)",
+      "passed": true,
+      "evidence": "'The sandbox receives pre-authorized client objects — structs or instances that hold credentials in their instance state and expose only the safe methods.' with Python code example."
+    },
+    {
+      "text": "Mentions FastMCP's CodeMode transform specifically as a fast path for Python harnesses",
+      "passed": true,
+      "evidence": "'FastMCP's Built-in CodeMode Transform — This is the fastest path to a working implementation' as the default path header"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Excellent response. Correctly identifies FastMCP as the fastest path, explains the pre-authorized client object pattern with working Python code, and clearly distinguishes the sandbox perimeter from credential hygiene."
+}

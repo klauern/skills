@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "2.6.1"
+    "version": "2.7.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -33,6 +33,11 @@
       "description": "TickTick task management via MCP integration",
       "name": "ticktick",
       "source": "./plugins/ticktick"
+    },
+    {
+      "description": "Agent architecture patterns for Claude Code harnesses",
+      "name": "agent-patterns",
+      "source": "./plugins/agent-patterns"
     }
   ]
 }

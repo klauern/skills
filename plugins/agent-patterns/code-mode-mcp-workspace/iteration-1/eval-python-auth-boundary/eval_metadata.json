@@ -1,0 +1,27 @@
+{
+  "eval_id": 3,
+  "eval_name": "eval-python-auth-boundary",
+  "prompt": "I'm implementing Code Mode MCP in a Python agent harness. What sandbox runtime should I use, and how do I make sure OAuth tokens don't leak into the sandbox?",
+  "assertions": [
+    {
+      "text": "Recommends at least one Python-specific sandbox option (FastMCP CodeMode transform, RestrictedPython, pyodide, or E2B)",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Explains the auth boundary pattern: tokens/credentials live on the host, not in the sandbox",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Explains that the sandbox receives pre-authorized client objects (not raw tokens/keys)",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Mentions FastMCP's CodeMode transform specifically as a fast path for Python harnesses",
+      "passed": null,
+      "evidence": null
+    }
+  ]
+}

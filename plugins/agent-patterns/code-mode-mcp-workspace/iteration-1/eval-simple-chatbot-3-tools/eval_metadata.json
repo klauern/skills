@@ -1,0 +1,27 @@
+{
+  "eval_id": 2,
+  "eval_name": "eval-simple-chatbot-3-tools",
+  "prompt": "I have a simple chatbot that uses 3 MCP tools: Google Calendar, Gmail, and a weather API. Should I implement Code Mode MCP?",
+  "assertions": [
+    {
+      "text": "Recommends AGAINST implementing Code Mode MCP for this use case",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Gives a concrete reason tied to the user's situation (too few tools, one-shot nature of calls, or sandbox overhead not worth it)",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Does NOT confusingly recommend Code Mode anyway 'for future-proofing' or unconditionally",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Mentions what threshold or conditions would make Code Mode worth reconsidering (e.g., if tool count grows, or chained workflows emerge)",
+      "passed": null,
+      "evidence": null
+    }
+  ]
+}

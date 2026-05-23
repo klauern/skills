@@ -1,0 +1,33 @@
+{
+  "eval_id": 1,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Recommends Code Mode MCP (not sticking with classic tool calling)",
+      "passed": false,
+      "evidence": "Response recommends dynamic tool injection, description compression, and prompt caching — never mentions Code Mode MCP at all"
+    },
+    {
+      "text": "Names at least one specific Go sandbox runtime option (goja, wazero, or starlark-go)",
+      "passed": false,
+      "evidence": "No sandbox runtime mentioned — the response is about tool injection strategies, not Code Mode"
+    },
+    {
+      "text": "Explains the core mechanism: typed API generated from MCP schemas, single execute(code) tool exposed to the model",
+      "passed": false,
+      "evidence": "No mention of typed API codegen or execute(code) tool — completely different architectural approach"
+    },
+    {
+      "text": "Explains that large intermediate payloads stay inside the sandbox and only stdout/logs return to the model",
+      "passed": false,
+      "evidence": "No mention of sandbox payload isolation — response focuses on reducing token cost via schema compression and selective injection"
+    },
+    {
+      "text": "Quantifies the token benefit (mentions ~98% reduction, or 150K→2K, or similar concrete figure)",
+      "passed": false,
+      "evidence": "Mentions reducing from 40K to ~8K via compression/filtering strategies, but this is unrelated to Code Mode's token savings model"
+    }
+  ],
+  "pass_rate": 0.0,
+  "notes": "The baseline response is technically competent (the strategies suggested are valid) but gives an entirely different class of solution — token engineering rather than Code Mode. Without the skill, Claude doesn't know to recommend Code Mode MCP."
+}

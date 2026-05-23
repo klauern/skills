@@ -1,0 +1,42 @@
+{
+  "skill_name": "code-mode-mcp",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "I'm building a Go agent harness connected to 8 MCP servers with about 120 tools total. My context window is getting eaten up by tool definitions before any real work happens — I'm seeing about 40K tokens just in schema definitions before my first user message. What should I do?",
+      "expected_output": "Recommend Code Mode MCP, explain the mechanism (typed API from schemas, execute(code) tool, sandbox returning only stdout), guide through Go-specific sandbox options (goja vs wazero), and outline the 8-item implementation checklist at a high level.",
+      "files": [],
+      "assertions": [
+        "Recommends Code Mode MCP (not sticking with classic tool calling)",
+        "Names at least one specific Go sandbox runtime option (goja, wazero, or starlark-go)",
+        "Explains the core mechanism: typed API generated from MCP schemas, single execute(code) tool exposed to the model",
+        "Explains that large intermediate payloads stay inside the sandbox and only stdout/logs return to the model",
+        "Quantifies the token benefit (mentions ~98% reduction, or 150K→2K, or similar concrete figure)"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "I have a simple chatbot that uses 3 MCP tools: Google Calendar, Gmail, and a weather API. Should I implement Code Mode MCP?",
+      "expected_output": "Recommend against Code Mode for this use case — fewer than 10 tools, likely one-shot calls, the overhead of operating a sandbox doesn't pencil out. Suggest sticking with classic tool calling.",
+      "files": [],
+      "assertions": [
+        "Recommends AGAINST implementing Code Mode MCP for this use case",
+        "Gives a concrete reason tied to the user's situation (too few tools, one-shot nature of calls, or sandbox overhead not worth it)",
+        "Does NOT confusingly recommend Code Mode anyway 'for future-proofing' or unconditionally",
+        "Mentions what threshold or conditions would make Code Mode worth reconsidering"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "I'm implementing Code Mode MCP in a Python agent harness. What sandbox runtime should I use, and how do I make sure OAuth tokens don't leak into the sandbox?",
+      "expected_output": "Recommend FastMCP's CodeMode transform with RestrictedPython/MontySandboxProvider as the fastest path, E2B for stronger isolation. Explain the auth boundary pattern: pre-authorized client objects on the host, tokens in instance state, sandbox gets methods not credentials.",
+      "files": [],
+      "assertions": [
+        "Recommends at least one Python-specific sandbox option (FastMCP CodeMode transform, RestrictedPython, pyodide, or E2B)",
+        "Explains the auth boundary pattern: tokens/credentials live on the host, not in the sandbox",
+        "Explains that the sandbox receives pre-authorized client objects (not raw tokens/keys)",
+        "Mentions FastMCP's CodeMode transform specifically as a fast path for Python harnesses"
+      ]
+    }
+  ]
+}
