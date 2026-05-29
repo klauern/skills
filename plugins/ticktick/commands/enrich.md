@@ -1,5 +1,5 @@
 ---
-allowed-tools: ["mcp__ticktick__get_task_by_id", "mcp__ticktick__get_project_with_undone_tasks", "mcp__ticktick__filter_tasks", "mcp__ticktick__update_task", "mcp__ticktick__batch_update_tasks", "mcp__ticktick__list_tags", "mcp__ticktick__list_projects", "mcp__ticktick__add_comment"]
+allowed-tools: ["mcp__ticktick__get_task_by_id", "mcp__ticktick__get_project_with_undone_tasks", "mcp__ticktick__filter_tasks", "mcp__ticktick__update_task", "mcp__ticktick__batch_update_tasks", "mcp__ticktick__complete_task", "mcp__ticktick__list_tags", "mcp__ticktick__list_projects", "mcp__ticktick__add_comment", "AskUserQuestion"]
 description: Interactively enrich a vague TickTick task (or a whole list) into an actionable item
 ---
 
@@ -28,11 +28,13 @@ notes — and write it all back.
 1. Resolve the task (`get_task_by_id`, or match a title within its project)
 2. Auto-gather: scan title/content for references (Jira keys, repos, URLs, people)
    and resolve only those already present — never search blindly
-3. Interview one question at a time, each with a recommended answer; skip any the
-   task or research already answers
-4. Merge answers into a full task object and `update_task` — write a markdown
+3. If a resolved reference IS the canonical tracker (open, owned Jira/GitHub item),
+   offer **close-as-duplicate** (`complete_task`) before enriching
+4. Interview, skipping anything already answered. Free-text for done-when/context;
+   AskUserQuestion option prompts (recommended-first) for priority/timeframe/labels
+5. Merge answers into a full task object and `update_task` — write a markdown
    content block AND set priority, tags, and dates
-5. Show a before/after of changed fields + the task ID
+6. Show a before/after of changed fields + the task ID
 
 ### Batch mode (project name)
 1. Fetch undone tasks via `get_project_with_undone_tasks`

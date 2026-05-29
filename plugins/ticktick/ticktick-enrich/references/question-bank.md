@@ -2,13 +2,32 @@
 
 Detailed reference for `ticktick-enrich`. Loaded on demand.
 
-## Interview principle (grill-me style)
+## Interview principle
 
-- Ask **one question at a time**. Wait for the answer before the next.
+- Walk the tree top-to-bottom; later answers may make a lower question moot.
 - Every question carries **your recommended answer** so the user can accept fast.
 - **Explore before asking**: if the task text or Phase-2 lookups already answer a
-  question, state what you found and skip the question (or ask only to confirm).
-- Walk the tree top-to-bottom; later answers may make a lower question moot.
+  question, state what you found and skip it (or ask only to confirm).
+- **Absorb multi-answer replies**: one user message often resolves several questions
+  at once — take all of them and skip the satisfied questions; don't re-ask.
+- **Hybrid input style**:
+  - *Free-text* for prose fields (Done-when, Context/Links) — offer recommended
+    phrasing the user can accept.
+  - *AskUserQuestion option prompts* for mechanical fields (Priority, Timeframe,
+    Labels). Recommended option **first**, suffixed "(Recommended)". Batch 2–4 into
+    one call. Labels = multi-select from the tag vocabulary.
+
+## Already-tracked-elsewhere branch (check before the interview)
+
+If Phase 2 resolved a reference that IS the system of record for this work (open Jira
+ticket, owning GitHub issue/PR), ask first whether to **close the TickTick task as a
+duplicate** rather than enrich it. Recommend close when:
+
+- The Jira/GitHub item is open and actively owned (has an assignee, recent activity).
+- The TickTick task adds no detail the tracker lacks.
+
+Recommend *keep & enrich* only when the user wants it as a personal reminder or
+next-action nudge distinct from the tracker. Close via `complete_task`.
 
 ## Question tree
 
@@ -23,12 +42,17 @@ Detailed reference for `ticktick-enrich`. Loaded on demand.
 ### 2. Priority (0 / 1 / 3 / 5)
 > "Priority? Recommended: **<n>** because <signal>."
 
-Recommendation heuristics (pick the highest that applies):
-- **5 (high)**: hard deadline this week, blocks others, security/compliance risk,
-  someone is explicitly waiting, production impact.
-- **3 (medium)**: clear owner + this-sprint relevance, follow-up the user committed to.
-- **1 (low)**: useful but no deadline, polish, "should look into".
+Recommendation heuristics (pick the highest that genuinely applies — lean
+conservative; when unsure between two levels, recommend the lower one):
+- **5 (high)**: a real near-term deadline, blocks others, active security/compliance
+  risk, someone is explicitly waiting, production impact.
+- **3 (medium)**: clear owner + this-sprint relevance, a follow-up the user committed to.
+- **1 (low)**: useful but no deadline, polish, "should look into", asks/questions.
 - **0 (none)**: idea/someday, no commitment.
+
+**Overdue ≠ high.** A passed due date (or a 2099/placeholder date) is a *recency*
+signal that the task has been sitting, not evidence of urgency. Do not inflate
+priority just because a date is in the past — judge urgency from the work itself.
 
 Never output 2 or 4 — invalid in TickTick.
 

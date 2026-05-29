@@ -70,17 +70,38 @@ resolve **only the ones already present** — never search blindly:
 Degrade gracefully: if a lookup tool is not connected or fails, note it and move on.
 Never block the interview on an external call.
 
-### Phase 3 — Interview (grill-me style)
+**Already tracked elsewhere? (ask first).** If a resolved reference IS the canonical
+system of record for this work — an open Jira ticket, a GitHub issue/PR that owns the
+task — surface that and offer **close-as-duplicate** *before* the interview. A
+TickTick item that merely mirrors an active Jira ticket usually shouldn't be enriched;
+it should be completed so the real tracker owns it. Only proceed to enrich if the user
+wants to keep the TickTick task as a personal reminder.
 
-Ask **one question at a time**, each with your recommended answer, walking the
-decision tree. **If a question is already answered by the task or by Phase-2
-research, skip it** — prefer exploring over asking. Default sequence:
+### Phase 3 — Interview
 
-1. **Done when?** — what does "done" look like? (sharpens title + acceptance)
-2. **Priority** — 0/1/3/5; recommend from signals (deadline, blocker, who's waiting)
-3. **Timeframe** — a concrete date, or "someday"; replace any 2099 placeholder
-4. **Labels** — propose from the existing tag vocabulary
-5. **Links/context** — any ticket, doc, repo, or person to attach
+Walk the decision tree, **skipping any question the task or Phase-2 research already
+answers** (a single user reply may resolve several — absorb them all and move on).
+Prefer exploring over asking.
+
+Use the right input style per field — **hybrid**:
+
+- **Free-text** for the prose fields: *Done when?* and *Context/Links* — they need the
+  user's own words. Offer a recommended phrasing they can accept.
+- **AskUserQuestion (option prompts)** for the mechanical fields: *Priority*,
+  *Timeframe*, *Labels*. Put the recommended option **first** and label it
+  "(Recommended)". Batch 2–4 of these into one AskUserQuestion call. Labels = a
+  multi-select drawn from the existing tag vocabulary.
+
+Default sequence:
+
+1. **Done when?** *(free-text)* — what does "done" look like? (sharpens title + acceptance)
+2. **Priority** *(option prompt)* — 0/1/3/5; recommend from signals (deadline, blocker,
+   who's waiting). **Treat overdue-ness as a recency signal, not urgency — lean
+   conservative; don't inflate priority just because a placeholder date has passed.**
+3. **Timeframe** *(option prompt)* — a concrete date, or "someday"; replace any
+   2099/overdue placeholder
+4. **Labels** *(multi-select option prompt)* — propose from the existing tag vocabulary
+5. **Links/context** *(free-text)* — any ticket, doc, repo, or person to attach
 6. **Next action** (optional, chunky items only) — the first physical step
 
 See `references/question-bank.md` for the full tree, recommendation heuristics, the
