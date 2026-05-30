@@ -20,9 +20,9 @@ Detailed reference for `ticktick-enrich`. Loaded on demand.
 - **Absorb multi-answer replies**: one user message often resolves several questions
   at once — take all of them and skip the satisfied questions; don't re-ask.
 - **Hybrid input style**:
-  - *Free-text* for prose fields (Done-when, Context/Links) — offer recommended
+  - _Free-text_ for prose fields (Done-when, Context/Links) — offer recommended
     phrasing the user can accept.
-  - *AskUserQuestion option prompts* for mechanical fields (Priority, Timeframe,
+  - _AskUserQuestion option prompts_ for mechanical fields (Priority, Timeframe,
     Labels). Recommended option **first**, suffixed "(Recommended)". Batch 2–4 into
     one call. Labels = multi-select from the tag vocabulary.
 
@@ -35,13 +35,14 @@ duplicate** rather than enrich it. Recommend close when:
 - The Jira/GitHub item is open and actively owned (has an assignee, recent activity).
 - The TickTick task adds no detail the tracker lacks.
 
-Recommend *keep & enrich* only when the user wants it as a personal reminder or
+Recommend _keep & enrich_ only when the user wants it as a personal reminder or
 next-action nudge distinct from the tracker. Close via `complete_task`.
 
 ## Question tree
 
 ### 1. Done when? (acceptance + title)
-> "What does *done* look like for this? I'll sharpen the title to match.
+
+> "What does _done_ look like for this? I'll sharpen the title to match.
 > Recommended: `<restated, verb-first title>`."
 
 - Goal: a verb-first, specific title and a one-line acceptance criterion.
@@ -49,23 +50,26 @@ next-action nudge distinct from the tracker. Close via `complete_task`.
 - Capture the criterion into the `## Done when` line of the content block.
 
 ### 2. Priority (0 / 1 / 3 / 5)
+
 > "Priority? Recommended: **<n>** because <signal>."
 
 Recommendation heuristics (pick the highest that genuinely applies — lean
 conservative; when unsure between two levels, recommend the lower one):
-- **5 (high)**: a real near-term deadline, blocks others, active security/compliance
-  risk, someone is explicitly waiting, production impact.
-- **3 (medium)**: clear owner + this-sprint relevance, a follow-up the user committed to.
-- **1 (low)**: useful but no deadline, polish, "should look into", asks/questions.
-- **0 (none)**: idea/someday, no commitment.
 
-**Overdue ≠ high.** A passed due date (or a 2099/placeholder date) is a *recency*
+- **5 (urgent/critical)**: a real near-term deadline, blocks others, active security/compliance
+  risk, someone is explicitly waiting, production impact.
+- **3 (high/important)**: clear owner + this-sprint relevance, a follow-up the user committed to.
+- **1 (medium)**: useful but no deadline, polish, "should look into", asks/questions.
+- **0 (low/none)**: idea/someday, no commitment.
+
+**Overdue ≠ high.** A passed due date (or a 2099/placeholder date) is a _recency_
 signal that the task has been sitting, not evidence of urgency. Do not inflate
 priority just because a date is in the past — judge urgency from the work itself.
 
 Never output 2 or 4 — invalid in TickTick.
 
 ### 3. Timeframe (date or someday)
+
 > "When does this need to happen? Recommended: <date | 'someday'>."
 
 - Convert relative answers ("Friday", "next week") to ISO 8601 **with offset**,
@@ -78,6 +82,7 @@ Never output 2 or 4 — invalid in TickTick.
   set it if the user confirms.
 
 ### 4. Labels (tags)
+
 > "Tags? Recommended: <subset of existing vocab>. Add/remove any?"
 
 - Propose from the **existing vocabulary** below. Reuse beats inventing.
@@ -85,12 +90,14 @@ Never output 2 or 4 — invalid in TickTick.
 - Do not recreate polluted/junk tags (e.g. `16157)`, `3334`, ` ``` `).
 
 ### 5. Links / context
+
 > "Any ticket, doc, repo, or person to attach? I found: <Phase-2 results>."
 
 - Fold confirmed links + resolved-reference summaries into `## Links` / `## Context`.
 - Keep summaries short (a line or two each), with the URL.
 
 ### 6. Next action (optional — chunky items only)
+
 > "First physical step? Recommended: <smallest next action>."
 
 - Only ask when the task is multi-step. Put it first in `## Done when` or as a
@@ -116,16 +123,16 @@ Refresh the live list anytime with `mcp__ticktick__list_tags`.
 
 Scan `title` + `content`. Resolve only matches that are present.
 
-| Reference | Pattern (illustrative) | Resolver |
-|-----------|------------------------|----------|
-| Jira key | `\b(FSEC\|PCI\|SECURE\|PLAN\|LOCKBOX)-\d+\b` | jira-core skill / `jira` CLI |
-| GitHub repo | `\bzendesk/[a-z0-9._-]+\b` | `gh repo view` |
-| GitHub PR/issue | `github\.com/[^/]+/[^/]+/(pull\|issues)/\d+` | `gh pr view` / `gh issue view` |
-| Confluence | `\.atlassian\.net/wiki/` | confluence skill |
-| Slack | `\bzendesk\.slack\.com/archives/\S+` | slack read (if available) |
-| Capacities | `capacities://\|app\.capacities\.io/` | note as external ref (no API here) |
-| Google Docs | `docs\.google\.com/\S+` | WebFetch (if allowed) |
-| Person | capitalized first-name mentions near "ask/message/follow-up" | cerebro lookup |
+| Reference       | Pattern (illustrative)                                       | Resolver                  |
+| --------------- | ------------------------------------------------------------ | ------------------------- | ---------------------------------- | ---- | --------------- | ---------------------------- |
+| Jira key        | `\b(FSEC                                                     | PCI                       | SECURE                             | PLAN | LOCKBOX)-\d+\b` | jira-core skill / `jira` CLI |
+| GitHub repo     | `\bzendesk/[a-z0-9._-]+\b`                                   | `gh repo view`            |
+| GitHub PR/issue | `github\.com/[^/]+/[^/]+/(pull                               | issues)/\d+`              | `gh pr view` / `gh issue view`     |
+| Confluence      | `\.atlassian\.net/wiki/`                                     | confluence skill          |
+| Slack           | `\bzendesk\.slack\.com/archives/\S+`                         | slack read (if available) |
+| Capacities      | `capacities://                                               | app\.capacities\.io/`     | note as external ref (no API here) |
+| Google Docs     | `docs\.google\.com/\S+`                                      | WebFetch (if allowed)     |
+| Person          | capitalized first-name mentions near "ask/message/follow-up" | cerebro lookup            |
 
 Degrade gracefully — a missing/erroring resolver is noted, not fatal.
 
@@ -136,16 +143,20 @@ them into `## Context`. Omit empty sections.
 
 ```markdown
 ## Done when
+
 <one-line acceptance criterion>
 
 ## Context
+
 <why this exists / background, including any prior note text>
 
 ## Links
+
 - <label>: <url>
 - Jira FSEC-1234: <one-line status summary> — <url>
 
 ## Next action
+
 <smallest first step, if captured>
 ```
 
