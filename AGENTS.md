@@ -172,8 +172,8 @@ plugins/
 **Four-Plugin Architecture**: The marketplace defines four separate plugins, each with distinct responsibilities. Each plugin has its own isolated commands.
 
 **Model Strategy**: Skills explicitly define when to use Haiku vs Sonnet:
-- **Haiku 4.5**: Fast operations (file I/O, pattern matching, parsing, git commands)
-- **Sonnet 4.5**: Complex reasoning (analysis, generation, decision-making, natural language synthesis)
+- **Haiku**: Fast operations (file I/O, pattern matching, parsing, git commands)
+- **Sonnet**: Complex reasoning (analysis, generation, decision-making, natural language synthesis)
 
 ## Tool Preferences
 

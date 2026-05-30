@@ -1,92 +1,115 @@
 ---
-allowed-tools: ["mcp__ticktick__get_task_by_id", "mcp__ticktick__get_project_with_undone_tasks", "mcp__ticktick__filter_tasks", "mcp__ticktick__update_task", "mcp__ticktick__batch_update_tasks", "mcp__ticktick__complete_task", "mcp__ticktick__list_tags", "mcp__ticktick__list_projects", "mcp__ticktick__add_comment", "AskUserQuestion"]
-description: Interactively enrich a vague TickTick task (or a whole list) into an actionable item
+allowed-tools: ["mcp__ticktick__search_task", "mcp__ticktick__get_task_by_id", "mcp__ticktick__update_task", "mcp__ticktick__list_projects", "mcp__ticktick__list_tags", "WebSearch", "WebFetch"]
+description: Enrich a TickTick task — sharpen the title, flesh out the description, add subtasks, and infer metadata (preview before write)
 ---
 
 # /ticktick:enrich
 
-Turn a half-sentence TickTick capture into an actionable task: gather context, then
-interview you one question at a time to fill in priority, timing, labels, links, and
-notes — and write it all back.
+Turn a thin, one-line TickTick task into a well-formed, actionable one:
+
+- A sharper, action-first **title**
+- A fleshed-out **description** (context, goal, acceptance criteria, notes)
+- A **subtask checklist** breaking the work into concrete steps
+- Metadata **you provide** (priority, dates, tags, project) — it asks, never guesses
+- Optional **references** you supply (or research it explicitly asks to do)
+
+This command **always shows a before → after preview and waits for your approval** before writing anything back to TickTick.
 
 ## Usage
 
 ```bash
-/ticktick:enrich [task title | task id | project name]
+/ticktick:enrich [task id | search terms]
 ```
 
 ## Arguments
 
-- `[task title | task id]` — enrich a single task (interactive, one question at a time)
-- `[project name]` (e.g. `Work`) — batch mode: loop over the project's undone tasks,
-  sparsest first, enriching one at a time with confirm-and-continue
-- *(omitted)* — ask which task to enrich, or offer "the sparsest task in Work"
+- `[task id | search terms]` (optional):
+  - A TickTick task **ID** (24-char hex) → resolved directly via `get_task_by_id`
+  - **Search terms** → matched against task titles via `search_task`
+  - **Omitted** → ask the user which task to enrich (offer a search)
 
 ## Behavior
 
-### Single task
-1. Resolve the task (`get_task_by_id`, or match a title within its project)
-2. Auto-gather: scan title/content for references (Jira keys, repos, URLs, people)
-   and resolve only those already present — never search blindly
-3. If a resolved reference IS the canonical tracker (open, owned Jira/GitHub item),
-   offer **close-as-duplicate** (`complete_task`) before enriching
-4. Interview, skipping anything already answered. Free-text for done-when/context;
-   AskUserQuestion option prompts (recommended-first) for priority/timeframe/labels
-5. Merge answers into a full task object and `update_task` — write a markdown
-   content block AND set priority, tags, and dates
-6. Show a before/after of changed fields + the task ID
+1. **Resolve** the target task. If search terms match multiple tasks, list the candidates and ask which one. Capture its `projectId` (needed for the write).
+2. **Read current state** and **spot gaps**: unclear goal, no steps, ambiguous title, no deadline or stated priority.
+3. **Interview** you to fill those gaps — focused questions only; it never invents names, dates, URLs, or scope you didn't state. If you say "you draft it," it proposes and lets you edit.
+4. **Draft** from your answers: sharper title, description, subtasks, and only the metadata you supplied.
+5. **Preview** a before → after diff of every field that would change. Subtasks and anything "open / not applied" are shown clearly.
+6. **Wait for approval.** On yes → call `update_task`. On edits → adjust and re-preview. On no → make no changes.
+7. **Confirm** what changed.
 
-### Batch mode (project name)
-1. Fetch undone tasks via `get_project_with_undone_tasks`
-2. Rank by sparseness (empty content, no tags, priority 0, placeholder date, short title)
-3. Enrich the sparsest, confirm, then offer the next; "stop" exits with a summary
+## Metadata policy (user-supplied only)
+
+- **Sets metadata only from what you tell it** — it won't infer priority from keywords or invent a due date.
+- It never overwrites an existing value without your explicit yes.
+- Priority mapping (when you express importance): urgent/critical → 5, high → 3, medium → 1, low/none → 0.
+- A project move is *suggested*, not done silently (use `move_task`).
 
 ## Implementation
 
-This command activates the `ticktick-enrich` skill, which carries the full workflow,
-question tree, recommendation heuristics, tag vocabulary, detection regexes, and the
-content template (`ticktick-enrich/references/question-bank.md`).
+The detailed workflow lives in the **`ticktick-enrich`** skill. Follow its phases:
 
-Build a **merged** task for `update_task` — preserve `id`, `etag`, `kind`,
-`projectId`, and any unchanged fields; do not send a sparse patch.
+1. Resolve task → 2. Analyze → 3. Draft enrichment → 4. Preview & gate → 5. Write via `update_task` → 6. Confirm.
+
+`update_task` takes `task_id` **plus a full `task` object** (camelCase fields). The call operates on the whole task, so **read the task with `get_task_by_id`, merge your enrichment into that object, and send it back complete** — this avoids wiping fields you didn't touch.
+
+To get a rich description **and** native checkable subtasks, set the task to checklist kind: a `TEXT`/`NOTE` task shows `content`; a `CHECKLIST` task shows `desc` + checkable `items`.
+
+```python
+update_task(
+    task_id="<task_id>",
+    task={
+        "id": "<task_id>",
+        "projectId": "<unchanged projectId>",   # carry over; required by the model
+        "title": "Sharpened title",
+        "kind": "CHECKLIST",                     # so desc + items both render
+        "desc": "## Goal\n...\n\n## Acceptance criteria\n- [ ] ...\n\n## References\n- ...",
+        "items": [
+            {"title": "First step", "status": 0},
+            {"title": "Second step", "status": 0},
+        ],
+        "priority": 3,                           # only if it was empty (conservative)
+        "tags": ["existing-tag"],                # carry existing; add only if empty
+        # ...carry over any other existing fields unchanged
+    },
+)
+```
+
+- Read with `get_task_by_id` (needs only `task_id`; it scans all projects). Carry its `projectId` and existing fields back in the `task` object.
+- **No subtasks** (notes-only enrichment): leave `kind` alone and put the description in `content` instead of `desc`.
+- **Clearing a date**: the MCP can't send null — set `dueDate`/`startDate` to `"1970-01-01T00:00:00.000+0000"`.
+- **References** (per project default): append a `## References` section to `content` — do not put links in a comment unless the user asks.
 
 ## Output
 
 ```text
 Enriched task:
-  Title:    Confirm Azure prod access via Okta SSO
-  Priority: 0 → 3 (medium)
-  Tags:     (none) → azure, secure
-  Due:      someday → 2026-06-05
-  Notes:    + Done when / Context / Links block
-  ID:       697b722a809a9107ca772506
+  Title:    Renew SSL cert for api.example.com  (was: "ssl")
+  Project:  Work
+  Priority: HIGH (was: none)            ← filled (was empty)
+  Subtasks: 4 added
+  Notes:    +Goal, +Acceptance criteria, +References (2 links)
+  ID:       abc123xyz
+
+Suggestions (not applied):
+  - Due date: none set — consider before cert expiry (2026-06-15)
 ```
 
 ## Examples
 
 ```bash
-# Single task by title
-/ticktick:enrich log in to azure zendesk prod through Okta
+# Enrich by search terms
+/ticktick:enrich renew ssl cert
 
-# Single task by id
-/ticktick:enrich 697b722a809a9107ca772506
+# Enrich by explicit task ID
+/ticktick:enrich 6f1e2a9c0b3d4e5f60718293
 
-# Batch over the Work list, sparsest first
-/ticktick:enrich Work
-
-# Interactive — let it pick the sparsest
+# Interactive (asks which task)
 /ticktick:enrich
 ```
 
 ## Notes
 
-- Priority scale: **0=none, 1=low, 3=medium, 5=high** — 2 and 4 are invalid.
-- Dates are ISO 8601 with offset; the task's `timeZone` is preserved (default
-  `America/Chicago`). "Someday" clears the date via the `1970-01-01` sentinel; an
-  existing `2099-01-01` is treated as "someday" on read.
-- Tags reuse the existing vocabulary (`aws`, `azure`, `zig`, `fsec`, `secure`,
-  `compliance`, `docs`, `jira`, `ai-tooling`, `work-link`, …) rather than inventing
-  new ones; new tags are unioned with the task's existing tags.
-- Opportunistic lookups (jira-core, confluence, cerebro, `gh`) are all optional —
-  the skill degrades gracefully to light parsing when a tool is unavailable.
-```
+- Requires the `ticktick` MCP server (verify with `/ticktick:setup`).
+- Read-then-write: a stale read can clobber concurrent edits, so the preview reflects the task as just read — re-resolve if the user pauses for a long time before approving.
+- Pairs well with `/ticktick:capture` (create thin) → `/ticktick:enrich` (flesh out) → `/ticktick:today` (work it).

@@ -1,0 +1,9 @@
+{
+  "author": {
+    "email": "klauer@gmail.com",
+    "name": "klauern"
+  },
+  "description": "Agent architecture patterns for Claude Code harnesses",
+  "name": "agent-patterns",
+  "version": "1.0.0"
+}

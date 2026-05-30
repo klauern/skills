@@ -1,0 +1,30 @@
+{
+  "reviews": [
+    {
+      "run_id": "eval-go-harness-120-tools-without_skill",
+      "feedback": "nope, not good",
+      "timestamp": "2026-05-23T01:54:39.896Z"
+    },
+    {
+      "run_id": "eval-simple-chatbot-3-tools-with_skill",
+      "feedback": "good suggestion",
+      "timestamp": "2026-05-23T01:54:39.896Z"
+    },
+    {
+      "run_id": "eval-simple-chatbot-3-tools-without_skill",
+      "feedback": "still good, but lengthy",
+      "timestamp": "2026-05-23T01:54:39.896Z"
+    },
+    {
+      "run_id": "eval-python-auth-boundary-with_skill",
+      "feedback": "excellent",
+      "timestamp": "2026-05-23T01:54:39.896Z"
+    },
+    {
+      "run_id": "eval-python-auth-boundary-without_skill",
+      "feedback": "no, this is very bad.   It isn't even really implementing mcp code mode",
+      "timestamp": "2026-05-23T01:54:39.896Z"
+    }
+  ],
+  "status": "in_progress"
+}

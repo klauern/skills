@@ -1,0 +1,32 @@
+{
+  "eval_id": 1,
+  "eval_name": "eval-go-harness-120-tools",
+  "prompt": "I'm building a Go agent harness connected to 8 MCP servers with about 120 tools total. My context window is getting eaten up by tool definitions before any real work happens — I'm seeing about 40K tokens just in schema definitions before my first user message. What should I do?",
+  "assertions": [
+    {
+      "text": "Recommends Code Mode MCP (not sticking with classic tool calling)",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Names at least one specific Go sandbox runtime option (goja, wazero, or starlark-go)",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Explains the core mechanism: typed API generated from MCP schemas, single execute(code) tool exposed to the model",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Explains that large intermediate payloads stay inside the sandbox and only stdout/logs return to the model",
+      "passed": null,
+      "evidence": null
+    },
+    {
+      "text": "Quantifies the token benefit (mentions ~98% reduction, or 150K→2K, or similar concrete figure)",
+      "passed": null,
+      "evidence": null
+    }
+  ]
+}

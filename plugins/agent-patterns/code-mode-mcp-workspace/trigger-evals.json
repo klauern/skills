@@ -1,0 +1,82 @@
+[
+  {
+    "query": "i'm connecting my agent to like 12 different mcp servers and the context window is just getting obliterated before i even say anything to the model. each conversation burns like 60k tokens just on tool definitions. is there a better architecture for this?",
+    "should_trigger": true
+  },
+  {
+    "query": "we're building a Go harness that wraps our internal APIs as MCP servers. right now the model sees all 200+ tool schemas at startup and it's eating our context budget. someone mentioned 'code mode' as a fix — what is that exactly and should we do it?",
+    "should_trigger": true
+  },
+  {
+    "query": "i need to design the sandbox for my agent's code execution environment. it'll be running model-generated TypeScript against a typed API we generated from MCP schemas. what runtime should i use — goja, wazero, or something else?",
+    "should_trigger": true
+  },
+  {
+    "query": "how do i make sure oauth tokens don't leak into the sandbox when implementing an execute(code) agent loop? the model writes code that calls our internal APIs and i don't want credentials accessible from inside the snippet",
+    "should_trigger": true
+  },
+  {
+    "query": "we have a cloudflare workers setup and want to use code mode mcp. should we expose the full tool schema set or use progressive disclosure with a search() meta-tool? we have about 800 endpoints",
+    "should_trigger": true
+  },
+  {
+    "query": "my team is debating: should our agent use classic tool calling or code mode for our MCP integration? we have 7 servers, about 90 tools, and most workflows involve chaining 4-5 calls with intermediate results that can be pretty big",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the auth boundary pattern for code mode? i know credentials shouldn't go into the sandbox but i'm not sure what the right abstraction is — should i pass client objects, method references, or use an rpc bridge?",
+    "should_trigger": true
+  },
+  {
+    "query": "we're hitting context window limits because our mcp tool definitions are massive. considered implementing code mode but worried about the sandbox ops overhead. is there a hybrid approach where we use both?",
+    "should_trigger": true
+  },
+  {
+    "query": "building a python agent harness with fastmcp and considering the codemode transform. what sandbox provider should i use for the execution environment and what are the tradeoffs?",
+    "should_trigger": true
+  },
+  {
+    "query": "what's the difference between client-side code mode (harness owns sandbox) vs server-side code mode (mcp server exposes codemode_execute)? trying to decide which fits our architecture better",
+    "should_trigger": true
+  },
+  {
+    "query": "i need to add a new MCP tool to our existing server. currently we have 8 tools for our database integration. can you help me write the tool definition and handler?",
+    "should_trigger": false
+  },
+  {
+    "query": "how do i set up an MCP server in python with fastmcp? just need a simple server with 3 tools for my personal project",
+    "should_trigger": false
+  },
+  {
+    "query": "can you help me debug why my claude agent keeps calling the wrong tool? it has access to get_weather and create_calendar_event but keeps mixing them up",
+    "should_trigger": false
+  },
+  {
+    "query": "i want to add tool use to my claude API application. should i use the tools parameter or the system prompt? i have 5 tools total",
+    "should_trigger": false
+  },
+  {
+    "query": "we're building a RAG pipeline and need to decide between embedding search results into the context vs using tool calling to retrieve on demand. which is better for our use case with a 200k context window?",
+    "should_trigger": false
+  },
+  {
+    "query": "how do i implement a sandboxed code execution environment for user-submitted python scripts? it's not for an agent — it's for a coding education platform where students run code",
+    "should_trigger": false
+  },
+  {
+    "query": "my claude agent is making too many tool calls and it's getting expensive. can i use prompt caching to reduce costs? i have about 15 tools defined",
+    "should_trigger": false
+  },
+  {
+    "query": "how do i write MCP tool descriptions that help claude understand when to call each tool? my tool descriptions seem vague and claude keeps calling the wrong ones",
+    "should_trigger": false
+  },
+  {
+    "query": "i have a large codebase and want claude to be able to search and edit files through MCP. should i use the official filesystem MCP server or build a custom one? i have maybe 20 file operation tools",
+    "should_trigger": false
+  },
+  {
+    "query": "we're building an agent that orchestrates other agents using the agent sdk. should we use MCP tools or direct API calls between the agents? performance matters a lot here",
+    "should_trigger": false
+  }
+]
