@@ -1,0 +1,28 @@
+{
+  "eval_id": 2,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Recommends AGAINST implementing Code Mode MCP for this use case",
+      "passed": true,
+      "evidence": "'Short answer: No. Stick with classic tool calling.'"
+    },
+    {
+      "text": "Gives a concrete reason tied to the user's situation (too few tools, one-shot nature of calls, or sandbox overhead not worth it)",
+      "passed": true,
+      "evidence": "'3 tools = maybe 500–1,500 tokens of definitions' and '8 non-trivial implementation items for a setup where your context window overhead is modest'"
+    },
+    {
+      "text": "Does NOT confusingly recommend Code Mode anyway 'for future-proofing' or unconditionally",
+      "passed": true,
+      "evidence": "Clear, unambiguous No recommendation throughout; future-proofing section correctly frames it as 'when to REVISIT the decision' not 'implement it now'"
+    },
+    {
+      "text": "Mentions what threshold or conditions would make Code Mode worth reconsidering (e.g., if tool count grows, or chained workflows emerge)",
+      "passed": true,
+      "evidence": "Explicit table with triggers: '5+ MCP servers or 50+ tools', '3+ chained calls', 'Results exceeding ~10,000 tokens', 'context-window limits', 'data segregation needs'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Perfect response — unambiguous No with solid reasoning and a concrete threshold table."
+}

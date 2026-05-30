@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 from __future__ import annotations
 
 import argparse
@@ -12,6 +16,7 @@ from typing import Any
 
 
 MAX_COMMIT_HEADLINES = 8
+GRAPHQL_PAGE_SIZE = 100
 
 
 @dataclass
@@ -22,14 +27,24 @@ class WorktreeResult:
     note: str | None = None
 
 
-def run(cmd: list[str], *, cwd: Path | None = None, check: bool = True) -> str:
-    proc = subprocess.run(
-        cmd,
-        cwd=str(cwd) if cwd else None,
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+def run(
+    cmd: list[str],
+    *,
+    cwd: Path | None = None,
+    check: bool = True,
+    timeout: float | None = 30.0,
+) -> str:
+    try:
+        proc = subprocess.run(
+            cmd,
+            cwd=str(cwd) if cwd else None,
+            text=True,
+            capture_output=True,
+            check=False,
+            timeout=timeout,
+        )
+    except subprocess.TimeoutExpired as exc:
+        raise RuntimeError(f"{' '.join(cmd)} timed out after {timeout}s") from exc
     if check and proc.returncode != 0:
         message = proc.stderr.strip() or proc.stdout.strip() or "unknown error"
         raise RuntimeError(f"{' '.join(cmd)} failed: {message}")
@@ -145,15 +160,23 @@ def ensure_worktree(
         head = worktree.get("HEAD")
         if not path:
             continue
-        if Path(path).resolve() == target_path.resolve():
+        resolved_path = Path(path).resolve()
+        if resolved_path == target_path.resolve():
             return WorktreeResult(status="reused", path=path, head=head, note="matched deterministic path")
-        if head and head == head_ref_oid:
+        if head and head == head_ref_oid and resolved_path.is_relative_to(target_base.resolve()):
             return WorktreeResult(status="reused", path=path, head=head, note="matched PR head commit")
 
     if target_path.exists():
         inside_work_tree = run(["git", "rev-parse", "--is-inside-work-tree"], cwd=target_path, check=False) == "true"
         if (target_path / ".git").exists() or inside_work_tree:
             head = run(["git", "rev-parse", "HEAD"], cwd=target_path, check=False) or None
+            if head != head_ref_oid:
+                return WorktreeResult(
+                    status="conflict",
+                    path=str(target_path),
+                    head=head_ref_oid,
+                    note=f"existing checkout at target path has unexpected HEAD {head or 'unknown'}",
+                )
             return WorktreeResult(status="reused", path=str(target_path), head=head, note="existing checkout at target path")
         return WorktreeResult(
             status="conflict",
@@ -197,10 +220,21 @@ def ensure_worktree(
     )
 
 
+def graphql_request(query: str, variables: dict[str, str | int]) -> dict[str, Any]:
+    cmd = ["gh", "api", "graphql", "-f", f"query={query}"]
+    for name, value in variables.items():
+        cmd.extend(["-F", f"{name}={value}"])
+    payload = run_json(cmd)
+    if "errors" in payload:
+        errors = "; ".join(err.get("message", "unknown error") for err in payload["errors"])
+        raise RuntimeError(errors)
+    return payload
+
+
 def fetch_graphql(repo_owner: str, repo_name: str, pr_number: int) -> dict[str, Any]:
     query = """
-query($owner: String!, $name: String!, $number: Int!) {
-  repository(owner: $owner, name: $name) {
+	query($owner: String!, $name: String!, $number: Int!) {
+	  repository(owner: $owner, name: $name) {
     pullRequest(number: $number) {
       number
       title
@@ -216,71 +250,200 @@ query($owner: String!, $name: String!, $number: Int!) {
       changedFiles
       author { login }
       headRepository { url nameWithOwner }
-      commits(first: 100) {
-        nodes {
-          commit {
-            oid
+	      commits(first: 100) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          commit {
+	            oid
             messageHeadline
             messageBody
-          }
-        }
-      }
-      files(first: 100) {
-        nodes {
-          path
-          additions
+	          }
+	        }
+	      }
+	      files(first: 100) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          path
+	          additions
           deletions
-        }
-      }
-      comments(first: 100) {
-        nodes {
-          author { login }
-          body
+	        }
+	      }
+	      comments(first: 100) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          author { login }
+	          body
           createdAt
           url
-        }
-      }
-      reviewThreads(first: 100) {
-        nodes {
-          isResolved
-          isOutdated
-          path
-          line
-          comments(first: 20) {
-            nodes {
-              author { login }
-              body
+	        }
+	      }
+	      reviewThreads(first: 100) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          id
+	          isResolved
+	          isOutdated
+	          path
+	          line
+	          comments(first: 100) {
+	            pageInfo { hasNextPage endCursor }
+	            nodes {
+	              author { login }
+	              body
               createdAt
             }
           }
         }
       }
-    }
-  }
-}
-"""
-    payload = run_json(
-        [
-            "gh",
-            "api",
-            "graphql",
-            "-f",
-            f"query={query}",
-            "-F",
-            f"owner={repo_owner}",
-            "-F",
-            f"name={repo_name}",
-            "-F",
-            f"number={pr_number}",
-        ]
-    )
-    if "errors" in payload:
-        errors = "; ".join(err.get("message", "unknown error") for err in payload["errors"])
-        raise RuntimeError(errors)
+	    }
+	  }
+	}
+	"""
+    payload = graphql_request(query, {"owner": repo_owner, "name": repo_name, "number": pr_number})
     pull_request = payload["data"]["repository"]["pullRequest"]
     if pull_request is None:
         raise RuntimeError(f"pull request #{pr_number} not found")
+    paginate_pull_request_connections(repo_owner, repo_name, pr_number, pull_request)
     return pull_request
+
+
+def paginate_pull_request_connections(
+    repo_owner: str,
+    repo_name: str,
+    pr_number: int,
+    pull_request: dict[str, Any],
+) -> None:
+    paginate_commits(repo_owner, repo_name, pr_number, pull_request["commits"])
+    paginate_files(repo_owner, repo_name, pr_number, pull_request["files"])
+    paginate_comments(repo_owner, repo_name, pr_number, pull_request["comments"])
+    paginate_review_threads(repo_owner, repo_name, pr_number, pull_request["reviewThreads"])
+
+
+def paginate_commits(repo_owner: str, repo_name: str, pr_number: int, connection: dict[str, Any]) -> None:
+    query = """
+	query($owner: String!, $name: String!, $number: Int!, $after: String) {
+	  repository(owner: $owner, name: $name) {
+	    pullRequest(number: $number) {
+	      commits(first: 100, after: $after) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          commit {
+	            oid
+	            messageHeadline
+	            messageBody
+	          }
+	        }
+	      }
+	    }
+	  }
+	}
+	"""
+    paginate_connection(repo_owner, repo_name, pr_number, connection, query, "commits")
+
+
+def paginate_files(repo_owner: str, repo_name: str, pr_number: int, connection: dict[str, Any]) -> None:
+    query = """
+	query($owner: String!, $name: String!, $number: Int!, $after: String) {
+	  repository(owner: $owner, name: $name) {
+	    pullRequest(number: $number) {
+	      files(first: 100, after: $after) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          path
+	          additions
+	          deletions
+	        }
+	      }
+	    }
+	  }
+	}
+	"""
+    paginate_connection(repo_owner, repo_name, pr_number, connection, query, "files")
+
+
+def paginate_comments(repo_owner: str, repo_name: str, pr_number: int, connection: dict[str, Any]) -> None:
+    query = """
+	query($owner: String!, $name: String!, $number: Int!, $after: String) {
+	  repository(owner: $owner, name: $name) {
+	    pullRequest(number: $number) {
+	      comments(first: 100, after: $after) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          author { login }
+	          body
+	          createdAt
+	          url
+	        }
+	      }
+	    }
+	  }
+	}
+	"""
+    paginate_connection(repo_owner, repo_name, pr_number, connection, query, "comments")
+
+
+def paginate_review_threads(repo_owner: str, repo_name: str, pr_number: int, connection: dict[str, Any]) -> None:
+    query = """
+	query($owner: String!, $name: String!, $number: Int!, $after: String) {
+	  repository(owner: $owner, name: $name) {
+	    pullRequest(number: $number) {
+	      reviewThreads(first: 100, after: $after) {
+	        pageInfo { hasNextPage endCursor }
+	        nodes {
+	          id
+	          isResolved
+	          isOutdated
+	          path
+	          line
+	          comments(first: 100) {
+	            pageInfo { hasNextPage endCursor }
+	            nodes {
+	              author { login }
+	              body
+	              createdAt
+	            }
+	          }
+	        }
+	      }
+	    }
+	  }
+	}
+	"""
+    paginate_connection(repo_owner, repo_name, pr_number, connection, query, "reviewThreads")
+    for thread in connection.get("nodes", []):
+        paginate_review_thread_comments(thread)
+
+
+def paginate_connection(
+    repo_owner: str,
+    repo_name: str,
+    pr_number: int,
+    connection: dict[str, Any],
+    query: str,
+    field_name: str,
+) -> None:
+    page_info = connection.get("pageInfo") or {}
+    while page_info.get("hasNextPage"):
+        payload = graphql_request(
+            query,
+            {
+                "owner": repo_owner,
+                "name": repo_name,
+                "number": pr_number,
+                "after": page_info["endCursor"],
+            },
+        )
+        next_connection = payload["data"]["repository"]["pullRequest"][field_name]
+        connection.setdefault("nodes", []).extend(next_connection.get("nodes", []))
+        page_info = next_connection.get("pageInfo") or {}
+        connection["pageInfo"] = page_info
+
+
+def paginate_review_thread_comments(thread: dict[str, Any]) -> None:
+    comments = thread.get("comments") or {}
+    page_info = comments.get("pageInfo") or {}
+    if page_info.get("hasNextPage"):
+        thread["commentPaginationNote"] = "additional review-thread comments omitted after first 100"
 
 
 def get_repo_identity(root: Path) -> tuple[str, str, str]:

@@ -4,13 +4,15 @@ Custom skills and commands for Claude Code.
 
 ## Overview
 
-This is a Claude Code plugin marketplace repository containing four plugins that automate Git workflows, pull request management, and development utilities. The repository is organized similarly to the official [Anthropic skills repository](https://github.com/anthropics/skills).
+This is a Claude Code plugin marketplace repository containing five plugins that automate Git workflows, pull request management, development utilities, knowledge capture, and task management. The repository is organized similarly to the official [Anthropic skills repository](https://github.com/anthropics/skills).
 
 **Plugins**:
+
 - **commits** - Conventional commit message creation following conventionalcommits.org
 - **pull-requests** - Intelligent PR assessment, creation, updates, conflict resolution, and comment review
 - **dev-utilities** - Development workflow utilities (AGENTS.md generation, GH Actions upgrades, CI analysis, git optimization, worktrees)
 - **capacities** - Capacities knowledge management API integration
+- **ticktick** - TickTick task capture, review, and enrichment workflows
 
 ## Installation
 
@@ -39,11 +41,12 @@ Add the marketplace once (GitHub repo or local path):
 Install one or more plugins from the marketplace:
 
 ```bash
-# Install all four plugins
+# Install all five plugins
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills
 /plugin install capacities@klauern-skills
+/plugin install ticktick@klauern-skills
 
 # Or install selectively
 /plugin install commits@klauern-skills
@@ -68,11 +71,12 @@ git clone https://github.com/klauern/klauern-skills.git
 2. Add the local marketplace and install plugins:
 
 ```bash
-/plugin marketplace add /Users/nklauer/dev/klauern-skills
+/plugin marketplace add /Users/klauer/dev/klauern-skills
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills
 /plugin install capacities@klauern-skills
+/plugin install ticktick@klauern-skills
 ```
 
 ## Available Skills
@@ -354,6 +358,7 @@ This command will:
 - Provide quality assessment and line count
 
 **Based on**:
+
 - [agents.md specification](https://agents.md/) - Universal format for AI assistants
 - [Writing a Good CLAUDE.md](https://www.humanlayer.dev/blog/writing-a-good-claude-md) - Best practices
 

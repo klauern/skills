@@ -1,0 +1,76 @@
+{
+  "skill_name": "code-mode-mcp",
+  "iteration": 1,
+  "configs": [
+    {
+      "name": "with_skill",
+      "pass_rate_mean": 1.0,
+      "pass_rate_stddev": 0.0,
+      "total_tokens_mean": 27583,
+      "duration_ms_mean": 84053,
+      "evals": [
+        {
+          "eval_id": 1,
+          "eval_name": "eval-go-harness-120-tools",
+          "pass_rate": 1.0,
+          "total_tokens": 27748,
+          "duration_ms": 94163
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "eval-simple-chatbot-3-tools",
+          "pass_rate": 1.0,
+          "total_tokens": 26023,
+          "duration_ms": 56737
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "eval-python-auth-boundary",
+          "pass_rate": 1.0,
+          "total_tokens": 28978,
+          "duration_ms": 101260
+        }
+      ]
+    },
+    {
+      "name": "without_skill",
+      "pass_rate_mean": 0.5,
+      "pass_rate_stddev": 0.41,
+      "total_tokens_mean": 19369,
+      "duration_ms_mean": 108513,
+      "evals": [
+        {
+          "eval_id": 1,
+          "eval_name": "eval-go-harness-120-tools",
+          "pass_rate": 0.0,
+          "total_tokens": 17328,
+          "duration_ms": 83331
+        },
+        {
+          "eval_id": 2,
+          "eval_name": "eval-simple-chatbot-3-tools",
+          "pass_rate": 1.0,
+          "total_tokens": 19274,
+          "duration_ms": 86741
+        },
+        {
+          "eval_id": 3,
+          "eval_name": "eval-python-auth-boundary",
+          "pass_rate": 0.5,
+          "total_tokens": 21504,
+          "duration_ms": 155468
+        }
+      ]
+    }
+  ],
+  "delta": {
+    "pass_rate": 0.5,
+    "direction": "with_skill_wins"
+  },
+  "analyst_observations": [
+    "Eval 1 (Go harness, 120 tools) shows the sharpest discrimination: 100% with skill vs. 0% without. The baseline gave technically valid advice (dynamic injection, compression, caching) but completely missed Code Mode MCP as the solution. This is the skill's primary value.",
+    "Eval 2 (3-tool chatbot) is non-discriminating — both configurations correctly recommend against Code Mode. The 'don't use Code Mode' case is common knowledge; knowing WHEN and HOW to use it is where the skill adds value.",
+    "Eval 3 (Python auth boundary) shows partial discrimination: both pass auth boundary and sandbox recommendation, but the with-skill response uniquely names FastMCP as the fast path and correctly describes the pre-authorized client object pattern (vs. the baseline's Docker-proxy pattern).",
+    "With-skill responses used more tokens (27K vs 19K mean) — expected, since reading SKILL.md and references/guide.md adds context. The extra tokens produce significantly more structured and actionable responses."
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "eval_id": 1,
+  "config": "with_skill",
+  "expectations": [
+    {
+      "text": "Recommends Code Mode MCP (not sticking with classic tool calling)",
+      "passed": true,
+      "evidence": "Clear section 'The Answer: Code Mode MCP' — 'Your situation clears every threshold for adopting Code Mode'"
+    },
+    {
+      "text": "Names at least one specific Go sandbox runtime option (goja, wazero, or starlark-go)",
+      "passed": true,
+      "evidence": "Table comparing goja, wazero, starlark-go with isolation/startup/fluency columns; recommends starting with goja"
+    },
+    {
+      "text": "Explains the core mechanism: typed API generated from MCP schemas, single execute(code) tool exposed to the model",
+      "passed": true,
+      "evidence": "'Code Mode replaces the 120-tool surface with one tool: execute(code). The model receives a typed API header (generated from your MCP schemas) and writes a code snippet'"
+    },
+    {
+      "text": "Explains that large intermediate payloads stay inside the sandbox and only stdout/logs return to the model",
+      "passed": true,
+      "evidence": "'Large intermediate values — documents, search results, paginated lists — stay inside the sandbox and never enter the model's context. Only console.log output returns to the model.'"
+    },
+    {
+      "text": "Quantifies the token benefit (mentions ~98% reduction, or 150K→2K, or similar concrete figure)",
+      "passed": true,
+      "evidence": "'a 4-server, 52-tool setup that consumes ~9,400 tokens of definitions in classic mode collapses to ~2K in Code Mode. Your 40K load could realistically drop to 1–3K.'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "All assertions passed. Response follows the skill's decision framework precisely, gives Go-specific sandbox recommendation, explains the mechanism and token math."
+}

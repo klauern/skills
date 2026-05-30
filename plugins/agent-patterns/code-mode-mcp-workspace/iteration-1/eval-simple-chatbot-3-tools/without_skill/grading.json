@@ -1,0 +1,28 @@
+{
+  "eval_id": 2,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Recommends AGAINST implementing Code Mode MCP for this use case",
+      "passed": true,
+      "evidence": "'No, you should not implement Code Mode MCP for your current chatbot.'"
+    },
+    {
+      "text": "Gives a concrete reason tied to the user's situation (too few tools, one-shot nature of calls, or sandbox overhead not worth it)",
+      "passed": true,
+      "evidence": "'The problem Code Mode MCP solves... does not apply at this scale.' References having only 3 tools vs. hundreds."
+    },
+    {
+      "text": "Does NOT confusingly recommend Code Mode anyway 'for future-proofing' or unconditionally",
+      "passed": true,
+      "evidence": "Clear No throughout; future section is framed as a revisit trigger, not immediate action"
+    },
+    {
+      "text": "Mentions what threshold or conditions would make Code Mode worth reconsidering (e.g., if tool count grows, or chained workflows emerge)",
+      "passed": true,
+      "evidence": "'When to revisit Code Mode MCP: if you grow to roughly 10+ MCP servers or 50+ tools, or if you start hitting consistent token cost problems'"
+    }
+  ],
+  "pass_rate": 1.0,
+  "notes": "Baseline also correctly recommends against Code Mode for this case. Both configurations pass eval 2 — this suggests the decision not to use Code Mode is common knowledge, while knowing WHEN to use it requires the skill."
+}

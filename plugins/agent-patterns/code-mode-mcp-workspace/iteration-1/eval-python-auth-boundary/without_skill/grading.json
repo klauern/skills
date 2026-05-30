@@ -1,0 +1,28 @@
+{
+  "eval_id": 3,
+  "config": "without_skill",
+  "expectations": [
+    {
+      "text": "Recommends at least one Python-specific sandbox option (FastMCP CodeMode transform, RestrictedPython, pyodide, or E2B)",
+      "passed": true,
+      "evidence": "Recommends Docker variants, gVisor, Firecracker/microVM, Wasm/Pyodide, RestrictedPython — comprehensive list, though Docker-first rather than Python-ecosystem-first"
+    },
+    {
+      "text": "Explains the auth boundary pattern: tokens/credentials live on the host, not in the sandbox",
+      "passed": true,
+      "evidence": "'credential boundary: the agent harness holds all OAuth tokens, the MCP Tool Executor makes authenticated calls and returns results only (no tokens), and the Code Sandbox gets results but never credentials'"
+    },
+    {
+      "text": "Explains that the sandbox receives pre-authorized client objects (not raw tokens/keys)",
+      "passed": false,
+      "evidence": "Explains a sidecar/proxy pattern where sandbox calls back to a harness over Unix socket — architecturally similar idea but does not describe the 'pre-authorized client objects' pattern. Sandbox receives results, not client handles."
+    },
+    {
+      "text": "Mentions FastMCP's CodeMode transform specifically as a fast path for Python harnesses",
+      "passed": false,
+      "evidence": "No mention of FastMCP — response gives Docker-first generic advice. Recommends RestrictedPython only as a weak fallback for 'trusted operators only'."
+    }
+  ],
+  "pass_rate": 0.5,
+  "notes": "Baseline gives technically competent Docker-centric advice but misses the Python-ecosystem-specific fast path (FastMCP) and frames RestrictedPython negatively rather than as a valid starting point. Auth boundary concept present but described at a different level of abstraction."
+}
