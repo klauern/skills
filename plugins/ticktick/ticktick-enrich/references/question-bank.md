@@ -121,18 +121,17 @@ Refresh the live list anytime with `mcp__ticktick__list_tags`.
 
 ## Reference-detection regexes (Phase 2)
 
-Scan `title` + `content`. Resolve only matches that are present.
+Scan `title` + `content`. Resolve only matches that are present. Patterns are
+illustrative; the `|` inside them is regex alternation, not a table delimiter.
 
-| Reference       | Pattern (illustrative)                                       | Resolver                  |
-| --------------- | ------------------------------------------------------------ | ------------------------- | ---------------------------------- | ---- | --------------- | ---------------------------- |
-| Jira key        | `\b(FSEC                                                     | PCI                       | SECURE                             | PLAN | LOCKBOX)-\d+\b` | jira-core skill / `jira` CLI |
-| GitHub repo     | `\bzendesk/[a-z0-9._-]+\b`                                   | `gh repo view`            |
-| GitHub PR/issue | `github\.com/[^/]+/[^/]+/(pull                               | issues)/\d+`              | `gh pr view` / `gh issue view`     |
-| Confluence      | `\.atlassian\.net/wiki/`                                     | confluence skill          |
-| Slack           | `\bzendesk\.slack\.com/archives/\S+`                         | slack read (if available) |
-| Capacities      | `capacities://                                               | app\.capacities\.io/`     | note as external ref (no API here) |
-| Google Docs     | `docs\.google\.com/\S+`                                      | WebFetch (if allowed)     |
-| Person          | capitalized first-name mentions near "ask/message/follow-up" | cerebro lookup            |
+- **Jira key** — `\b(FSEC|PCI|SECURE|PLAN|LOCKBOX)-\d+\b` → jira-core skill / `jira` CLI
+- **GitHub repo** — `\bzendesk/[a-z0-9._-]+\b` → `gh repo view`
+- **GitHub PR/issue** — `github\.com/[^/]+/[^/]+/(pull|issues)/\d+` → `gh pr view` / `gh issue view`
+- **Confluence** — `\.atlassian\.net/wiki/` → confluence skill
+- **Slack** — `\bzendesk\.slack\.com/archives/\S+` → slack read (if available)
+- **Capacities** — `capacities://|app\.capacities\.io/` → note as external ref (no API here)
+- **Google Docs** — `docs\.google\.com/\S+` → WebFetch (if allowed)
+- **Person** — capitalized first-name mentions near "ask/message/follow-up" → cerebro lookup
 
 Degrade gracefully — a missing/erroring resolver is noted, not fatal.
 
