@@ -15,6 +15,7 @@ config.yaml
 # Dolt database files (added by bd init)
 *.db
 .env
+.worktrees/
 
 # Beads / Dolt files (added by bd init)
 .beads-credential-key

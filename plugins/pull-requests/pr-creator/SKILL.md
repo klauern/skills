@@ -18,6 +18,8 @@ User: /pr
 
 The skill will: find the PR template → analyze branch commits → infer information → ask only for gaps → create PR with `gh`.
 
+For broader PR inspection, comment triage, or worktree setup, use the top-level `pull-requests` skill and `pr-assess` command instead.
+
 ## Workflow
 
 ### Phase 1: Template Discovery

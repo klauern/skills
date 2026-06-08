@@ -15,7 +15,7 @@
       "source": "./plugins/commits"
     },
     {
-      "description": "Intelligent pull request creation skill",
+      "description": "Intelligent pull request workflows",
       "name": "pull-requests",
       "source": "./plugins/pull-requests"
     },
