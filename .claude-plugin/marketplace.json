@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "2.9.0"
+    "version": "3.0.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -10,12 +10,12 @@
   },
   "plugins": [
     {
-      "description": "Conventional commit message creation skill",
+      "description": "Conventional commit creation and commit splitting skills",
       "name": "commits",
       "source": "./plugins/commits"
     },
     {
-      "description": "Intelligent pull request creation skill",
+      "description": "Pull request creation, updating, review-comment triage, and merge conflict resolution",
       "name": "pull-requests",
       "source": "./plugins/pull-requests"
     },
@@ -30,7 +30,7 @@
       "source": "./plugins/capacities"
     },
     {
-      "description": "TickTick task management via MCP integration",
+      "description": "TickTick task management integration via MCP",
       "name": "ticktick",
       "source": "./plugins/ticktick"
     },
