@@ -32,8 +32,7 @@
     {
       "description": "TickTick task management via MCP integration",
       "name": "ticktick",
-      "source": "./plugins/ticktick",
-      "commands": ["commands/enrich.md"]
+      "source": "./plugins/ticktick"
     },
     {
       "description": "Agent architecture patterns for Claude Code harnesses",
