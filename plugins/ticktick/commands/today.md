@@ -7,62 +7,17 @@ description: Show today's tasks and overdue items, with triage actions
 
 Display overdue tasks and tasks due today, then offer quick triage actions for each.
 
-## Usage
-
-```bash
-/ticktick:today
-```
-
 ## Behavior
 
-1. Fetch overdue tasks and today's tasks in parallel
-2. Display both groups in a structured format
-3. Offer per-task actions: complete, reschedule to tomorrow, or skip
-4. Execute requested actions via `complete_task` or `update_task`
-5. Print a summary of actions taken
+Run the **ticktick-review** skill's daily flow:
 
-## Implementation
+1. Fetch in parallel: today (`list_undone_tasks_by_time_query "today"`) and overdue
+   (`filter_tasks`, `endDate` < start of today).
+2. Display both groups with the skill's priority labels and days-overdue.
+3. Offer per-task actions: [c]omplete, [r]eschedule to tomorrow (same time, or all-day),
+   [n]o date (clear via `uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py"
+   clear-dates`), [s]kip.
+4. Execute and summarize counts. If nothing is due: "All clear — no tasks due today."
 
-Fetch simultaneously:
-- `list_undone_tasks_by_time_query` with `query_command: "today"` — tasks due today
-- `filter_tasks` with `endDate` set to the start of today (midnight) — overdue tasks (due before today and still undone)
-
-Display format:
-
-```text
-OVERDUE (N tasks)
-- [HIGH] Finish quarterly report (Work) — 3 days overdue
-- [MED]  Reply to Alice (Inbox) — 1 day overdue
-
-TODAY (N tasks)
-- [HIGH] Team standup prep (Work) — due 09:00
-- [LOW]  Water plants (Home) — all-day
-```
-
-After displaying, prompt for actions on each task:
-- **[c]omplete** — mark done via `complete_task` (requires `project_id` and `task_id`)
-- **[r]eschedule** — move to tomorrow via `update_task` (set due date to next day)
-- **[n]o date** — clear due/start dates via the `ticktick_api.py` script:
-  ```bash
-    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
-  ```
-- **[s]kip** — leave unchanged
-
-> **Note**: Delete is not offered in the daily view — use `/ticktick:inbox` for full triage including deletion.
-
-## Output
-
-```text
-Actions taken:
-  Completed:    2 tasks
-  Rescheduled:  1 task
-  Skipped:      1 task
-```
-
-## Notes
-
-- Priority labels (TickTick-native): HIGH (priority 5), MED (priority 3), LOW (priority 1), NONE (priority 0)
-- "Days overdue" is calculated from the task's original due date
-- Rescheduling sets the due date to tomorrow at the same time (or all-day if no time was set)
-- If there are no overdue or due tasks, report "All clear — no tasks due today."
-- The `complete_task` and `update_task` tools require both `project_id` and `task_id` — extract `projectId` from the task data returned by the query tools
+Tool notes: `complete_task`/`update_task` need both `project_id` and `task_id` (take
+`projectId` from the fetched task data).

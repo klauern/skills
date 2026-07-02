@@ -1,6 +1,7 @@
 ---
 allowed-tools: ["mcp__ticktick__create_task", "mcp__ticktick__list_projects", "mcp__ticktick__batch_add_tasks"]
 description: Capture a task or list of tasks to TickTick
+argument-hint: "[task description]"
 ---
 
 # /ticktick:capture
@@ -10,91 +11,16 @@ Quickly create one or more tasks in TickTick, with optional project, due date, a
 ## Usage
 
 ```bash
-/ticktick:capture [task description]
+/ticktick:capture Buy milk tomorrow
+/ticktick:capture Fix login bug - high priority, due Friday
+/ticktick:capture            # interactive: prompts for the task
 ```
-
-## Arguments
-
-- `[task description]` (optional): Natural-language task description. If omitted, interactive mode prompts for input.
 
 ## Behavior
 
-### With a task description:
-1. Parse the input for title, project hint, due date, and priority
-2. If the project is ambiguous, call `list_projects` and ask the user to choose
-3. Call `create_task` (or `batch_add_tasks` for multiple tasks)
-4. Confirm with task title, project name, due date, and task ID
+Invoke the **ticktick-capture** skill with the description (asking for one if omitted):
 
-### Interactive mode (no argument):
-1. Ask: "What task would you like to capture?"
-2. Optionally prompt: "Any project, due date, or priority to set?"
-3. Proceed with creation and confirmation
-
-## Implementation
-
-Parse the user-supplied description (or ask for one) and extract:
-- **Title**: The core task text
-- **Project**: Any project name hint (e.g., "in Work", "#personal")
-- **Due date**: Natural language dates ("tomorrow", "Friday", "next Monday")
-- **Priority**: Keywords like "high priority", "urgent", "low"
-
-Call `list_projects` when:
-- A project hint is present but does not unambiguously match a known project
-- No project is specified and the user may want to choose
-
-**Single task** — call `create_task` with the task wrapped in a `task` object:
-```json
-{
-  "task": {
-    "title": "Buy milk",
-    "projectId": "abc123",
-    "dueDate": "2026-04-03T00:00:00.000+0000",
-    "priority": 0
-  }
-}
-```
-
-**Multiple tasks** — call `batch_add_tasks` with an array of task objects:
-```json
-{
-  "tasks": [
-    { "title": "Review PR #42", "priority": 3 },
-    { "title": "Update docs" }
-  ]
-}
-```
-
-## Output
-
-```text
-Created task:
-  Title:   Buy milk
-  Project: Personal
-  Due:     2026-04-03
-  ID:      abc123xyz
-```
-
-## Examples
-
-```bash
-# Single task with natural-language date
-/ticktick:capture Buy milk tomorrow
-
-# Task with priority and due date
-/ticktick:capture Fix the login bug - high priority, due Friday
-
-# Interactive mode
-/ticktick:capture
-
-# Multiple tasks (batch)
-/ticktick:capture
-- Review PR #42
-- Update README
-- Send standup notes
-```
-
-## Notes
-
-- Priority mapping (TickTick-native): urgent/critical/high → 5, medium → 3, low → 1, none → 0
-- Dates are interpreted relative to today
-- If no project is chosen, the task lands in the default inbox
+1. Parse title, project hint, due date, and priority per the skill's mapping tables.
+2. Resolve the project via `list_projects` (ask if ambiguous; omit for Inbox).
+3. Create via `create_task`, or `batch_add_tasks` when the user gave a list.
+4. Confirm with task title, project name, due date, priority label, and task ID.

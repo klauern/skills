@@ -32,7 +32,7 @@ Extract the target branch from `$ARGUMENTS` by looking for:
 ## Context
 
 - Current git status: !`git status`
-- Current git diff (staged and unstaged changes): !`git diff HEAD`
+- Change summary (fetch the full diff on demand): !`git diff HEAD --stat`
 - Current branch: !`git branch --show-current`
 - **Target branch argument: `$ARGUMENTS`**
 
@@ -58,7 +58,7 @@ Extract the target branch from `$ARGUMENTS` by looking for:
      - Examples: `git checkout -b feature/add-user-auth`, `git checkout -b fix/memory-leak`, `git checkout -b chore/update-deps`
      - If already on a feature branch, proceed to next step
 
-3. Follow all instructions from [`commit.md`](commit.md) to create the commit(s)
+3. Create the commit(s) per the **conventional-commits** skill (same behavior as `/commits:commit`)
    - Analyze the changes and create appropriate conventional commit message(s)
    - Stage relevant untracked files if needed
    - Create commit(s) with well-formatted messages
@@ -71,18 +71,11 @@ Extract the target branch from `$ARGUMENTS` by looking for:
 
 ## Execution Strategy
 
-- You have the capability to call multiple tools in a single response
-- **For single commits**: Execute branch creation (if needed), commit, and push in parallel where possible
-- **For multiple commits**: Create all commits first, then push once at the end
-- Use efficient bash chaining with `&&` where appropriate
+- **For single commits**: branch creation (if needed), commit, and push run sequentially — chain with `&&`
+- **For multiple commits**: create all commits first, then push once at the end
 
 ## Important
 
-- **RESPECT USER'S EXPLICIT INTENT**: When `$ARGUMENTS` contains a branch reference (e.g., "main", "to main", "push to main"), the user is **explicitly requesting** to commit to that branch. Honor this request without creating a feature branch or asking for confirmation.
-- **Argument parsing**: Extract branch names from phrases - "to main" means branch `main`, "on master" means branch `master`
-- See [`commit.md`](commit.md) for detailed commit creation instructions
-- **Default behavior** (when `$ARGUMENTS` is empty): never commit directly to `main` or `master` - create a feature branch first
-- **Explicit request** (when `$ARGUMENTS` specifies `main`/`master`): commit directly to that branch - this overrides the default safety behavior
 - Follow the repository's existing commit style based on recent commit history
 - Use heredoc for multi-line commit messages
 - Verify the push succeeded by checking the output
