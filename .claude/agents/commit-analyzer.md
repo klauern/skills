@@ -2,7 +2,7 @@
 name: commit-analyzer
 model: sonnet
 description: Analyzes git diffs and recommends atomic commit boundaries for splitting large changes into focused commits
-allowedTools:
+tools:
   - Read
   - Bash
   - Grep

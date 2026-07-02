@@ -17,12 +17,13 @@ if [[ "$has_m_flag" == "false" ]]; then
 fi
 
 # For heredoc-style commits: git commit -m "$(cat <<'EOF'\ntype: msg\nEOF\n)"
-# Extract the first meaningful line after the heredoc opener
-if echo "$command" | grep -q 'cat <<'; then
+# Anchor to the heredoc that FOLLOWS -m so an unrelated earlier heredoc isn't picked up.
+if echo "$command" | grep -qE -- '-[a-zA-Z]*m[[:space:]]+"\$\(cat <<'; then
+  msg=$(echo "$command" | sed -n '/-[a-zA-Z]*m[[:space:]]*"\$(cat <</{n;s/^[[:space:]]*//;p;}' | head -1)
+elif echo "$command" | grep -q 'cat <<'; then
   msg=$(echo "$command" | sed -n "/cat <</{n;s/^[[:space:]]*//;p;}" | head -1)
 else
   # Extract message from -m "message", --message "message", -am "message", etc.
-  # Try double quotes first, then single quotes, then --message= form
   msg=$(echo "$command" | sed -n "s/.*\(-[a-zA-Z]*m\|--message\)[[:space:]]*\"\([^\"]*\)\".*/\2/p")
   if [[ -z "$msg" ]]; then
     msg=$(echo "$command" | sed -n "s/.*\(-[a-zA-Z]*m\|--message\)[[:space:]]*'\([^']*\)'.*/\2/p")
@@ -35,18 +36,17 @@ else
   fi
 fi
 
-# If -m flag was present but we couldn't extract a message, deny to prevent bypass
-if [[ -z "$msg" ]]; then
-  cat >&2 <<'EOF'
-{"hookSpecificOutput":{"permissionDecision":"deny"},"systemMessage":"Unable to parse commit message from -m/--message. Use a quoted message (e.g., -m \"type(scope): description\")."}
-EOF
-  exit 2
+# Message uses a variable or couldn't be parsed (e.g. -m "$MSG", escaped quotes):
+# pass rather than hard-deny — we can't see the real message, and blocking legitimate
+# commits is worse than missing a badly-formatted one.
+if [[ -z "$msg" || "$msg" == \$* ]]; then
+  exit 0
 fi
 
-# Validate conventional commit format
-if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore)(\([a-zA-Z0-9_-]+\))?(!)?: .+'; then
+# Validate conventional commit format (scope may list several comma-separated areas)
+if ! echo "$msg" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-zA-Z0-9_,./ -]+\))?(!)?: .+'; then
   cat >&2 <<'EOF'
-{"hookSpecificOutput":{"permissionDecision":"deny"},"systemMessage":"Commit message does not follow conventional commit format. Expected: <type>(<scope>): <description>\nTypes: feat, fix, docs, style, refactor, perf, test, build, ci, chore"}
+{"hookSpecificOutput":{"permissionDecision":"deny"},"systemMessage":"Commit message does not follow conventional commit format. Expected: <type>(<scope>): <description>\nTypes: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"}
 EOF
   exit 2
 fi

@@ -2,7 +2,7 @@
 name: skill-validator
 model: haiku
 description: Validates SKILL.md files against token budget guidelines and plugin consistency
-allowedTools:
+tools:
   - Read
   - Bash
   - Grep

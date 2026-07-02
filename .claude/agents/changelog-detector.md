@@ -2,7 +2,7 @@
 name: changelog-detector
 model: sonnet
 description: Fetches and summarizes changelogs for dependency and GitHub Actions upgrades, detecting breaking changes
-allowedTools:
+tools:
   - Bash
   - Read
   - WebFetch
