@@ -162,12 +162,5 @@ Then ask: "Proceed with this split? [Y/n/modify]"
 
 ## Common Patterns
 
-| Change Mix | Split Strategy |
-|------------|---------------|
-| Feature + tests | Two commits: feat, then test |
-| Feature + docs | Two commits: feat, then docs |
-| Multiple fixes | One commit per fix |
-| Refactor + feature | Two commits: refactor first |
-| Config + code | Two commits: config first |
-
-**For more patterns and examples, load @references/examples.md**
+See the Split Decision Guide table in [examples.md](references/examples.md) — one home
+for the change-mix → strategy patterns.

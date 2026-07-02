@@ -63,16 +63,7 @@ Look for these indicators of separate concerns:
 
 ### Splitting Hunks
 
-```bash
-# Interactive hunk selection
-git add -p <file>
-
-# During interactive add:
-# y - stage this hunk
-# n - skip this hunk
-# s - split into smaller hunks
-# e - manually edit hunk
-```
+Use `git add -p <file>` — key legend and editing rules in [splitting.md](splitting.md).
 
 ## Change Classification
 

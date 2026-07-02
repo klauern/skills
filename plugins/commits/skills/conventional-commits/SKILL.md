@@ -1,6 +1,6 @@
 ---
 name: conventional-commits
-description: This skill should be used when the user asks to "create a conventional commit", "write semantic commit messages", "commit and push with conventional commits", or "split changes into multiple conventional commits".
+description: This skill should be used when the user asks to "create a conventional commit", "write semantic commit messages", or "commit and push with conventional commits".
 version: 1.0.0
 ---
 
@@ -10,15 +10,8 @@ version: 1.0.0
 
 This skill creates well-formatted commit messages following the Conventional Commits specification. It analyzes git changes, determines commit types and scopes, and creates structured commits supporting semantic versioning and automated changelog generation.
 
-## When to Use This Skill
-
-Use this skill when:
-
-- Creating commits that follow Conventional Commits format
-- User requests "conventional commits" or "semantic commits"
-- Breaking down changes into multiple logical commits with proper scoping
-- Committing and pushing changes with structured messages
-- Working in repositories that enforce commit message conventions
+For splitting mixed changes into multiple atomic commits, use the **commit-splitter**
+skill — this skill covers writing the messages and committing.
 
 ## Quick Format
 
@@ -30,51 +23,16 @@ Use this skill when:
 [optional footer(s)]
 ```
 
-**Common types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`
+See [format-reference.md](references/format-reference.md) for the full specification —
+types, scopes, and breaking-change syntax live there (single source of truth).
 
-**Breaking changes**: Use '!' after type/scope or `BREAKING CHANGE:` footer
+## Workflow
 
-## Workflow Decision Tree
-
-1. **Check staging status**:
-   - Staged changes → Single commit workflow
-   - Unstaged changes → Multi-commit workflow
-
-2. **Push requirement**:
-   - User mentions "push" → Push after committing
-   - Otherwise → Commit only
-
-## Sub-Agent Strategy
-
-### Use Haiku for
-
-- Quick diff analysis and file categorization
-- Simple commit message drafting
-
-### Use Sonnet for
-
-- Commit breakpoint determination and multi-commit planning
-- Scope identification and complex message composition
-- Cross-cutting change analysis
-
-## Progressive Disclosure
-
-Load additional context only when needed:
-
-- **@references/workflows.md** - Detailed single/multi-commit workflows with bash commands and staging strategies
-- **@references/examples.md** - Real-world commit examples for features, fixes, breaking changes, and multi-commit scenarios
-- **@references/best-practices.md** - Guidelines, common pitfalls, atomic commit patterns, and scope naming conventions
-- **@references/format-reference.md** - Complete Conventional Commits specification with all types, components, and breaking change syntax
-
-## Essential Instructions
-
-### Single Commit Workflow
-
-When changes are already staged:
-
-1. Review: `git diff --cached` and `git log -10 --oneline`
-2. Determine type, scope, and breaking change status
-3. Create message following format above
+1. **Check staging status**: staged changes → commit them as-is; unstaged mixed changes
+   that need splitting → delegate to the commit-splitter skill.
+2. Review context: `git diff --cached` and `git log -10 --oneline` (match the repo's
+   existing style).
+3. Determine type, scope, and breaking-change status per the format reference.
 4. Commit with heredoc:
    ```bash
    git commit -m "$(cat <<'EOF'
@@ -86,22 +44,7 @@ When changes are already staged:
    EOF
    )"
    ```
-5. Push if requested: `git push`
-
-**For detailed steps, load @references/workflows.md**
-
-### Multi-Commit Workflow
-
-When nothing is staged and changes need splitting:
-
-1. Review: `git status`, `git diff`, `git log -10 --oneline`
-2. Categorize changes by type, scope, and logical boundaries (use Haiku)
-3. Plan commit breakdown with atomic, self-contained commits (use Sonnet)
-4. For each commit: stage files, create commit with heredoc
-5. Verify: `git log --oneline -n <count>`
-6. Push if requested: `git push`
-
-**For detailed steps and examples, load @references/workflows.md**
+5. Push only if the user asked: `git push`
 
 ## Key Principles
 
@@ -110,6 +53,9 @@ When nothing is staged and changes need splitting:
 - **Concise descriptions**: ≤72 characters, lowercase, no period
 - **Meaningful bodies**: Explain "why" not "what" (diff shows "what")
 - **Explicit breaking changes**: Always use '!' or `BREAKING CHANGE:` footer
-- **Multiple small commits**: Better than one large mixed commit
 
-**For comprehensive guidelines, load @references/best-practices.md**
+## Progressive Disclosure
+
+- [format-reference.md](references/format-reference.md) — the complete specification
+- [best-practices.md](references/best-practices.md) — judgment calls: scope naming, body writing, common pitfalls
+- [examples.md](references/examples.md) — breaking-change and multi-commit examples
