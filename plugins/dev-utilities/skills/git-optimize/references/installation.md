@@ -108,4 +108,3 @@ chmod +x $(which git-trim)
 
 Once installed, configure git-trim:
 - [Configuration Guide](configuration.md)
-- [Example Workflows](example_workflows.md)

@@ -31,18 +31,29 @@ Repository maintenance through branch cleanup and optimization operations.
 - Commit operations
 - Remote management (use standard git)
 
+## Step 1 — Check Prerequisites
+
+The convenience commands below are **git aliases, not built-ins**. Before using any of
+them, verify they exist and offer to install the missing ones (definitions in
+[configuration.md](references/configuration.md)):
+
+```bash
+git config alias.cleanup || echo "alias missing"
+```
+
+If the user prefers not to install aliases, use the raw-git equivalents in the table.
+
 ## Commands
 
-| Command | Purpose | Time | Safety |
-|---------|---------|------|--------|
-| `git cleanup` | Delete branches merged to master | Seconds | High |
-| `git sweep` | Aggressive cleanup (master/develop) | Seconds | High |
-| `git trim` | Smart detection (merged/stray/squash) | Seconds | High |
-| `git trim --dry-run` | Preview what trim would delete | Seconds | Safe |
-| `git pruner` | Remove unreachable objects | Minutes-Hours | Medium |
-| `git repacker` | Optimal delta compression | Hours | High |
-| `git optimize` | pruner + repacker + prune-packed | Hours | Medium |
-| `git trimall` | Full workflow (fetch→trim→cleanup→optimize) | 10min-Hours | Medium |
+| Alias | Raw-git equivalent | Purpose | Time |
+|-------|--------------------|---------|------|
+| `git cleanup` | `git branch --merged \| grep -vE '^\*\|master\|main' \| xargs -r git branch -d` | Delete branches merged to HEAD | Seconds |
+| `git sweep` | same, against `master`/`develop` | Aggressive merged-branch cleanup | Seconds |
+| `git trim` | external tool ([git-trim](references/installation.md)) | Smart detection (merged/stray/squash) | Seconds |
+| `git pruner` | `git reflog expire --expire=now --all && git gc --prune=now` | Remove unreachable objects | Minutes-Hours |
+| `git repacker` | `git repack -a -d --depth=250 --window=250` | Optimal delta compression | Hours |
+| `git optimize` | pruner + repacker + `git prune-packed` | Full optimization cycle | Hours |
+| `git trimall` | fetch→trim→cleanup→sweep→optimize | Complete workflow | 10min-Hours |
 
 ## Workflows
 
@@ -53,13 +64,28 @@ git checkout main && git pull && git cleanup
 
 **Weekly maintenance**:
 ```bash
-git fetch --all --prune && git trim --dry-run && git trim
+git fetch --all --prune && git trim --dry-run   # then delete per the strategy below
 ```
 
 **Monthly deep clean**:
 ```bash
 git trimall
 ```
+
+## git-trim Execution Strategy (non-interactive)
+
+git-trim's confirmation prompt uses terminal control sequences that break under pipes —
+**never** use `yes | git trim` or `echo y | git trim`. Instead:
+
+1. `git trim --dry-run` and parse the branch names under "Delete merged local branches:"
+2. Delete each locally: `git branch -d <branch>`
+3. Attempt remote deletion: `git push origin --delete <branch>`
+4. Treat "remote ref does not exist" as success — the remote branch was already
+   removed (e.g. by fetch --prune or the forge's delete-on-merge)
+5. Verify with `git branch -vv`
+
+Note: git-trim upstream (foriequal0/git-trim) has been unmaintained for years — it still
+works, but prefer the raw-git equivalents when it misbehaves.
 
 ## Model Strategy
 
@@ -105,7 +131,3 @@ See [configuration.md](references/configuration.md) for full alias definitions.
 3. Schedule optimize/repacker overnight
 4. Use `git reflog` for recovery
 
-## Version History
-
-- **1.1.0**: Optimized skill documentation (62% reduction)
-- **1.0.0**: Initial release with git-trim integration

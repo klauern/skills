@@ -21,7 +21,9 @@ git config trim.exclude "staging production qa"
 
 ## Git Aliases
 
-Your optimization aliases in `~/.gitconfig`:
+The optimization aliases this skill relies on. **They are not git built-ins** — install
+them into `~/.gitconfig` (offer this as setup step 1 if `git config alias.cleanup` is
+empty):
 
 ```ini
 [alias]
