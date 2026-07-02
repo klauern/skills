@@ -31,6 +31,27 @@ Context, constraints, links to prior decisions, gotchas.
 
 Enrichment is an interview, not a guess. Read the task, then ask only for what's missing — batch the questions, keep them short, and accept "skip" for any.
 
+Interview mechanics:
+
+- Walk the questions top-to-bottom; later answers may make a lower question moot.
+- **Explore before asking**: if the task text or resolved references already answer a
+  question, state what you found and skip it (or ask only to confirm).
+- **Absorb multi-answer replies**: one user message often resolves several questions at
+  once — take all of them, don't re-ask.
+- **Hybrid input style**: free-text for prose fields (goal, context/links) with a
+  recommended phrasing the user can accept; AskUserQuestion option prompts for
+  mechanical fields (priority, timeframe, tags) with the recommended option first,
+  batched 2–4 per call.
+- **Suggestion phrasing**: recommendations are previews, never silent writes. And
+  **overdue ≠ high** — a passed (or placeholder) due date means the task has been
+  sitting, not that it's urgent; judge importance from the work itself.
+
+**Already tracked elsewhere?** If a resolved reference IS the system of record (an open,
+actively-owned Jira ticket or GitHub issue/PR) and the TickTick task adds nothing the
+tracker lacks, offer to **close the task as a duplicate** (`complete_task`) instead of
+enriching. Keep-and-enrich only when the user wants a personal reminder distinct from
+the tracker.
+
 - **Goal**: "What does *done* look like for this?"
 - **Ambiguous title**: "What is '<bare word>' here — a place, person, tool?" (e.g. "Gable")
 - **Steps**: "Any steps you already have in mind? I can propose a draft if not."
@@ -90,6 +111,42 @@ Never change an existing value without the user's explicit yes. Anything unconfi
 - 1–3 links max, each with a one-line "why relevant".
 - Verify the link resolves (`WebFetch`) before adding; drop dead links.
 - Append under `## References` in `content`. Never replace the user's existing notes — append.
+
+### Reference-detection regexes
+
+Scan `title` + `content`; resolve only what's present, and degrade gracefully — a
+missing/erroring resolver is noted, not fatal. (Personal/work patterns — adjust to your
+own trackers.)
+
+- **Jira key** — `\b(FSEC|PCI|SECURE|PLAN|LOCKBOX)-\d+\b` → `jira` CLI
+- **GitHub repo** — `\bzendesk/[a-z0-9._-]+\b` → `gh repo view`
+- **GitHub PR/issue** — `github\.com/[^/]+/[^/]+/(pull|issues)/\d+` → `gh pr view` / `gh issue view`
+- **Confluence** — `\.atlassian\.net/wiki/` → confluence tooling
+- **Slack** — `\bzendesk\.slack\.com/archives/\S+` → slack read (if available)
+- **Capacities** — `capacities://|app\.capacities\.io/` → note as external ref
+- **Google Docs** — `docs\.google\.com/\S+` → WebFetch (if allowed)
+- **Person** — capitalized first-name mentions near "ask/message/follow-up" → confirm with the user
+
+## Tag vocabulary (personal, controlled list)
+
+Propose from the existing vocabulary — reuse beats inventing. Union with current tags,
+dedup, lower-case. Refresh the live list with `mcp__ticktick__list_tags`.
+
+Work / security / infra: `aws`, `azure`, `guild-azure`, `zig`, `zig-taxonomy`, `fsec`,
+`secure`, `compliance`, `docs`, `jira`, `ai-tooling`, `research`, `incident-followup`,
+`work-link`, `project-pine`, `engineering`, `engineering-all`.
+
+Personal: `finances`, `purchase`, `gift`, `read`, `read-later`, `books`, `watch`,
+`veterans`, `ec`, `ec-veterans`, `scouts`, `writing`, `actionable`.
+
+> Ignore junk tags from bad imports (`16157)`, `3334`, `35445`, `35542`, ` ``` `,
+> `ask-`, `dsp`, `td`) — never propose or recreate them.
+
+## Someday / placeholder dates (read side)
+
+Treat an existing `1970-01-01` or `2099-01-01` due date as "someday" when reading — they
+are placeholders, not real deadlines. Never write new sentinel dates; clear dates via
+`/ticktick:clear-dates` and leave "someday" tasks dateless (optionally tagged `someday`).
 
 ## Worked example
 

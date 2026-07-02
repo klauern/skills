@@ -1,7 +1,7 @@
 ---
 name: code-mode-mcp
 description: >
-  Expert reference for Code Mode MCP — the agent architecture pattern where Claude writes TypeScript/Python code against typed APIs generated from MCP schemas, replacing hundreds of discrete tool calls with a single execute(code) tool (98%+ token reduction, per Anthropic/Cloudflare). USE THIS SKILL whenever a user: has 5+ MCP servers or 50+ tools and asks about context window costs or tool schema bloat; asks "should I use code mode or classic tool calling"; is choosing a sandbox runtime for agent code execution (goja, wazero, starlark-go, E2B, Firecracker, isolated-vm, pyodide, RestrictedPython); asks about auth boundaries or credential hygiene in an execute(code) agent loop; mentions tool definitions eating the context window before conversations start; asks about typed API generation from MCP schemas or the execute(code) pattern; or is implementing Code Mode in Go, Python, or TypeScript. This skill contains a sandbox runtime comparison table (9 options with startup/isolation/host-language tradeoffs), a Go vs Cloudflare implementation table, an 8-item implementation checklist with security constraints, and a decision matrix not reliably in general training data. Prefer this skill over answering from general knowledge whenever MCP architecture, sandbox design, or execute(code) loops are involved.
+  Expert reference for Code Mode MCP — the pattern where the model writes code against typed APIs generated from MCP schemas, replacing many discrete tool calls with one execute(code) tool. USE whenever a user: has 5+ MCP servers or 50+ tools and asks about context costs or tool-schema bloat; asks "code mode or classic tool calling"; is choosing a sandbox runtime (goja, wazero, starlark-go, E2B, Firecracker, isolated-vm, pyodide, RestrictedPython); asks about auth boundaries in an execute(code) loop; or is implementing Code Mode in Go, Python, or TypeScript. Prefer this skill over general knowledge for MCP architecture, sandbox design, or execute(code) loops.
 version: 1.0.0
 allowed-tools: Bash Read Grep Glob WebFetch
 ---
@@ -74,7 +74,7 @@ Walk through in order — each has a trust implication:
 
 - **Client-side** (harness owns sandbox): works with any compliant MCP server today
 - **Server-side** (MCP server owns sandbox): any MCP client gets Code Mode for free; FastMCP `CodeMode` transform; Cloudflare MCP Portal
-- **Filesystem-mounted discovery**: tools as files, loaded via directory listing on demand — drives the 150K→2K result
+- **Filesystem-mounted discovery**: tools as files, loaded via directory listing on demand — drives the ~150K→~2K result in Cloudflare's demo
 
 ## Security: the critical trap
 
@@ -85,7 +85,7 @@ will succeed — the runtime did its job.
 Treat every binding as a privilege grant. Scope OAuth tokens at auth time. Allowlist
 destructive operations per-role. Sandboxing is defense-in-depth, not the perimeter.
 
-## Worked example token comparison
+## Worked example token comparison (per Cloudflare's published demo)
 
 | Approach | Tokens | Round-trips |
 |----------|--------|-------------|
