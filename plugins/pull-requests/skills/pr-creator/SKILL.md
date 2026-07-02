@@ -20,6 +20,17 @@ The skill will: find the PR template → analyze branch commits → infer inform
 
 ## Workflow
 
+### Phase 0: Preflight
+
+```bash
+gh pr view 2>&1 || true                             # Existing PR? Show URL and stop
+BASE="${BASE:-$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)}"
+git push -u origin "$(git branch --show-current)"   # Ensure branch is on the remote
+```
+
+Honor a user-supplied `--base <branch>` over the detected default, and use `$BASE`
+everywhere a base branch appears below — never hardcode `main`.
+
 ### Phase 1: Template Discovery
 
 Search locations (in order):
@@ -37,11 +48,14 @@ Search locations (in order):
 
 **Git commands**:
 ```bash
-git rev-parse --abbrev-ref HEAD                    # Current branch
-git symbolic-ref refs/remotes/origin/HEAD          # Base branch
-git log origin/main...HEAD --oneline               # Commits
-git diff origin/main...HEAD --name-status          # Files changed
+git rev-parse --abbrev-ref HEAD                        # Current branch
+git log origin/"$BASE"...HEAD --oneline                # Commits
+git diff origin/"$BASE"...HEAD --stat --name-status    # Files changed
+git diff origin/"$BASE"...HEAD                         # Full diff (summarize by area if >500 lines)
 ```
+
+Analyze **all** commits and the full diff, not just the latest commit — the "why" comes
+from commit messages; the "what" comes from the diff.
 
 **Auto-extracted fields**:
 
@@ -63,20 +77,22 @@ git diff origin/main...HEAD --name-status          # Files changed
 - **Medium (confirm)**: PR title, scope, checkbox items
 - **Low (ask user)**: "Why"/motivation, manual test steps, screenshots, migration guides
 
-### Phase 4: PR Creation
+### Phase 4: Preview and Create
+
+Show the user the proposed title and body and get approval before creating. Then:
 
 ```bash
-gh pr create \
-  --title "feat: Add feature" \
-  --body "$(cat <<'EOF'
+cat <<'BODY' > /tmp/pr-body.md
 ## Summary
 ...
-EOF
-)" \
-  --base main \
-  --label "enhancement" \
-  --assignee "@me"
+BODY
+gh pr create --base "$BASE" --title "feat: Add feature" --body-file /tmp/pr-body.md \
+  --label "enhancement" --assignee "@me"
+rm -f /tmp/pr-body.md
 ```
+
+**NEVER use `gh pr create --fill`** — it bypasses all analysis and copies commit
+messages verbatim.
 
 **Auto-labels**: `feat:` → enhancement, `fix:` → bug, `docs:` → documentation
 

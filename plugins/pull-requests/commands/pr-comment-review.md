@@ -42,10 +42,25 @@ Review comments can have different states that affect their relevance:
    - These are general comments on the PR itself
 
 3. **Fetch PR Review Threads (with state)**
-   Use GraphQL to get review threads with resolution and outdated status:
+   Use GraphQL with variables (robust against quoting; no manual substitution):
    ```bash
-   echo '{"query": "query { repository(owner: \"OWNER\", name: \"REPO\") { pullRequest(number: NUM) { reviewThreads(first: 100) { nodes { isResolved isOutdated path line resolvedBy { login } comments(first: 10) { nodes { author { login } body createdAt } } } } } } }"}' | gh api graphql --input -
+   gh api graphql \
+     -F owner='{owner}' -F name='{repo}' -F number=<NUM> \
+     -f query='
+       query($owner: String!, $name: String!, $number: Int!) {
+         repository(owner: $owner, name: $name) {
+           pullRequest(number: $number) {
+             reviewThreads(first: 100) {
+               nodes {
+                 isResolved isOutdated path line resolvedBy { login }
+                 comments(first: 10) { nodes { author { login } body createdAt } }
+               }
+             }
+           }
+         }
+       }'
    ```
+   (`-F owner='{owner}' -F name='{repo}'` auto-fill from the current repo.)
 
    Key fields:
    - `isResolved` - Whether the thread has been resolved
@@ -86,10 +101,8 @@ gh pr view --json number -q .number
 # View conversation comments
 gh pr view 123 --json comments -q '.comments[] | "\(.author.login): \(.body)"'
 
-# Get review threads with state (GraphQL)
-echo '{"query": "query { repository(owner: \"myorg\", name: \"myrepo\") { pullRequest(number: 123) { reviewThreads(first: 100) { nodes { isResolved isOutdated path line resolvedBy { login } comments(first: 10) { nodes { author { login } body } } } } } } }"}' | gh api graphql --input -
-
 # Filter to only open (unresolved, not outdated) threads with jq
+# (pipe the GraphQL query from step 3)
 ... | jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false and .isOutdated == false)'
 
 # Count outdated threads that were filtered
