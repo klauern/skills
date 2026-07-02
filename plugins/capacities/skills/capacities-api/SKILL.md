@@ -1,6 +1,6 @@
 ---
 name: capacities-api
-description: This skill should be used when the user asks to "list Capacities spaces", "search Capacities", "save a weblink to Capacities", "append to a Capacities daily note", or mentions Capacities API workflows.
+description: Integrates the Capacities knowledge-management REST API to list spaces, search content, save weblinks, and append daily notes. Use when the user asks to "list Capacities spaces", "search Capacities", "save a weblink to Capacities", "append to a Capacities daily note", or mentions Capacities API workflows.
 version: 1.0.0
 author: klauern
 ---
@@ -40,6 +40,9 @@ Invoke this skill when the user:
 | `/capacities:save-weblink --url <url>` | Save a webpage to a space |
 | `/capacities:daily-note --text <md>` | Append to today's daily note |
 
+The backing script also offers `capacities.py lookup <term> --space-id <id>` — title-only
+lookup within a single space.
+
 ## Execution Workflow
 
 ### Phase 1: Authentication Check
@@ -50,83 +53,29 @@ Before any API call, verify `CAPACITIES_API_TOKEN` is set. If missing, guide use
 
 Most operations require a space ID:
 - If space ID provided, use it directly
-- If not provided, list spaces and ask user to select
+- If not provided, list spaces and ask user to select (space-selection strategies in the API reference)
 
 ### Phase 3: Execute Operation
 
-Run the appropriate API endpoint with provided/selected parameters. See @references/api-reference.md for complete endpoint specifications.
+Run the appropriate endpoint via `uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" …`.
+See [api-reference.md](references/api-reference.md) for complete endpoint specifications.
 
 ### Phase 4: Handle Response
 
-- Display results in human-readable format
-- Use `--json` flag for JSON output
-- Handle rate limits gracefully (wait and retry per RateLimit-Reset header)
-
-## Sub-Agent Strategy
-
-### Use Haiku for:
-- Listing spaces (simple API call, parse JSON)
-- Fetching space info (simple API call)
-- Executing search with known parameters
-- Saving weblinks with all parameters provided
-- Cache lookups and validation
-
-### Use Sonnet for:
-- Understanding user intent to determine operation
-- Constructing search queries from natural language
-- Deciding target space when user doesn't specify
-- Composing markdown content for daily notes
-- Synthesizing and summarizing search results
-- Handling errors and guiding user through setup
+- Display results in human-readable format (`--json` for JSON output)
+- Rate limits are strict on most endpoints; the script caches spaces/space-info.
+  Limits, recovery steps, and script patterns live in the API reference.
 
 ## Common Patterns
 
-### Quick Note Capture
-```text
-User: "Remember to review the API design tomorrow"
-→ Append formatted markdown to daily note
-```
-
-### Web Clipping
-```text
-User: "Save this article: https://example.com/article"
-→ Save weblink with auto-detected metadata, optionally add tags/notes
-```
-
-### Knowledge Search
-```text
-User: "What did I write about project planning?"
-→ Search across spaces, present results with highlights
-```
-
-For detailed workflows, see @references/workflows.md
-
-## API Rate Limits
-
-| Endpoint | Rate Limit | Cache Strategy |
-|----------|------------|----------------|
-| GET /spaces | 5/60s | Cache 5 min in `~/.cache/capacities/spaces.json` |
-| GET /space-info | 5/60s | Cache 10 min in `~/.cache/capacities/space-info-{id}.json` |
-| POST /search | 120/60s | No cache (generous limit) |
-| POST /save-weblink | 10/60s | Invalidates space cache |
-| POST /save-to-daily-note | 5/60s | Invalidates space cache |
-
-## Error Handling
-
-| Error | Cause | Resolution |
-|-------|-------|------------|
-| 401 Unauthorized | Invalid/expired token | Regenerate token in Capacities settings |
-| 429 Too Many Requests | Rate limit exceeded | Wait for reset (check RateLimit-Reset header) |
-| 400 Bad Request | Invalid parameters | Check parameter format (UUIDs, content length) |
-| Network Error | Connection issues | Check internet connection |
+- **Quick note capture**: "Remember to review the API design tomorrow" → append formatted markdown to the daily note
+- **Web clipping**: "Save this article: <url>" → save-weblink with metadata, optional tags/notes
+- **Knowledge search**: "What did I write about project planning?" → search across spaces, present highlights
 
 ## Progressive Disclosure
 
-Load additional documentation on-demand:
-
-- **@references/api-reference.md** - Complete API specification with endpoint details, request/response schemas, data types, and OpenAPI link
-- **@references/workflows.md** - Common usage patterns including meeting notes capture, research collection, daily review integration, multi-space handling, and error recovery strategies
-- **@references/examples.md** - Detailed command examples with output samples for all operations (spaces, search, weblinks, daily notes) plus script direct usage and pipeline patterns
+- [api-reference.md](references/api-reference.md) — complete endpoint specs,
+  rate-limit strategy, space-selection guidance, script patterns, and error recovery
 
 ## Requirements
 
@@ -137,6 +86,5 @@ Load additional documentation on-demand:
 ## Limitations
 
 - API is in beta - endpoints may change
-- Limited to 5 endpoints (more coming per Capacities roadmap)
 - No direct object editing (only create/append)
 - No file/image upload support yet

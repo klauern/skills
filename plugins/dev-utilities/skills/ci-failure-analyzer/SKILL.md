@@ -15,9 +15,8 @@ Automated analysis and resolution of GitHub Actions CI failures.
 
 **Documentation**:
 - [Workflows](references/workflows.md) — Step-by-step analysis flows
-- [Failure Patterns](references/failure-patterns.md) — Detection patterns and fix commands
+- [Failure Patterns](references/failure-patterns.md) — Detection patterns, fix commands, and log-parsing techniques
 - [Tool Detection](references/tool-detection.md) — Project tool/formatter detection
-- [Log Parsing](references/log-parsing.md) — Error extraction techniques
 - [Examples](references/examples.md) — Real-world scenarios
 
 ## When to Use
@@ -97,16 +96,8 @@ Automated analysis and resolution of GitHub Actions CI failures.
 
 ## Failure Categories
 
-| Type | Auto-Fix Rate | Primary Model |
-|------|--------------|---------------|
-| Formatting | 99% | Haiku |
-| Linting (--fix) | 60-80% | Haiku |
-| Type checking | 20-30% | Sonnet |
-| Tests | 5-10% | Sonnet |
-| Dependencies | 90-95% | Haiku |
-| Infrastructure | 5% | Sonnet |
-
-See [failure-patterns.md](references/failure-patterns.md) for full taxonomy.
+See the taxonomy table in [failure-patterns.md](references/failure-patterns.md) —
+detection signatures, auto-fix likelihood, and fix commands per category.
 
 ## Troubleshooting
 

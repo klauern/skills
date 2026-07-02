@@ -218,11 +218,3 @@ Prompt the user for these decisions:
 | Bind mount fails                          | Ensure `~/.claude/` exists on host (`initializeCommand` should create it). On Windows, use `${localEnv:USERPROFILE}` instead of `${localEnv:HOME}`                                                                   |
 | DevPod "unknown field" in provider config | Provider JSON at `~/.devpod/contexts/default/providers/docker/provider.json` has fields from a newer DevPod version. Fix: `devpod provider delete docker && devpod provider add docker` to regenerate a clean config |
 | Firewall script sudo fails                | Ensure sudoers grants NOPASSWD for the firewall script path, iptables, ip6tables, and ipset. Do NOT wrap with `sudo bash` — use `sudo /path/to/script` since scripts have shebangs                                   |
-
-## Version History
-
-- **1.4.0**: Add runtime-safe auth forwarding (`containerEnv` + `remoteEnv`), mount/symlink host `~/.claude.json`, add `--doctor`/`--auth-check` preflight flow, and align Taskfile tasks with script flags. Forward Bedrock env vars (`ANTHROPIC_BEDROCK_BASE_URL`, `CLAUDE_CODE_USE_BEDROCK`, `CLAUDE_CODE_SKIP_BEDROCK_AUTH`) and `ANTHROPIC_CUSTOM_HEADERS` via `containerEnv`. Hard-code `NODE_USE_SYSTEM_CA=1` for corporate proxy compatibility. **Breaking**: removes `devcontainer:up`, `devcontainer:stop`, and `devcontainer:delete` tasks — replaced by `devcontainer:ssh` (auto-starts), `devcontainer:down`, and `devcontainer:rebuild`. `devcontainer:ssh` now runs `bash devcontainer-ssh.sh` instead of `devpod ssh .` directly.
-- **1.3.0**: Auto-detect custom API gateways (`*_BASE_URL` in settings.json) and remote MCP servers (sse/http/streamable entries from user/project MCP config) — extract domains for firewall allowlist, forward `ANTHROPIC_AUTH_TOKEN` when custom gateway detected
-- **1.2.0**: Add `runArgs` (NET_ADMIN/NET_RAW), `remoteEnv` (ANTHROPIC_API_KEY, HOST_HOME), `.cache` directory fix, host path symlink in setup.sh, bind mount verification in entry script
-- **1.1.0**: Replace config sync infrastructure with direct `~/.claude/` host bind mount
-- **1.0.0**: Initial release with DevPod + SSH + firewall + config mirroring

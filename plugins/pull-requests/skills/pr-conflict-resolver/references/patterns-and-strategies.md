@@ -86,22 +86,10 @@ git log --format="%h %s" origin/main..MERGE_HEAD -- file
 **When**: Complex logic, domain knowledge required
 - **Action**: Present analysis, explain trade-offs, recommend approach, assist implementation
 
-## Language-Specific Patterns
+## Formatting-Conflict Rule
 
-### Python
-- Import sorting: stdlib → third-party → local (PEP 8)
-- Type hint conflicts: Usually additive, merge both
-- Docstring conflicts: Combine content
-
-### JavaScript/TypeScript
-- Import sorting: absolute before relative
-- Type definition conflicts: Check for breaking changes
-- Semicolon differences: Apply project eslint/prettier
-
-### Go
-- Import grouping: std → external → internal
-- Use gofumpt for formatting conflicts
-- Interface additions: Usually additive
+Resolve whitespace/import-order conflicts by running the project's own formatter
+(prettier, black, gofumpt) rather than hand-merging — the tool's output is the answer.
 
 ## Anti-Patterns to Avoid
 

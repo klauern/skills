@@ -24,7 +24,6 @@ Error: Process completed with exit code 1.
 3. Apply: `npx prettier --write .`
 4. Confirm: `npx prettier --check .`
 
-**Time**: ~5s | **Cost**: ~$0.001
 
 ---
 
@@ -50,7 +49,6 @@ Error: Process completed with exit code 1.
    - Line 23: Add return type annotation
    - Line 28: Type the result properly
 
-**Time**: ~30s | **Cost**: ~$0.015
 
 ---
 
@@ -86,7 +84,6 @@ FAIL src/calculator.test.ts
 return numbers.reduce((sum, n) => sum + n, 0);  // Restore initial value
 ```
 
-**Time**: ~27s | **Cost**: ~$0.012
 
 ---
 
@@ -106,7 +103,6 @@ npm ERR! Invalid: lock file's lodash@4.17.20 does not satisfy lodash@^4.17.21
 2. Verify: `git diff package-lock.json`
 3. Confirm: `npm ci` succeeds
 
-**Time**: ~10s | **Cost**: ~$0.002
 
 ---
 
@@ -127,7 +123,6 @@ src/api.ts:28:5 - error TS2554: Expected 2 arguments, but got 3.
    - A) Migrate to 1.0.0 API
    - B) Downgrade temporarily
 
-**Time**: ~45s | **Cost**: ~$0.020
 
 ---
 
@@ -171,16 +166,4 @@ src/index.ts:12 - error TS2304: Cannot find name 'crypto'.
 
 ---
 
-## Summary
-
-| Example | Type | Model | Auto-Fix | Time | Cost |
-|---------|------|-------|----------|------|------|
-| Formatting | Mechanical | Haiku | 100% | ~5s | $0.001 |
-| Linting + Types | Mixed | Haiku/Sonnet | 40% | ~30s | $0.015 |
-| Test Failure | Logic | Sonnet | 0% | ~27s | $0.012 |
-| Lock File | Dependency | Haiku | 100% | ~10s | $0.002 |
-| Breaking Change | Migration | Sonnet | 0% | ~45s | $0.020 |
-| Missing Secret | Config | Sonnet | 0% | ~20s | $0.010 |
-| Matrix Failure | Mixed | Mixed | Varies | ~35s | $0.018 |
-
-**Key Insight**: Mechanical issues (formatting, locks) are fast and cheap. Logic issues (tests, breaking changes) require analysis and user input.
+**Key Insight**: Mechanical issues (formatting, locks) resolve quickly and automatically. Logic issues (tests, breaking changes) require analysis and user input.

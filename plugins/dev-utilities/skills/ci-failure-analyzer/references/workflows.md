@@ -26,7 +26,7 @@ gh run view <run-id> --log-failed
 ```
 
 ### Phase 4: Analyze Root Causes (Sonnet)
-1. Extract error messages using patterns from [log-parsing.md](log-parsing.md)
+1. Extract error messages using patterns from the Log Parsing section of [failure-patterns.md](failure-patterns.md)
 2. Categorize by type (see [failure-patterns.md](failure-patterns.md))
 3. Determine fixability: auto-fix vs manual vs investigation
 

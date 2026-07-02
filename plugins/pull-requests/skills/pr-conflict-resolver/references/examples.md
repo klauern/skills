@@ -1,34 +1,6 @@
 # Conflict Resolution Examples
 
-## Example 1: Import Ordering (Auto-Resolve)
-
-**Conflict**:
-```python
-<<<<<<< HEAD
-import os
-import sys
-from typing import Dict, List
-=======
-from typing import Dict, List
-import os
-import sys
->>>>>>> feature/add-types
-```
-
-**Analysis**: Same imports, different order → Auto-resolve with PEP 8 sorting
-
-**Resolution**:
-```python
-import os
-import sys
-from typing import Dict, List
-```
-
-**Command**: `git add file.py` (auto-resolved)
-
----
-
-## Example 2: Function Signature Change (Suggest Strategy)
+## Example 1: Function Signature Change (Suggest Strategy)
 
 **Conflict**:
 ```python
@@ -61,7 +33,7 @@ def create_user(email: str, password: str, role: str = 'user'):
 
 ---
 
-## Example 3: Refactoring Conflict (Manual Guidance)
+## Example 2: Refactoring Conflict (Manual Guidance)
 
 **Conflict**:
 ```python
@@ -107,7 +79,7 @@ class Order:
 
 ---
 
-## Example 4: Logic Conflict (Choose with Guidance)
+## Example 3: Logic Conflict (Choose with Guidance)
 
 **Conflict**:
 ```python

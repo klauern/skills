@@ -37,40 +37,8 @@ The skill will: detect ecosystem(s) → analyze outdated → categorize by semve
 | go | go.mod | `go list -m -u all` | `go get -u ./...` |
 | cargo | Cargo.toml | `cargo outdated` | `cargo update` |
 
-## Key Commands
-
-### npm (using npm-check-updates)
-
-```bash
-npx ncu                    # Check outdated (colorized)
-npx ncu --jsonUpgraded     # JSON output for parsing
-npx ncu -u                 # Update package.json
-npx ncu --target minor     # Only minor/patch updates
-```
-
-### poetry
-
-```bash
-poetry show --outdated     # List outdated
-poetry update              # Update all
-poetry update pkg-name     # Update specific
-```
-
-### go
-
-```bash
-go list -m -u all         # List outdated modules
-go get -u ./...           # Update all
-go mod tidy               # Clean up go.mod
-```
-
-### cargo
-
-```bash
-cargo outdated            # Check outdated (requires cargo-outdated)
-cargo update              # Update Cargo.lock
-cargo upgrade             # Update Cargo.toml (requires cargo-edit)
-```
+Full per-ecosystem command references (flags, lock operations, constraint syntax) live
+in [ecosystems.md](references/ecosystems.md) — the table above is the quick index.
 
 ## Decision Points
 

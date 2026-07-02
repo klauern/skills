@@ -129,6 +129,21 @@ curl -X GET "https://api.capacities.io/space-info?spaceid=$SPACE_ID" \
 
 ---
 
+### POST /lookup
+
+Look up content by title within a single space (lighter than /search; used by
+`capacities.py lookup <term> --space-id <id>`).
+
+**Request Body:**
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| searchTerm | string | Yes | Title search term |
+| spaceId | UUID | Yes | Space to look in |
+
+**Response:** `results` array of `{id, title, structureId}` matches.
+
+---
+
 ### POST /search
 
 Search for content across spaces.
@@ -273,22 +288,44 @@ curl -X POST "https://api.capacities.io/save-to-daily-note" \
 
 ---
 
-## Data Types
+## Per-Endpoint Rate Strategy
 
-### UUID Format
-All IDs are UUIDs: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+| Endpoint | Limit | Strategy |
+|----------|-------|----------|
+| spaces | 5/60s | Cache aggressively (script caches 5 min) |
+| space-info | 5/60s | Cache per space (10 min) |
+| search | 120/60s | Generous, minimal concern |
+| save-weblink | 10/60s | Batch if multiple saves |
+| daily-note | 5/60s | Combine entries when possible |
 
-### Icon Colors
-18 available colors for iconify icons:
-- red, orange, amber, yellow, lime, green
-- emerald, teal, cyan, sky, blue, indigo
-- violet, purple, fuchsia, pink, rose, gray
+When rate limited: read `RateLimit-Reset`, wait that many seconds, retry.
 
-### Markdown Support
-The `mdText` field supports standard markdown:
-- Headers, lists, bold/italic
-- Code blocks, links, blockquotes
-- Tables (GitHub-flavored)
+## Choosing a Space
+
+Most users have several spaces (Personal, Work, …). Selection order:
+1. **Explicit** — the user names a space ("save to my Work space")
+2. **Context** — infer from content (e.g. "meeting notes" → Work) and confirm
+3. **Interactive** — list spaces and ask
+
+## Script Patterns
+
+```bash
+# Force fresh data past the cache
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces --no-cache
+
+# Pipeline: resolve a space ID, then search it
+SPACE_ID=$(uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces --json | jq -r '.spaces[0].id')
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" search "meeting" --space-ids "$SPACE_ID" --json | jq '.results[].title'
+```
+
+## Error Recovery
+
+| Error | Recovery |
+|-------|----------|
+| 401 Unauthorized | Check `CAPACITIES_API_TOKEN`; regenerate in Capacities Settings > API |
+| 404 space not found | `/capacities:list-spaces`, verify the ID, check for deleted/archived space |
+| 400 mdText too long | Max 200,000 chars — split into multiple daily-note entries or summarize |
+| 429 rate limited | Wait `RateLimit-Reset` seconds, retry |
 
 ---
 

@@ -30,21 +30,8 @@ git log --format="%h %s" -L <start>,<end>:path/to/file  # Line history
 
 ## Parsing Phase
 
-### Conflict Marker Format
-```
-<<<<<<< HEAD (ours)
-Current branch changes
-||||||| base (optional)
-Common ancestor content
-=======
-Incoming branch changes
->>>>>>> feature-branch (theirs)
-```
-
-### Parse Steps
-1. Track state: NORMAL → OURS → BASE (optional) → THEIRS → NORMAL
-2. Capture line ranges for each conflict
-3. Extract 5 lines context before/after
+Extract each conflict's ours/base/theirs content from the standard markers, capture line
+ranges, and keep ~5 lines of context before/after for classification.
 
 ## Classification Phase
 
