@@ -18,7 +18,7 @@ Validate one or all SKILL.md files against the token budget and authoring guidel
 
 1. **Discover Skills**
    - If a plugin name is provided, find `plugins/<name>/*/SKILL.md`
-   - Otherwise, find all `plugins/*/*/SKILL.md`
+   - Otherwise, find all `plugins/*/skills/*/SKILL.md`
 
 2. **For Each SKILL.md, Check**:
 
@@ -38,7 +38,7 @@ Validate one or all SKILL.md files against the token budget and authoring guidel
 
 4. **Report Results**:
    ```
-   plugins/commits/conventional-commits/SKILL.md
+   plugins/commits/skills/conventional-commits/SKILL.md
      [PASS] 102 lines (limit: 500)
      [PASS] name: conventional-commits
      [PASS] description: 145 chars (limit: 200)

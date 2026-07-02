@@ -548,7 +548,7 @@ Use this checklist when authoring or reviewing skills:
 - Quick start prominently placed
 - Model strategy clearly documented
 
-**Location**: `plugins/pull-requests/pr-creator/SKILL.md`
+**Location**: `plugins/pull-requests/skills/pr-creator/SKILL.md`
 
 ### Efficient Skill: conventional-commits
 
@@ -560,13 +560,13 @@ Use this checklist when authoring or reviewing skills:
 - Each reference file covers one topic
 - Cross-references instead of duplication
 
-**Location**: `plugins/commits/conventional-commits/SKILL.md`
+**Location**: `plugins/commits/skills/conventional-commits/SKILL.md`
 
 ## Additional Resources
 
 - **Agent Skills Specification**: https://agentskills.io/specification
 - **This Repository's AGENTS.md**: `AGENTS.md` (repository root)
-- **Example Skills**: `plugins/*/*/SKILL.md`
+- **Example Skills**: `plugins/*/skills/*/SKILL.md`
 
 ## Summary
 

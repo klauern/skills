@@ -80,7 +80,7 @@ klauern-skills/
 
 ### 3. Skills (No Version)
 
-**Location**: `plugins/<name>/<skill-name>/SKILL.md`
+**Location**: `plugins/<name>/skills/<skill-name>/SKILL.md`
 
 ```yaml
 ---
@@ -162,14 +162,14 @@ git describe --tags --abbrev=0 --match=v*
 git diff --name-only v2.0.0 HEAD
 
 # Analyze changes:
-# - plugins/commits/conventional-commits/SKILL.md → commits plugin changed
+# - plugins/commits/skills/conventional-commits/SKILL.md → commits plugin changed
 # - plugins/pull-requests/commands/pr.md → pull-requests plugin changed
 # - .claude-plugin/marketplace.json → marketplace metadata changed
 ```
 
 ### Change Categories
 
-1. **Skill changes**: `plugins/<name>/<skill-name>/**`
+1. **Skill changes**: `plugins/<name>/skills/<skill-name>/**`
 2. **Command changes**: `plugins/<name>/commands/**`
 3. **Plugin metadata**: `plugins/<name>/.claude-plugin/plugin.json`
 4. **Marketplace metadata**: `.claude-plugin/marketplace.json`
