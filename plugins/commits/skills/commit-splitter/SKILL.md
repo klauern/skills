@@ -50,8 +50,6 @@ Use this skill when:
    - Interactive → Present plan, confirm each commit
    - Automatic → Execute all commits in sequence
 
-## Sub-Agent Strategy
-
 ### Use Haiku for
 
 - File listing and categorization
@@ -69,9 +67,9 @@ Use this skill when:
 
 Load additional context only when needed:
 
-- **@references/analysis.md** - Detailed diff analysis techniques, hunk parsing, and grouping algorithms
-- **@references/splitting.md** - Git commands for staging hunks, interactive add, and partial commits
-- **@references/examples.md** - Real-world split scenarios with before/after examples
+- [analysis.md](references/analysis.md) - Detailed diff analysis techniques, hunk parsing, and grouping algorithms
+- [splitting.md](references/splitting.md) - Git commands for staging hunks, interactive add, and partial commits
+- [examples.md](references/examples.md) - Real-world split scenarios with before/after examples
 
 ## Essential Instructions
 
@@ -131,7 +129,7 @@ git add -N <file>  # Track file without staging
 git add -p         # Select hunks
 ```
 
-**For complex splits, load @references/splitting.md**
+**For complex splits, load [splitting.md](references/splitting.md)**
 
 ### Output Format
 

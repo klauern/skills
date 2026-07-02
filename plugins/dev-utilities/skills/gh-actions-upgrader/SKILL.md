@@ -94,11 +94,6 @@ chore(ci): upgrade GitHub Actions to latest versions
 
 **PR includes**: Summary, breaking changes per action, fork migration notes, testing checklist.
 
-## Model Strategy
-
-- **Haiku**: File discovery, YAML parsing, version comparison, pattern matching
-- **Sonnet**: Breaking change analysis, risk assessment, PR generation, fork migration decisions
-
 ## Finding Breaking Changes
 
 Never rely on memorized version facts — always fetch the release notes for the actual

@@ -67,14 +67,9 @@ For each surfaced task, offer actions:
 **Phase 5 — Execute & Summarize**
 Batch execute all user choices. End with: "N completed, M rescheduled, P deleted."
 
-## Sub-Agent Strategy
-
-**Use Haiku for**: all parallel task fetches, `complete_task`, `update_task` calls
-**Use Sonnet for**: prioritization reasoning, selecting focus items, triage recommendations, rescheduling date suggestions
-
 ## Progressive Disclosure
 
-- `@references/gtd-contexts.md` — GTD context mapping, review checklists, triage decision tree
+- [gtd-contexts.md](references/gtd-contexts.md) — GTD context mapping, review checklists, triage decision tree
 
 ## Requirements
 

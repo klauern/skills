@@ -109,13 +109,6 @@ messages verbatim.
 
 **Issue linking patterns**: `Closes #123`, `Fixes #456`, `Resolves #789`, `Related to #111`
 
-## Model Strategy
-
-| Task | Model | Rationale |
-|------|-------|-----------|
-| File/template discovery, git ops, parsing | Haiku | Fast, deterministic |
-| Commit analysis, PR generation, gap detection | Sonnet | Complex reasoning |
-
 ## Requirements
 
 - Git repository with remote

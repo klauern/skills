@@ -87,13 +87,6 @@ git-trim's confirmation prompt uses terminal control sequences that break under 
 Note: git-trim upstream (foriequal0/git-trim) has been unmaintained for years — it still
 works, but prefer the raw-git equivalents when it misbehaves.
 
-## Model Strategy
-
-| Task | Model |
-|------|-------|
-| Command execution, alias listing | Haiku |
-| Analyzing branches, recommending strategy | Sonnet |
-
 ## Configuration
 
 **Git-flow setup** (multiple base branches):

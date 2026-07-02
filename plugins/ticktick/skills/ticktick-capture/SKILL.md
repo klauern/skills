@@ -52,14 +52,9 @@ Extract from user input: title, project hint (name/keyword), due date expression
 **Phase 4 — Confirm**
 Show: task title, project name (or "Inbox"), due date, priority label, task ID.
 
-## Sub-Agent Strategy
-
-**Use Haiku for**: `list_projects`, `create_task`, `batch_add_tasks` — fast, deterministic API calls
-**Use Sonnet for**: NL parsing, date inference from relative expressions, project disambiguation, batch structuring from prose lists
-
 ## Progressive Disclosure
 
-- `@references/examples.md` — NL parsing examples, date/priority mappings, MCP call shapes
+- [examples.md](references/examples.md) — NL parsing examples, date/priority mappings, MCP call shapes
 
 ## Requirements
 

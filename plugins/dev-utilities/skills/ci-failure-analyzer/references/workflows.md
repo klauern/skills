@@ -101,22 +101,6 @@ npm ci                      # Verify
 
 ---
 
-## Model Strategy
-
-| Phase | Model | Why |
-|-------|-------|-----|
-| Context detection | Haiku | Fast I/O |
-| Log retrieval | Haiku | Command execution |
-| Pattern matching | Haiku | Known signatures |
-| Root cause analysis | Sonnet | Semantic reasoning |
-| Fix strategy | Sonnet | Decision making |
-| Tool execution | Haiku | Run commands |
-| Explanation | Sonnet | Natural language |
-
-**Decision**: Use Haiku if pattern is known and fix is mechanical. Use Sonnet if reasoning or explanation needed.
-
----
-
 ## Result Reporting Template
 
 ```

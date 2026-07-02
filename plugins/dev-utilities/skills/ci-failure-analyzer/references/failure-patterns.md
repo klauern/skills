@@ -78,14 +78,6 @@ timeout|exceeded.*time limit|operation was canceled
 | Exit 124 | Timeout | Optimize or increase limit |
 | Exit 143 | SIGTERM (killed) | Resource limit |
 
-## Model Selection
-
-| Confidence | Model | Action |
-|------------|-------|--------|
-| High (95%+) | Haiku | Auto-fix immediately |
-| Medium (70-90%) | Haiku | Attempt fix, verify result |
-| Low (<70%) | Sonnet | Analyze before acting |
-
 # Log Parsing
 
 Techniques for parsing GitHub Actions logs and extracting errors.

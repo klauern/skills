@@ -85,15 +85,6 @@ Automated analysis and resolution of GitHub Actions CI failures.
 | Type/test fixes | ⚠️ Ask first | Present options, wait for approval |
 | Workflow edits | ❌ Never | Guidance only |
 
-## Model Strategy
-
-| Task | Model |
-|------|-------|
-| Command execution, pattern matching | Haiku |
-| Root cause analysis, explanations | Sonnet |
-
-**Rule**: If fix is mechanical → Haiku. If reasoning needed → Sonnet.
-
 ## Failure Categories
 
 See the taxonomy table in [failure-patterns.md](references/failure-patterns.md) —

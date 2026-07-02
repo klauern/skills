@@ -192,13 +192,6 @@ Prompt the user for these decisions:
    - **Yes**: SSH in and immediately run `claude`
    - **No** (recommended): SSH in to a shell, run claude manually
 
-## Model Strategy
-
-| Task                                                   | Model  |
-| ------------------------------------------------------ | ------ |
-| File detection, version parsing, template substitution | Haiku  |
-| Tool analysis, Dockerfile optimization, user decisions | Sonnet |
-
 ## Requirements
 
 - Target project directory exists with source code

@@ -97,7 +97,3 @@ fd -tf --max-depth 4 'package.json|pyproject.toml|go.mod|Cargo.toml'
 
 *User preference: use `gofumpt` over `gofmt` per CLAUDE.md
 
-## Model Strategy
-
-- **Haiku**: File existence checks, config parsing, pattern matching
-- **Sonnet**: Conflicting tools, trade-off explanations, recommendations when nothing detected

@@ -64,7 +64,7 @@ Skip anything the task already answers. If the user says "you draft it," propose
 **Phase 4 — Draft from Their Answers**
 Structure what the user gave you (and only that):
 - **Title**: sharpen for clarity using their clarified intent — verb first, specific object. Keep their meaning.
-- **Description** (markdown → `desc` for checklist tasks, `content` for text): Goal, Acceptance criteria, Notes, References — built only from supplied context. Template in `@references/enrichment-guide.md`.
+- **Description** (markdown → `desc` for checklist tasks, `content` for text): Goal, Acceptance criteria, Notes, References — built only from supplied context. Template in [enrichment-guide.md](references/enrichment-guide.md).
 - **Subtasks**: from the steps they described (or a proposed draft they approved). Normal task → native `items` (`kind: CHECKLIST`). **Recurring task** (`repeatFlag` set) → keep `kind: TEXT`, use a markdown `- [ ]` checklist in `content`, and never touch `repeatFlag`/`dueDate`/`reminders` (native `items` re-check awkwardly each cycle).
 - **Metadata**: set only what the user specified — a deadline they gave → `dueDate`; importance they stated → `priority`; tags/project they named. See policy below.
 
@@ -86,14 +86,9 @@ Summarize what changed and restate anything still open.
 - **Tags**: settable via `tags`; reuse existing tags (`list_tags`) and confirm any new tag with the user.
 - **Project**: a move is cleaner via `move_task` — suggest, don't move silently.
 
-## Sub-Agent Strategy
-
-**Use Haiku for**: `search_task`, `get_task_by_id`, `list_projects`, `list_tags`, the final `update_task` call — fast, deterministic.
-**Use Sonnet for**: title rewriting, description synthesis, subtask decomposition, metadata inference, judging which references are worth attaching.
-
 ## Progressive Disclosure
 
-- `@references/enrichment-guide.md` — description template, acceptance-criteria patterns, subtask heuristics, conservative metadata rules, research/link guidance, worked before/after example.
+- [enrichment-guide.md](references/enrichment-guide.md) — description template, acceptance-criteria patterns, subtask heuristics, conservative metadata rules, research/link guidance, worked before/after example.
 
 ## Requirements
 

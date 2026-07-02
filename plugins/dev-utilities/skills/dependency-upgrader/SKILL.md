@@ -61,15 +61,6 @@ Prompt user for:
 
 See [breaking-changes.md](references/breaking-changes.md) for detection methods.
 
-## Model Strategy
-
-| Task | Model | Rationale |
-|------|-------|-----------|
-| File discovery, manifest parsing | Haiku | Fast, deterministic |
-| Command execution, version parsing | Haiku | Mechanical operations |
-| Breaking change analysis | Sonnet | Complex reasoning |
-| PR/commit message generation | Sonnet | Natural language synthesis |
-
 ## Git Operations
 
 **Branch**: `chore/upgrade-{ecosystem}-deps-{date}` or `chore/upgrade-dependencies-{date}`
