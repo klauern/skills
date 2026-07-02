@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash
+allowed-tools: Bash(uv run:*)
 description: List all Capacities spaces
 ---
 
@@ -23,11 +23,7 @@ List all spaces in your Capacities account.
 ## Implementation
 
 ```bash
-# Get the script path relative to this command
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
-# Run the capacities script
-uv run "$SCRIPT_DIR/capacities.py" spaces --json
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces --json
 ```
 
 ## Output

@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash
+allowed-tools: Bash(uv run:*)
 description: Search content in Capacities spaces
 ---
 
@@ -34,18 +34,16 @@ Search for content across one or more Capacities spaces.
 ## Implementation
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 # If no space-ids provided, list spaces first
 if [ -z "$SPACE_IDS" ]; then
     echo "Available spaces:"
-    uv run "$SCRIPT_DIR/capacities.py" spaces
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
     echo ""
     echo "Provide --space-ids to search specific spaces"
     exit 0
 fi
 
-uv run "$SCRIPT_DIR/capacities.py" search "$TERM" \
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" search "$TERM" \
     --space-ids "$SPACE_IDS" \
     --mode "${MODE:-title}" \
     --json

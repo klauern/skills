@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash
+allowed-tools: Bash(uv run:*)
 description: Get structures and collections for a Capacities space
 ---
 
@@ -31,15 +31,13 @@ Get detailed information about a Capacities space including its structures (obje
 ## Implementation
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 if [ -n "$1" ]; then
     # Space ID provided
-    uv run "$SCRIPT_DIR/capacities.py" space-info "$1" --json
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" space-info "$1" --json
 else
     # List spaces first, then prompt
     echo "Available spaces:"
-    uv run "$SCRIPT_DIR/capacities.py" spaces
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
     echo ""
     echo "Provide a space ID to get detailed info."
 fi

@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash
+allowed-tools: Bash(uv run:*)
 description: Add content to today's daily note in Capacities
 ---
 
@@ -34,18 +34,16 @@ Append markdown content to today's daily note in a Capacities space.
 ## Implementation
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 # If no space-id, list spaces first
 if [ -z "$SPACE_ID" ]; then
     echo "Available spaces:"
-    uv run "$SCRIPT_DIR/capacities.py" spaces
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
     echo ""
     echo "Provide --space-id to specify target space"
     exit 0
 fi
 
-uv run "$SCRIPT_DIR/capacities.py" daily-note \
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" daily-note \
     --space-id "$SPACE_ID" \
     --text "$TEXT" \
     ${NO_TIMESTAMP:+--no-timestamp} \

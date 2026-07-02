@@ -50,13 +50,11 @@ For each task, the user chooses:
 - **[r]eschedule** — prompt for new date, then call `update_task`
 - **[n]o date** — clear due/start dates via the `ticktick_api.py` script:
   ```bash
-  SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-  uv run "$SCRIPT_DIR/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
   ```
 - **[d]elete** — permanently remove via the `ticktick_api.py` script:
   ```bash
-  SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-  uv run "$SCRIPT_DIR/ticktick_api.py" delete-task --task-id <TASK_ID> --project-id <PROJECT_ID> --json
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py" delete-task --task-id <TASK_ID> --project-id <PROJECT_ID> --json
   ```
 - **[s]kip** — leave unchanged
 

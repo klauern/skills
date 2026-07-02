@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash
+allowed-tools: Bash(uv run:*)
 description: Save a webpage to a Capacities space
 ---
 
@@ -38,18 +38,16 @@ Save a webpage URL to a Capacities space, optionally with additional metadata an
 ## Implementation
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 # If no space-id, list spaces first
 if [ -z "$SPACE_ID" ]; then
     echo "Available spaces:"
-    uv run "$SCRIPT_DIR/capacities.py" spaces
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
     echo ""
     echo "Provide --space-id to specify target space"
     exit 0
 fi
 
-uv run "$SCRIPT_DIR/capacities.py" save-weblink \
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" save-weblink \
     --space-id "$SPACE_ID" \
     --url "$URL" \
     ${TITLE:+--title "$TITLE"} \
