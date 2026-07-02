@@ -1,90 +1,32 @@
 ---
 allowed-tools: Bash(uv run:*)
 description: Search content in Capacities spaces
+argument-hint: "<term> [--space-ids <ids>] [--mode fullText|title] [--filter <structure-ids>]"
 ---
 
 # /capacities:search
 
-Search for content across one or more Capacities spaces.
+Search across one or more Capacities spaces. Modes: `title` (default, fast) or
+`fullText` (comprehensive); `--filter` limits results to specific structure IDs.
 
 ## Usage
 
 ```bash
-/capacities:search <term> [--space-ids <ids>] [--mode fullText|title]
+/capacities:search "project plan" --space-ids abc-123
+/capacities:search "quarterly review" --space-ids abc-123,def-456 --mode fullText
 ```
-
-## Arguments
-
-- `term` (required): Search query string
-- `--space-ids` (required if not prompted): Comma-separated list of space UUIDs
-- `--mode` (optional): Search mode - `title` (default) or `fullText`
-- `--filter` (optional): Comma-separated structure IDs to filter results
 
 ## Behavior
 
-### With all arguments:
-1. Execute search with provided parameters
-2. Return results with highlights and snippets
-
-### Hybrid mode (missing space-ids):
-1. List available spaces
-2. Ask user which spaces to search
-3. Execute search with selected spaces
-
-## Implementation
+Follow the **capacities-api** skill (auth check → space resolution → execute):
 
 ```bash
-# If no space-ids provided, list spaces first
-if [ -z "$SPACE_IDS" ]; then
-    echo "Available spaces:"
-    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
-    echo ""
-    echo "Provide --space-ids to search specific spaces"
-    exit 0
-fi
+# If --space-ids is missing, list spaces and ask which to search
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
 
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" search "$TERM" \
-    --space-ids "$SPACE_IDS" \
-    --mode "${MODE:-title}" \
-    --json
+    --space-ids "$SPACE_IDS" --mode "${MODE:-title}" ${FILTER:+--filter "$FILTER"} --json
 ```
 
-## Output
-
-Returns JSON with search results:
-```json
-{
-  "results": [
-    {
-      "id": "object-uuid",
-      "title": "Meeting Notes",
-      "highlights": ["...matching **text**..."],
-      "structureId": "note-structure-uuid"
-    }
-  ]
-}
-```
-
-## Search Modes
-
-- **title** (default): Fast search through titles only
-- **fullText**: Comprehensive search through all content
-
-## Examples
-
-```bash
-# Search titles in a single space
-/capacities:search "project plan" --space-ids abc-123
-
-# Full-text search across multiple spaces
-/capacities:search "quarterly review" --space-ids abc-123,def-456 --mode fullText
-
-# Filter to specific structure types
-/capacities:search "meeting" --space-ids abc-123 --filter note-struct-id
-```
-
-## Notes
-
-- Rate limit: 120 requests per 60 seconds (most generous)
-- Full-text search is slower but more comprehensive
-- Results include relevance-ordered matches with highlights
+Present results with their highlights, relevance-ordered. Rate limit is a generous
+120/60s — see the skill's API reference for schemas.
