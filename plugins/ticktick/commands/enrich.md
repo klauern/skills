@@ -77,7 +77,7 @@ update_task(
 
 - Read with `get_task_by_id` (needs only `task_id`; it scans all projects). Carry its `projectId` and existing fields back in the `task` object.
 - **No subtasks** (notes-only enrichment): leave `kind` alone and put the description in `content` instead of `desc`.
-- **Clearing a date**: the MCP can't send null — set `dueDate`/`startDate` to `"1970-01-01T00:00:00.000+0000"`.
+- **Clearing a date**: the MCP can't send null — use `/ticktick:clear-dates` (the `ticktick_api.py` script). Never set a sentinel date; a 1970 date makes the task maximally overdue in reviews.
 - **References** (per project default): append a `## References` section to `content` — do not put links in a comment unless the user asks.
 
 ## Output

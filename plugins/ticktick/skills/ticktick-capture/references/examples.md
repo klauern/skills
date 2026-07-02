@@ -1,10 +1,3 @@
----
-name: ticktick-capture-examples
-description: Natural-language capture examples and field reference for the TickTick capture skill
-version: 1.1.0
-author: klauern
----
-
 # TickTick Capture: Examples and Field Reference
 
 ## Natural Language → Field Mapping
@@ -12,14 +5,14 @@ author: klauern
 | Input | title | dueDate | priority | project hint |
 |-------|-------|---------|----------|-------------|
 | "Buy milk tomorrow" | Buy milk | tomorrow → next day | 0 | — |
-| "Fix login bug - high priority, due Friday" | Fix login bug | next Friday | 3 | — |
+| "Fix login bug - high priority, due Friday" | Fix login bug | next Friday | 5 | — |
 | "Review PR by end of day" | Review PR | today 17:00 | 0 | — |
 | "Call dentist next Monday at 2pm" | Call dentist | next Mon 14:00 | 0 | — |
 | "Urgent: deploy hotfix" | Deploy hotfix | — | 5 | — |
-| "Add dark mode to Work project, low priority" | Add dark mode | — | 0 | Work |
+| "Add dark mode to Work project, low priority" | Add dark mode | — | 1 | Work |
 | "Finish report in 3 days" | Finish report | today + 3d | 0 | — |
-| "Important: renew subscription by end of week" | Renew subscription | Friday EOD | 3 | — |
-| "Write tests for auth module - medium priority" | Write tests for auth module | — | 1 | — |
+| "Important: renew subscription by end of week" | Renew subscription | Friday EOD | 5 | — |
+| "Write tests for auth module - medium priority" | Write tests for auth module | — | 3 | — |
 | "Buy birthday gift for Sarah, due next Saturday" | Buy birthday gift for Sarah | next Sat | 0 | — |
 
 ## Date Expression → ISO 8601
@@ -37,18 +30,23 @@ author: klauern
 | "by Friday" | Upcoming Friday |
 | "end of month" | Last day of current month |
 
-Always output ISO 8601 with timezone offset: `2026-04-03T14:00:00+00:00`
-Use UTC if user timezone is unknown. Omit time component for date-only due dates.
+Always output ISO 8601 with a colon-free timezone offset (TickTick's API format):
+`2026-04-03T14:00:00.000+0000`. Use UTC if user timezone is unknown. Omit time
+component for date-only due dates.
 
 ## Priority Keyword Mapping
 
+TickTick-native scale: 0=none, 1=low, 3=medium, 5=high.
+
 | Signal words | priority value |
 |-------------|---------------|
-| "urgent", "ASAP", "critical", "immediately" | 5 |
-| "high priority", "important", "must do" | 3 |
-| "medium", "normal", "moderate" | 1 |
-| "low priority", "someday", "when I can" | 0 |
+| "urgent", "ASAP", "critical", "immediately", "high priority", "important", "must do" | 5 |
+| "medium", "normal", "moderate" | 3 |
+| "low priority", "when I can" | 1 |
 | (no signal) | 0 |
+
+Do not treat "someday" as a priority signal — leave priority 0 and leave dates unset
+(see the ticktick-review skill's someday handling).
 
 ## `create_task` MCP Call Shape
 
@@ -59,7 +57,7 @@ The official TickTick MCP wraps task fields in a `task` object:
   "task": {
     "title": "Fix login bug",
     "projectId": "abc123-uuid",
-    "dueDate": "2026-04-03T17:00:00+00:00",
+    "dueDate": "2026-04-03T17:00:00.000+0000",
     "priority": 5,
     "tags": ["bug", "auth"],
     "content": "Users can't log in with SSO. Check the OAuth callback handler."
@@ -82,8 +80,8 @@ When user provides a list, structure as array of task objects:
 ```json
 {
   "tasks": [
-    { "title": "Review PR #42", "priority": 3 },
-    { "title": "Update docs", "dueDate": "2026-04-10T00:00:00+00:00" },
+    { "title": "Review PR #42", "priority": 5 },
+    { "title": "Update docs", "dueDate": "2026-04-10T00:00:00.000+0000" },
     { "title": "Deploy to staging", "priority": 5, "tags": ["deploy"] }
   ]
 }

@@ -44,8 +44,7 @@ After displaying, prompt for actions on each task:
 - **[r]eschedule** — move to tomorrow via `update_task` (set due date to next day)
 - **[n]o date** — clear due/start dates via the `ticktick_api.py` script:
   ```bash
-  SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-  uv run "$SCRIPT_DIR/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
   ```
 - **[s]kip** — leave unchanged
 
@@ -62,7 +61,7 @@ Actions taken:
 
 ## Notes
 
-- Priority labels: HIGH (priority >= 3), MED (priority 1-2), LOW (priority 0)
+- Priority labels (TickTick-native): HIGH (priority 5), MED (priority 3), LOW (priority 1), NONE (priority 0)
 - "Days overdue" is calculated from the task's original due date
 - Rescheduling sets the due date to tomorrow at the same time (or all-day if no time was set)
 - If there are no overdue or due tasks, report "All clear — no tasks due today."

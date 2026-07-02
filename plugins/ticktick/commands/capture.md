@@ -48,7 +48,7 @@ Call `list_projects` when:
   "task": {
     "title": "Buy milk",
     "projectId": "abc123",
-    "dueDate": "2026-04-03T00:00:00+00:00",
+    "dueDate": "2026-04-03T00:00:00.000+0000",
     "priority": 0
   }
 }
@@ -95,6 +95,6 @@ Created task:
 
 ## Notes
 
-- Priority mapping: urgent/critical → 5, high → 3, medium → 1 (TickTick scale), low/none → 0
+- Priority mapping (TickTick-native): urgent/critical/high → 5, medium → 3, low → 1, none → 0
 - Dates are interpreted relative to today
 - If no project is chosen, the task lands in the default inbox

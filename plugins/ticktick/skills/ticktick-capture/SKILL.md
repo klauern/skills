@@ -29,8 +29,8 @@ Converts natural language input into structured TickTick tasks using the MCP ser
 |-------|-----------|--------|
 | Title | `title` | Required, plain text |
 | Project | `projectId` | UUID from `list_projects` |
-| Due date | `dueDate` | ISO 8601: `2026-04-03T10:00:00+00:00` |
-| Priority | `priority` | 0=none, 1=low, 3=medium, 5=high |
+| Due date | `dueDate` | ISO 8601: `2026-04-03T10:00:00.000+0000` (offset without colon) |
+| Priority | `priority` | 0=none, 1=low, 3=medium, 5=high — map user words directly: "urgent"/"high"→5, "medium"→3, "low"→1, unstated→0 |
 | Tags | `tags` | Array of strings |
 | Notes | `content` | Markdown supported |
 

@@ -1,10 +1,3 @@
----
-name: ticktick-review-gtd-contexts
-description: GTD context mappings and review checklists for the TickTick review skill
-version: 1.1.0
-author: klauern
----
-
 # TickTick Review: GTD Contexts and Review Checklists
 
 ## GTD Concept → TickTick MCP Tool Mapping
@@ -16,7 +9,7 @@ author: klauern
 | Today's commitments | `list_undone_tasks_by_time_query("today")` | Tasks due today |
 | Overdue | `filter_tasks` with `endDate` < today | Tasks past their due date |
 | This week | `list_undone_tasks_by_time_query("next7day")` | Tasks due within 7 days |
-| Someday / Maybe | `filter_tasks` with `priority: [0]` | No-priority tasks |
+| Someday / Maybe | `search_task` for a `someday` tag, or a dedicated Someday list/project | Explicitly deferred tasks with no due date. (Don't query `priority: [0]` — 0 is the default for every untriaged task, so that returns the whole backlog.) |
 | Waiting for | `search_task` with query "waiting" | Tasks containing "waiting" keyword |
 
 ## Daily Review Checklist

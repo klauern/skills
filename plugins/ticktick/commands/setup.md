@@ -47,6 +47,7 @@ Then restart Claude Code — it will prompt for TickTick OAuth on first use.
 ## Notes
 
 - This plugin requires a global `ticktick` MCP server configured via `claude mcp add`
+- **The server name must be exactly `ticktick`** — the plugin's skills and commands reference tools by the `mcp__ticktick__*` prefix, which is derived from the registered server name. Registering it as `TickTick` (or anything else) silently breaks every allowed-tools entry.
 - The official TickTick MCP server at mcp.ticktick.com handles OAuth automatically
 - No environment variables are needed for the MCP connection
 - `TICKTICK_ACCESS_TOKEN` is only needed for the `ticktick_api.py` script (clear-dates, delete-task)

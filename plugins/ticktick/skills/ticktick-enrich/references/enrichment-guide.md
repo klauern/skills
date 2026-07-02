@@ -76,8 +76,8 @@ All live inside the `task` object (camelCase). **Set only from what the user tel
 
 | Field | `task` field | Set when… | Notes |
 |-------|--------------|-----------|-------|
-| Priority | `priority` | the user states importance | urgent/critical→5, important→3, nice-to-have→1; else leave as-is |
-| Due date | `dueDate` | the user gives a deadline | ISO 8601; clear with `1970-01-01T00:00:00.000+0000` |
+| Priority | `priority` | the user states importance | urgent/critical/high→5, medium→3, low→1; else leave as-is |
+| Due date | `dueDate` | the user gives a deadline | ISO 8601 (`.000+0000` offset); to clear, use `/ticktick:clear-dates` — never a sentinel date |
 | Start date | `startDate` | the user gives a start | rarely; ISO 8601 |
 | Tags | `tags` | the user names tags | reuse existing (`list_tags`); confirm new ones |
 | Project | `projectId` | the user asks to move | prefer `move_task`; otherwise just *suggest* |
@@ -118,7 +118,7 @@ desc:
 
   ## References
   - [Staging deploy runbook](https://wiki/…) — exact steps + rollback
-priority: 3 (medium)        ← set (you said "important")
+priority: 3 (medium)        ← set (you said "medium importance")
 tags:     [deploy]          ← set (you named #deploy; matched existing tag)
 items:                      ← 4 subtasks from the steps you described (kind → CHECKLIST)
   - Tag and build the v2.3 image

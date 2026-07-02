@@ -33,7 +33,7 @@ Fields live in the `task` object (camelCase):
 | Description | `desc` (checklist) / `content` (text) | Markdown. Holds Goal / Acceptance criteria / References |
 | Subtasks | `items` | Native checklist `[{ "title": "...", "status": 0 }]`; checkable in-app (needs `kind: CHECKLIST`) |
 | Priority | `priority` | 0=none, 1=low, 3=medium, 5=high |
-| Due date | `dueDate` | ISO 8601: `2026-06-15T10:00:00+0000`; clear with `1970-01-01T00:00:00.000+0000` |
+| Due date | `dueDate` | ISO 8601: `2026-06-15T10:00:00.000+0000`; MCP `update_task` cannot clear a date — use `/ticktick:clear-dates` (the `ticktick_api.py` script) |
 | Start date | `startDate` | ISO 8601 |
 | Tags | `tags` | Array of strings; match existing via `list_tags` |
 | Project | `projectId` | Carry over unchanged; an actual move is cleaner via `move_task` |
@@ -81,8 +81,8 @@ Summarize what changed and restate anything still open.
 
 - **Set metadata only from what the user states.** Never infer priority from keywords or invent a due date. If they don't mention it, leave it — or ask.
 - Never overwrite an existing value without the user's explicit yes.
-- Priority mapping (when the user expresses importance): urgent/critical → 5, high → 3, medium → 1, low/none → 0.
-- **Dates**: only a deadline the user gives; `dueDate`/`startDate` in ISO 8601. Clear with `1970-01-01T00:00:00.000+0000`.
+- Priority mapping (when the user expresses importance, TickTick-native): urgent/critical/high → 5, medium → 3, low → 1, none → 0.
+- **Dates**: only a deadline the user gives; `dueDate`/`startDate` in ISO 8601. To clear a date, use `/ticktick:clear-dates` — never set a sentinel date (a 1970 date makes the task maximally overdue in reviews).
 - **Tags**: settable via `tags`; reuse existing tags (`list_tags`) and confirm any new tag with the user.
 - **Project**: a move is cleaner via `move_task` — suggest, don't move silently.
 
