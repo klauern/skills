@@ -51,7 +51,7 @@ Automated analysis and resolution of GitHub Actions CI failures.
 |----------|---------|
 | Formatting | `npx prettier --write .`, `black .`, `gofumpt -w .` |
 | Linting | `npx eslint --fix .`, `ruff check --fix .` |
-| Lock files | `npm install`, `poetry lock --no-update` |
+| Lock files | `npm install`, `poetry lock` (Poetry 2.x) |
 
 **Always**: Show intent before running, verify with `git diff --stat`
 

@@ -86,9 +86,9 @@ poetry update                   # All dependencies
 poetry update package-name      # Specific package
 poetry update --dry-run         # Preview changes
 
-# Lock operations
-poetry lock                     # Update lock without install
-poetry lock --no-update         # Regenerate without updating
+# Lock operations (Poetry 2.x)
+poetry lock                     # Regenerate lock without upgrading pins
+poetry lock --regenerate        # Force full re-resolution
 
 # Add with constraints
 poetry add "package@^2.0"       # Caret constraint

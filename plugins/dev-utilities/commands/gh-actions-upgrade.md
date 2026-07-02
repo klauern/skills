@@ -1,5 +1,6 @@
 ---
 description: Automatically detect, analyze, and upgrade GitHub Actions in workflows
+allowed-tools: Bash, Read, Edit, Glob, Grep, AskUserQuestion
 ---
 
 # GitHub Actions Upgrade
@@ -192,8 +193,6 @@ This PR upgrades GitHub Actions in our workflows to their latest versions and mi
 ### actions/checkout v3 → v4
 
 - Runner requires Node.js 20 (previously Node.js 16)
-- Default `fetch-depth` changed from `1` to `0` (full history)
-- Removed deprecated `set-safe-directory` parameter
 
 **Action required**: Verify workflows still function correctly with these changes.
 
@@ -201,6 +200,9 @@ This PR upgrades GitHub Actions in our workflows to their latest versions and mi
 
 - Runner requires Node.js 20 (previously Node.js 16)
 - Cache behavior improvements (no breaking changes expected)
+
+(Breaking-change details above are examples — always pull the real ones from each
+action's release notes via `gh api repos/{owner}/{repo}/releases`.)
 
 ## Testing Recommendations
 
@@ -286,5 +288,5 @@ excluded_actions:
 
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [Conventional Commits](https://www.conventionalcommits.org/)
-- [/commit-push](./commit-push.md) - Used internally for commits
-- [/pr](./pr.md) - Used internally for PR creation
+- `/commits:commit-push` (commits plugin) - Used internally for commits
+- `/pull-requests:pr` (pull-requests plugin) - Used internally for PR creation

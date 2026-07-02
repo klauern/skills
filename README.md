@@ -398,7 +398,7 @@ Create and manage git worktrees for parallel development work.
 /dev-utilities:worktree
 ```
 
-This command uses the git-worktree-creator agent to set up separate working directories for different branches.
+Creates, lists, and removes worktrees with `git worktree`, setting up separate working directories for different branches.
 
 #### /dev-utilities:continue
 

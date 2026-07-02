@@ -1,41 +1,25 @@
 ---
 description: Migrate CLAUDE.md to AGENTS.md with symlinks for cross-agent compatibility
+allowed-tools: Bash, Read, Edit, Grep, Glob
 ---
 
-You will look at the repository and make appropriate changes to CLAUDE.md and AGENTS.md following: https://agents.md/
+# /dev-utilities:agents-md
 
-Per the docs:
+Migrate this repository's assistant config to the [agents.md](https://agents.md/) convention:
+`AGENTS.md` is the source of truth, with `CLAUDE.md` symlinked to it for backward compatibility.
 
-```
-4.1. Migration Commands
+## Steps
 
-Here's how to move your existing config to AGENTS.md while keeping backward compatibility:
-
-# Cline
-mv .clinerules AGENTS.md && ln -s AGENTS.md .clinerules
-
-# Claude Code
-mv CLAUDE.md AGENTS.md && ln -s AGENTS.md CLAUDE.md
-
-# Cursor
-mv .cursorrules AGENTS.md && ln -s AGENTS.md .cursorrules
-
-# Gemini CLI
-mv GEMINI.md AGENTS.md && ln -s AGENTS.md GEMINI.md
-
-# OpenAI Codex
-mv AGENTS.md AGENTS.md && ln -s AGENTS.md AGENTS.md
-
-# GitHub Copilot (replace [name] with your actual filename)
-mv .github/instructions/[name].instructions.md AGENTS.md && ln -s ../../AGENTS.md .github/instructions/[name].instructions.md
-
-# Replit
-mv .replit.md AGENTS.md && ln -s AGENTS.md .replit.md
-
-# Windsurf
-mv .windsurfrules AGENTS.md && ln -s AGENTS.md .windsurfrules
-
-These commands move your existing config to AGENTS.md and create symbolic links back to the old locations. Your tools keep working, but now they're all reading from the same source of truth.
-```
-
-Check whether we have a CLAUDE.md file in the repository. If it exists, you will move it to AGENTS.md and create a symbolic link back to CLAUDE.md.  If it's already symlinked, you will not do anything.  If both exist, you will attempt to merge the two, deduplicating any overlapping content.  You will also update any references to CLAUDE.md in the repository to point to AGENTS.md instead.  Then, you will create a symlink from CLAUDE.md to AGENTS.md.
+1. Check the state of `CLAUDE.md` and `AGENTS.md` in the repository root:
+   - `CLAUDE.md` is already a symlink to `AGENTS.md` → nothing to do; report and stop.
+   - Only `CLAUDE.md` exists → migrate it:
+     ```bash
+     mv CLAUDE.md AGENTS.md && ln -s AGENTS.md CLAUDE.md
+     ```
+   - Both exist as regular files → merge their content into `AGENTS.md`, deduplicating
+     overlapping sections, then replace `CLAUDE.md` with the symlink.
+   - Neither exists → report that there is nothing to migrate.
+2. Update any references to `CLAUDE.md` elsewhere in the repository (docs, scripts, CI)
+   to point at `AGENTS.md`.
+3. Verify: `ls -la CLAUDE.md` shows the symlink, and `git status` shows the rename plus
+   the new link.

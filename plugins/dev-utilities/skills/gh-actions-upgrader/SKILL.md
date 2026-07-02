@@ -99,11 +99,18 @@ chore(ci): upgrade GitHub Actions to latest versions
 - **Haiku**: File discovery, YAML parsing, version comparison, pattern matching
 - **Sonnet**: Breaking change analysis, risk assessment, PR generation, fork migration decisions
 
-## Common Breaking Changes
+## Finding Breaking Changes
 
-**actions/checkout v3→v4**: Node.js 16→20, fetch-depth default 1→0
-**actions/setup-node v3→v4**: Node.js 16→20
-**github/codeql-action v2→v3**: Config schema changes
+Never rely on memorized version facts — always fetch the release notes for the actual
+versions involved:
+
+```bash
+gh api repos/{owner}/{repo}/releases/latest --jq .tag_name
+gh api repos/{owner}/{repo}/releases --jq '.[].body' | head -100
+```
+
+Look for "Breaking", "Deprecated", runner/Node.js requirement changes, and renamed or
+removed inputs between the current and target versions.
 
 ## Requirements
 

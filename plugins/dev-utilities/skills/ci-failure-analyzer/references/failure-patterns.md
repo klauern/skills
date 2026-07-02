@@ -20,7 +20,7 @@ Quick reference for failure detection and resolution.
 | | pytest | `FAILED`, `AssertionError` | ❌ 5-10% | Manual |
 | | Go test | `--- FAIL:`, `want/got` | ❌ 5-10% | Manual |
 | **Deps** | npm ci | `out of sync`, lock mismatch | ✅ 95% | `npm install` |
-| | poetry | `lock file`, mismatch | ✅ 90% | `poetry lock --no-update` |
+| | poetry | `lock file`, mismatch | ✅ 90% | `poetry lock` (Poetry 2.x) |
 | | cargo | `Cargo.lock` | ✅ 90% | `cargo update` |
 | **Build** | Webpack/Vite | `Module not found` | ⚠️ 30-40% | Fix imports |
 | | tsc build | `TS\d{4}` in build | ❌ 20-30% | Manual |
@@ -92,7 +92,7 @@ timeout|exceeded.*time limit|operation was canceled
 | Exit 0 | Success | - |
 | Exit 1 | General failure | Analyze logs |
 | Exit 2 | Compilation error | Type/build issue |
-| Exit 78 | Permission denied | Secrets/permissions |
+| Exit 78 | Neutral status (deprecated, pre-2019 actions) | Rare; check action version |
 | Exit 124 | Timeout | Optimize or increase limit |
 | Exit 143 | SIGTERM (killed) | Resource limit |
 
