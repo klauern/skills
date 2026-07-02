@@ -6,59 +6,68 @@ This file provides guidance to AI coding assistants (Claude Code, Cursor, Windsu
 
 ## Project Overview
 
-This is a Claude Code plugin marketplace containing four plugins that automate Git and PR workflows:
+This is a Claude Code plugin marketplace. The authoritative plugin list lives in
+`.claude-plugin/marketplace.json` — currently six plugins:
 
 1. **commits** - Conventional commit creation and splitting following conventionalcommits.org
-2. **pull-requests** - Intelligent PR creation with template-based field extraction
-3. **dev-utilities** - Development workflow utilities (agents-md migration, worktrees, GH Actions upgrades)
+2. **pull-requests** - PR creation, updating, review-comment triage, and merge conflict resolution
+3. **dev-utilities** - Development workflow utilities (agents-md migration, worktrees, GH Actions upgrades, CI analysis, git optimization, devcontainers)
 4. **capacities** - Capacities knowledge management API integration
+5. **ticktick** - TickTick task management via MCP (capture, review, enrich)
+6. **agent-patterns** - Agent architecture patterns (Code Mode MCP)
 
 **Marketplace Name**: `klauern-skills` (published as "klauern" on GitHub)
 
 **Installation**:
 ```bash
 /plugin marketplace add klauern/klauern-skills
-/plugin install commits@klauern-skills
-/plugin install pull-requests@klauern-skills
-/plugin install dev-utilities@klauern-skills
-/plugin install capacities@klauern-skills
+/plugin install <plugin-name>@klauern-skills   # e.g. commits, pull-requests, ticktick
+```
+
+## Repository Layout
+
+```
+.claude-plugin/marketplace.json    # Plugin registry (source of truth for plugins + version)
+plugins/<plugin>/
+├── .claude-plugin/plugin.json     # Plugin metadata + version
+├── commands/*.md                  # Slash commands (thin wrappers that invoke skills)
+├── skills/<skill>/SKILL.md        # Skills (MUST live under skills/ for discovery)
+│   └── references/*.md            # On-demand documentation
+└── scripts/*.py                   # External scripts (invoked via ${CLAUDE_PLUGIN_ROOT})
+.claude/                           # Repo-local tooling (agents, hooks, version-manager)
+docs/                              # Authoring guidelines, script development, beads workflow
+history/                           # AI planning docs and session artifacts
 ```
 
 ## Development Commands
 
 ### Adding New Skills
 
-1. Navigate to the appropriate plugin directory: `plugins/<plugin-name>/`
-2. Create `skill-name/SKILL.md` with frontmatter:
+1. Create `plugins/<plugin-name>/skills/<skill-name>/SKILL.md` with frontmatter:
    ```yaml
    ---
    name: skill-name
-   description: Brief description
-   version: 1.0.0
-   author: klauern
+   description: What it does + when to use it (trigger phrases)
    ---
    ```
-3. Add references documentation in `skill-name/references/`
+   The `skills/` directory is required — Claude Code only discovers plugin skills there.
+2. Add on-demand documentation in `skills/<skill-name>/references/`.
 
 **Token Budget Guidelines**:
 - **Metadata** (name + description): ~100 tokens - loads at discovery for all skills
 - **SKILL.md body**: <500 lines (~5000 tokens) - loads only when skill activates
 - **Reference files**: <500 lines each - loads on demand when explicitly needed
-- **Progressive disclosure**: Essential instructions in SKILL.md, detailed content in references/
+- **Progressive disclosure**: Essential instructions in SKILL.md, detailed content in references/ (plain relative links — never `@references/…`, which loads eagerly)
 
 **See [docs/skill-authoring-guidelines.md](docs/skill-authoring-guidelines.md) for comprehensive best practices.**
 
 ### Adding New Commands
 
-1. Create `plugins/<plugin-name>/commands/command-name.md` with frontmatter:
-   ```yaml
-   ---
-   allowed-tools: Bash
-   description: Command description
-   ---
-   ```
-2. Write bash implementation with clear instructions
-3. Test with `/plugin-name:command-name`
+1. Create `plugins/<plugin-name>/commands/command-name.md` with frontmatter defining
+   `allowed-tools`, `description`, and (if it takes arguments) `argument-hint`.
+2. Keep commands thin: usage + arguments + examples + "invoke the X skill". Workflow
+   logic belongs in the skill so it isn't forked in two places.
+3. Test with `/plugin-name:command-name`.
 
 ### External Scripts
 
@@ -69,125 +78,20 @@ For complex logic or external dependencies, use scripts in `plugins/<plugin-name
 uv run "${CLAUDE_PLUGIN_ROOT}/scripts/my-script.py" [args]
 ```
 
+Never derive script paths from `$0` (command bash blocks run via `bash -c`, so `$0` is
+the shell binary) and never hardcode install locations.
+
 **See [docs/script-development.md](docs/script-development.md) for full guidance.**
-
-## Architecture
-
-### Plugin Organization
-
-Each plugin is self-contained in its own directory under `plugins/`:
-
-```
-plugins/
-├── commits/                      → Conventional commit creation and splitting
-│   ├── .claude-plugin/
-│   │   └── plugin.json
-│   ├── commands/
-│   │   ├── commit.md
-│   │   ├── commit-push.md
-│   │   └── commit-split.md
-│   ├── conventional-commits/     → Skill with docs
-│   │   ├── SKILL.md
-│   │   └── references/
-│   │       ├── workflows.md
-│   │       ├── examples.md
-│   │       ├── best-practices.md
-│   │       └── format-reference.md
-│   └── commit-splitter/          → Commit splitting skill
-│       ├── SKILL.md
-│       └── references/
-│
-├── pull-requests/                → PR creation and management
-│   ├── .claude-plugin/
-│   │   └── plugin.json
-│   ├── commands/
-│   │   ├── pr.md
-│   │   ├── pr-update.md
-│   │   ├── pr-comment-review.md
-│   │   └── merge-conflicts.md
-│   ├── pr-creator/               → PR creation skill
-│   │   └── SKILL.md
-│   └── pr-conflict-resolver/     → Conflict resolution skill
-│       ├── SKILL.md
-│       └── references/
-│
-├── dev-utilities/                → Development workflow tools
-│   ├── .claude-plugin/
-│   │   └── plugin.json
-│   ├── commands/
-│   │   ├── agents-md.md
-│   │   ├── continue.md
-│   │   ├── worktree.md
-│   │   ├── gh-actions-upgrade.md
-│   │   ├── gh-checks.md
-│   │   ├── git-optimize.md
-│   │   ├── skill-lint.md
-│   │   └── devcontainer-setup.md
-│   ├── gh-actions-upgrader/      → GH Actions upgrade skill
-│   │   ├── SKILL.md
-│   │   └── references/
-│   ├── ci-failure-analyzer/      → CI failure analysis skill
-│   │   ├── SKILL.md
-│   │   └── references/
-│   ├── git-optimize/             → Git optimization skill
-│   │   ├── SKILL.md
-│   │   └── references/
-│   ├── dependency-upgrader/      → Dependency upgrade skill
-│   │   ├── SKILL.md
-│   │   └── references/
-│   └── devcontainer-setup/       → DevContainer scaffolding skill
-│       ├── SKILL.md
-│       └── references/
-│
-└── capacities/                   → Capacities knowledge management
-    ├── .claude-plugin/
-    │   └── plugin.json
-    ├── commands/
-    │   ├── daily-note.md
-    │   ├── list-spaces.md
-    │   ├── save-weblink.md
-    │   ├── search.md
-    │   └── space-info.md
-    ├── capacities-api/           → Capacities API skill
-    │   ├── SKILL.md
-    │   └── references/
-    ├── session-capture/          → Session capture skill
-    │   └── SKILL.md
-    └── scripts/
-        └── capacities.py
-
-.claude-plugin/
-└── marketplace.json              → Plugin registry (points to ./plugins/*)
-```
-
-### Key Architectural Patterns
-
-**Plugin Isolation**: Each plugin has its own directory with commands and skills, preventing command duplication across plugins.
-
-**Skill Structure**: Each skill contains a `SKILL.md` file with metadata frontmatter plus optional `references/` directory for supporting documentation.
-
-**Command Structure**: Commands are markdown files with frontmatter defining `allowed-tools` and `description`. Commands contain bash scripts and natural language instructions.
-
-**Four-Plugin Architecture**: The marketplace defines four separate plugins, each with distinct responsibilities. Each plugin has its own isolated commands.
-
-**Model Strategy**: Skills explicitly define when to use Haiku vs Sonnet:
-- **Haiku**: Fast operations (file I/O, pattern matching, parsing, git commands)
-- **Sonnet**: Complex reasoning (analysis, generation, decision-making, natural language synthesis)
 
 ## Tool Preferences
 
 From `.cursor/rules/development-workflow.mdc` (always active):
 
-**Required**:
 - **GitHub**: Use `gh` CLI (not MCP or direct API calls)
 - **File Search**: Use `fd` instead of `find`
 - **Package Manager**: Use `bun`/`bunx` instead of npm equivalents
 - **Python**: Use `uv run` with inline script dependencies
 - **Go**: Use `gofumpt` (not standard `gofmt`)
-
-**Context-Specific**:
-- **AWS**: Use `aws-sso` for authentication (Zendesk internal)
-- **JIRA**: CLI available, project prefixes: FSEC, SECURE
 
 ## Conventions
 
@@ -197,256 +101,112 @@ All commits must follow https://www.conventionalcommits.org/:
 
 ```
 <type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
 ```
 
-**Types**: feat, fix, docs, style, refactor, perf, test, build, ci, chore
+**Types**: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
+(enforced by the `validate-commit-format.sh` PreToolUse hook).
 
-**Creating Commits**:
-- Use `/commits:commit` for commit without push
-- Use `/commits:commit-push` for commit and push
-- Always use heredoc for multi-line messages:
-  ```bash
-  git commit -m "$(cat <<'EOF'
-  feat(scope): add new feature
-
-  Detailed explanation here.
-  EOF
-  )"
-  ```
+- Use `/commits:commit` (commit only) or `/commits:commit-push` (commit and push)
+- Always use heredoc for multi-line messages
 
 ### Git Workflow
 
-**Branch Management**:
-- Always create feature branches from `main` for new work
-- Never commit directly to `main` or `master`
-- After merging a feature branch to `main`, **always delete the branch** both locally and remotely:
-  ```bash
-  git branch -d feature-branch-name
-  git push origin --delete feature-branch-name
-  ```
+- Always create feature branches from `main` for new work; never commit directly to `main`/`master`
+- After merging a feature branch, delete it locally and remotely
 
-### PR Creation Workflow
+### PR Workflow
 
-The `pr-creator` skill intelligently infers PR metadata:
-
-1. Auto-discovers PR templates from `.github/`, `.github/PULL_REQUEST_TEMPLATE/`, `docs/`
-2. Analyzes commit history to extract PR title, type, related issues
-3. Pre-checks template checkboxes based on file changes
-4. Minimizes manual input by inferring what it can
-
-**Template Detection**: Uses multiple methods (`fd`, `find`, direct checks) to ensure reliability across environments.
-
-### GitHub Actions Upgrades
-
-The `gh-actions-upgrader` skill:
-
-1. Detects action versions and fork status using `gh api`
-2. Identifies breaking changes and parameter updates
-3. Migrates forked actions to upstream equivalents
-4. Creates comprehensive upgrade PRs with migration notes
-
-**Fork Detection**: Uses GitHub API to check if actions are forks and recommends upstream migrations.
+The `pr-creator` skill discovers PR templates, analyzes commits and the full diff,
+pre-fills template checkboxes from evidence, and never uses `gh pr create --fill`.
+Conflict resolution is handled by the `pr-conflict-resolver` skill via
+`/pull-requests:merge-conflicts`.
 
 ## Issue Tracking with bd (beads)
 
-**IMPORTANT**: Use **bd (beads)** for ALL issue tracking. No markdown TODOs.
+**IMPORTANT**: Use **bd (beads)** for ALL issue tracking. No markdown TODOs, no external
+trackers, no duplicate tracking systems.
 
-**Essential commands:**
 ```bash
-bd ready                              # Find available work
-bd update <id> --status in_progress   # Claim task
-bd close <id> --reason "Done"         # Complete task
-bd create "Title" -t task -p 2        # Create issue
+bd ready --json                       # Find available work
+bd update <id> --claim --json         # Claim task atomically
+bd create "Title" -t task -p 2 --json # Create issue (types: bug/feature/task/epic/chore; priority 0-4)
+bd close <id> --reason "Done" --json  # Complete task
 ```
 
-**Rules:**
-- ✅ Use bd for ALL task tracking
-- ✅ Commit `.beads/issues.jsonl` with code changes
-- ✅ Store AI planning docs in `history/` directory
-- ❌ No markdown TODOs or external trackers
+- Link discovered work: `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
+- The tracked export file is `.beads/beads.left.jsonl`
+- Store AI planning docs in `history/`
 
-**Full documentation:** See [docs/beads-workflow.md](docs/beads-workflow.md)
+**Full documentation**: [docs/beads-workflow.md](docs/beads-workflow.md)
 
 ## Key Files
 
-**Plugin Configuration**:
-- `.claude-plugin/marketplace.json` - Plugin registry pointing to `./plugins/*`
-- `plugins/*/.claude-plugin/plugin.json` - Individual plugin metadata
-
-**Development Context**:
-- `.cursor/rules/development-workflow.mdc` - Tool preferences (always active)
-- `.cursor/rules/project-overview.mdc` - Repository structure (always active)
-
-**Skill References**:
-- `plugins/commits/conventional-commits/SKILL.md` - Commit message standards
-- `plugins/commits/commit-splitter/SKILL.md` - Commit splitting into atomic changes
-- `plugins/pull-requests/pr-creator/SKILL.md` - PR creation with template inference
-- `plugins/pull-requests/pr-conflict-resolver/SKILL.md` - Merge conflict resolution
-- `plugins/dev-utilities/gh-actions-upgrader/SKILL.md` - GitHub Actions upgrade automation
-- `plugins/dev-utilities/ci-failure-analyzer/SKILL.md` - CI failure analysis and debugging
-- `plugins/dev-utilities/git-optimize/SKILL.md` - Git repository optimization
-- `plugins/dev-utilities/dependency-upgrader/SKILL.md` - Dependency upgrade automation
-- `plugins/dev-utilities/devcontainer-setup/SKILL.md` - DevContainer scaffolding for Claude Code
-- `plugins/capacities/capacities-api/SKILL.md` - Capacities knowledge management API integration
-- `plugins/capacities/session-capture/SKILL.md` - Session capture for knowledge management
+- `.claude-plugin/marketplace.json` — plugin registry and marketplace version (source of truth)
+- `plugins/*/.claude-plugin/plugin.json` — individual plugin metadata
+- `plugins/*/skills/*/SKILL.md` — the skills themselves
+- `.cursor/rules/*.mdc` — tool preferences and repo overview (always active)
+- `docs/skill-authoring-guidelines.md` — authoring standards enforced by skill-validator
 
 ## Versioning
 
-Marketplace uses semantic versioning. When adding features:
+Semantic versioning at two levels: each plugin's `plugin.json`, plus the marketplace
+`metadata.version` (always >= the highest plugin version). After modifying a plugin:
 
-1. Update version in `.claude-plugin/marketplace.json`
-2. Create conventional commit with `feat(plugin-name):` prefix
-3. Tag release if publishing to marketplace
-
-Current version: 2.4.0
+1. Run `/bump-version <plugin-name>` (backed by the `.claude/skills/version-manager` skill)
+2. Commit as `chore(release): bump <plugin-name> to <version>`
+3. Tag if publishing
 
 ## MCP Server Strategy
 
-This repository deliberately has no `.mcp.json` project configuration:
-
 - **context7** and **exa** are globally configured and available in all projects
-- **gh CLI** is preferred over GitHub MCP server (per Tool Preferences above)
-- **Capacities** has no public MCP server; Python scripts via `uv run` are the correct approach
+- **gh CLI** is preferred over the GitHub MCP server (per Tool Preferences)
+- **ticktick** requires a user-level MCP server registered as exactly `ticktick`
+  (`claude mcp add --transport http ticktick https://mcp.ticktick.com/ -s user`);
+  `/ticktick:setup` verifies the connection
+- **Capacities** has no public MCP server; the plugin's Python script via `uv run` is
+  the correct approach
 
-No project-level MCP servers are needed.
+No project-level `.mcp.json` is needed.
 
 ## Claude Code Automation
 
-**Hooks** (`.claude/hooks/`):
-- `block-grep-extended.sh` - PreToolUse(Bash): blocks `grep -E` for macOS compatibility
-- `validate-commit-format.sh` - PreToolUse: validates conventional commit format before `git commit`
-- `version-bump-reminder.sh` - UserPromptSubmit: reminds to run `/version-bump` before commit-push
-- `dev-context.sh` - SessionStart: injects plugin/skill counts at session start
-- `pr-quality-check.sh` - PostToolUse: validates PR quality after `gh pr create`
-- `workflow-lint.sh` - PostToolUse: lints GitHub workflow files after edits
-- `auto-validate-skill.sh` - PostToolUse: suggests skill-validator agent when SKILL.md is modified
+**Hooks** (`.claude/hooks/`, registered in `.claude/settings.json`):
+- `validate-commit-format.sh` - PreToolUse(Bash): validates conventional commit format
+- `workflow-lint.sh` - PostToolUse(Edit|Write): lints GitHub workflow files
+- `auto-validate-skill.sh` - PostToolUse(Edit|Write): suggests skill-validator when SKILL.md changes
+- `version-bump-reminder.sh` - UserPromptSubmit: reminds to run `/bump-version` before commit-push
+- `dev-context.sh` - SessionStart: injects plugin/skill counts
 
 **Subagents** (`.claude/agents/`):
-- `skill-validator.md` - Validates SKILL.md files against authoring guidelines
-- `release-checker.md` - Pre-publish validation across all plugins
-- `changelog-detector.md` - Fetches and summarizes changelogs for dependency and GitHub Actions upgrades, detecting breaking changes
-- `commit-analyzer.md` - Analyzes git diffs and recommends atomic commit boundaries for splitting large changes
-- `pr-preflight-reviewer.md` - Reviews PR diff against description draft, flagging inconsistencies before submission
+- `skill-validator` - Validates SKILL.md files against authoring guidelines
+- `release-checker` - Pre-publish validation across all plugins
+- `changelog-detector` - Fetches and summarizes changelogs for upgrades, detecting breaking changes
+- `commit-analyzer` - Recommends atomic commit boundaries for splitting large changes
+- `pr-preflight-reviewer` - Reviews PR diff against description draft before submission
 
 ## Cross-Agent Compatibility
 
-This repository uses `AGENTS.md` following the [agents.md specification](https://agents.md/) for broader AI assistant support across Claude Code, Cursor, Windsurf, Cline, Roo-Cline, and other coding assistants. The `CLAUDE.md` file is a symbolic link to `AGENTS.md` for backward compatibility.
-
-The `/dev-utilities:agents-md` command can be used to migrate other repositories from `CLAUDE.md` to `AGENTS.md` with automatic symlink creation.
-
-<!-- BEGIN BEADS INTEGRATION -->
-## Issue Tracking with bd (beads)
-
-**IMPORTANT**: This project uses **bd (beads)** for ALL issue tracking. Do NOT use markdown TODOs, task lists, or other tracking methods.
-
-### Why bd?
-
-- Dependency-aware: Track blockers and relationships between issues
-- Git-friendly: Dolt-powered version control with native sync
-- Agent-optimized: JSON output, ready work detection, discovered-from links
-- Prevents duplicate tracking systems and confusion
-
-### Quick Start
-
-**Check for ready work:**
-
-```bash
-bd ready --json
-```
-
-**Create new issues:**
-
-```bash
-bd create "Issue title" --description="Detailed context" -t bug|feature|task -p 0-4 --json
-bd create "Issue title" --description="What this issue is about" -p 1 --deps discovered-from:bd-123 --json
-```
-
-**Claim and update:**
-
-```bash
-bd update <id> --claim --json
-bd update bd-42 --priority 1 --json
-```
-
-**Complete work:**
-
-```bash
-bd close bd-42 --reason "Completed" --json
-```
-
-### Issue Types
-
-- `bug` - Something broken
-- `feature` - New functionality
-- `task` - Work item (tests, docs, refactoring)
-- `epic` - Large feature with subtasks
-- `chore` - Maintenance (dependencies, tooling)
-
-### Priorities
-
-- `0` - Critical (security, data loss, broken builds)
-- `1` - High (major features, important bugs)
-- `2` - Medium (default, nice-to-have)
-- `3` - Low (polish, optimization)
-- `4` - Backlog (future ideas)
-
-### Workflow for AI Agents
-
-1. **Check ready work**: `bd ready` shows unblocked issues
-2. **Claim your task atomically**: `bd update <id> --claim`
-3. **Work on it**: Implement, test, document
-4. **Discover new work?** Create linked issue:
-   - `bd create "Found bug" --description="Details about what was found" -p 1 --deps discovered-from:<parent-id>`
-5. **Complete**: `bd close <id> --reason "Done"`
-
-### Auto-Sync
-
-bd automatically syncs via Dolt:
-
-- Each write auto-commits to Dolt history
-- Use `bd dolt push`/`bd dolt pull` for remote sync
-- No manual export/import needed!
-
-### Important Rules
-
-- ✅ Use bd for ALL task tracking
-- ✅ Always use `--json` flag for programmatic use
-- ✅ Link discovered work with `discovered-from` dependencies
-- ✅ Check `bd ready` before asking "what should I work on?"
-- ❌ Do NOT create markdown TODO lists
-- ❌ Do NOT use external issue trackers
-- ❌ Do NOT duplicate tracking systems
-
-For more details, see README.md and docs/QUICKSTART.md.
-
-<!-- END BEADS INTEGRATION -->
+This repository uses `AGENTS.md` following the [agents.md specification](https://agents.md/);
+`CLAUDE.md` is a symlink to it. The `/dev-utilities:agents-md` command migrates other
+repositories to this convention.
 
 ## Landing the Plane (Session Completion)
 
-**When ending a work session**, you MUST complete ALL steps below. Work is NOT complete until `git push` succeeds.
+**When ending a work session**, complete ALL steps below. Work is NOT complete until `git push` succeeds.
 
-**MANDATORY WORKFLOW:**
-
-1. **File issues for remaining work** - Create issues for anything that needs follow-up
-2. **Run quality gates** (if code changed) - Tests, linters, builds
-3. **Update issue status** - Close finished work, update in-progress items
-4. **PUSH TO REMOTE** - This is MANDATORY:
+1. **File issues for remaining work** (bd)
+2. **Run quality gates** (if code changed) — tests, linters, `/skill-lint`
+3. **Update issue status** — close finished work
+4. **PUSH TO REMOTE** (mandatory):
    ```bash
    git pull --rebase
    bd sync
    git push
    git status  # MUST show "up to date with origin"
    ```
-5. **Clean up** - Clear stashes, prune remote branches
-6. **Verify** - All changes committed AND pushed
-7. **Hand off** - Provide context for next session
+5. **Clean up** — clear stashes, prune remote branches
+6. **Hand off** — provide context for the next session
 
-**CRITICAL RULES:**
-- Work is NOT complete until `git push` succeeds
-- NEVER stop before pushing - that leaves work stranded locally
-- NEVER say "ready to push when you are" - YOU must push
+- NEVER stop before pushing — that leaves work stranded locally
+- NEVER say "ready to push when you are" — YOU must push
 - If push fails, resolve and retry until it succeeds
