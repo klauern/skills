@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash
+allowed-tools: Bash, Read, Edit
 description: Resolve Merge Conflicts
 ---
 

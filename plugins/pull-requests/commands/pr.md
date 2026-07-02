@@ -22,7 +22,10 @@ Create a pull request by analyzing the actual diff, generating a structured desc
    ```
    If a PR already exists, show its URL and stop.
 
-2. **Determine base branch** (default: `main`). Parse `--base` and `--draft` arguments if provided.
+2. **Determine base branch** (default: the repo's default branch). Parse `--base` and `--draft` arguments if provided, and use the result everywhere a base branch is needed:
+   ```bash
+   BASE="${BASE:-$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)}"
+   ```
 
 3. **Ensure branch is pushed** to remote:
    ```bash
@@ -35,18 +38,18 @@ Collect all information needed to write a good PR description:
 
 **Commits in this PR:**
 ```bash
-git log main..HEAD --pretty=format:"%s%n%b" --reverse
+git log "$BASE"..HEAD --pretty=format:"%s%n%b" --reverse
 ```
 
 **Changed files with stats:**
 ```bash
-git diff main...HEAD --stat
-git diff --name-status main...HEAD
+git diff "$BASE"...HEAD --stat
+git diff --name-status "$BASE"...HEAD
 ```
 
 **Full diff:**
 ```bash
-git diff main...HEAD
+git diff "$BASE"...HEAD
 ```
 
 **Branch name** (may contain ticket references):
@@ -141,7 +144,7 @@ cat <<'BODY' > /tmp/pr-body.md
 BODY
 
 # Create PR
-gh pr create --base <branch> --title "<title>" --body-file /tmp/pr-body.md [--draft]
+gh pr create --base "$BASE" --title "<title>" --body-file /tmp/pr-body.md [--draft]
 
 # Clean up
 rm -f /tmp/pr-body.md
@@ -157,7 +160,7 @@ Display the PR URL to the user.
 
 - **CRITICAL**: Always analyze the full diff and all commits, not just the most recent one
 - **NEVER use `--fill`** — always generate a structured description from diff analysis
-- Use `gh pr diff` or `git diff main...HEAD` for the most accurate view of changes
+- Use `gh pr diff` or `git diff "$BASE"...HEAD` for the most accurate view of changes
 - Focus on accuracy over creativity — describe what's actually there
 - The "why" comes from commit messages; the "what" comes from the diff
 - If the diff is very large (>500 lines), summarize by file/area rather than line-by-line

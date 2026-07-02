@@ -3,7 +3,7 @@
     "email": "klauer@gmail.com",
     "name": "klauern"
   },
-  "description": "Intelligent pull request creation skill",
+  "description": "Pull request creation, updating, review-comment triage, and merge conflict resolution",
   "name": "pull-requests",
   "version": "1.2.0"
 }

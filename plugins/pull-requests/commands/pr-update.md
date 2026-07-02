@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 description: Update PR title and description based on actual changes
 ---
 # /pr-update
@@ -130,9 +130,11 @@ This command performs a comprehensive review of the PR and updates it to match r
    gh pr edit <number> --title "New Title" --body "New Description"
    ```
 
-   Or if body is long:
+   Or if body is long (heredoc preserves multi-line content; `echo` does not):
    ```bash
-   echo "New Description" > /tmp/pr-body.md
+   cat <<'BODY' > /tmp/pr-body.md
+   [new description]
+   BODY
    gh pr edit <number> --title "New Title" --body-file /tmp/pr-body.md
    ```
 
