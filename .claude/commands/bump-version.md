@@ -48,29 +48,21 @@ Interactive version bump workflow for plugins in the klauern-skills repository.
    python3 .claude/skills/version-manager/scripts/bump_version.py plugins/<plugin-name> <bump-type>
    ```
 
-6. **Update changelog**:
-   ```bash
-   NEW_VERSION=$(jq -r '.version' .claude-plugin/marketplace.json)
-   python3 .claude/skills/version-manager/scripts/update_changelog.py $NEW_VERSION
-   ```
-
-7. **Stage and commit**:
+6. **Stage and commit**:
    ```bash
    git add .claude-plugin/marketplace.json \
-           plugins/<plugin-name>/.claude-plugin/plugin.json \
-           CHANGELOG.md
+           plugins/<plugin-name>/.claude-plugin/plugin.json
 
    git commit -m "$(cat <<'EOF'
    chore(release): bump <plugin-name> to <new-version>
 
    - Updated <plugin-name> from <old-version> to <new-version>
    - Updated marketplace from <old-marketplace-version> to <new-marketplace-version>
-   - Updated CHANGELOG.md
    EOF
    )"
    ```
 
-8. **Show summary**:
+7. **Show summary**:
    Display what was updated and remind user to push when ready.
 
 ## Error Handling
