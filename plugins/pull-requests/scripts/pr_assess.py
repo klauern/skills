@@ -167,22 +167,11 @@ def ensure_worktree(
             return WorktreeResult(status="reused", path=path, head=head, note="matched PR head commit")
 
     if target_path.exists():
-        inside_work_tree = run(["git", "rev-parse", "--is-inside-work-tree"], cwd=target_path, check=False) == "true"
-        if (target_path / ".git").exists() or inside_work_tree:
-            head = run(["git", "rev-parse", "HEAD"], cwd=target_path, check=False) or None
-            if head != head_ref_oid:
-                return WorktreeResult(
-                    status="conflict",
-                    path=str(target_path),
-                    head=head_ref_oid,
-                    note=f"existing checkout at target path has unexpected HEAD {head or 'unknown'}",
-                )
-            return WorktreeResult(status="reused", path=str(target_path), head=head, note="existing checkout at target path")
         return WorktreeResult(
             status="conflict",
             path=str(target_path),
             head=head_ref_oid,
-            note="target path exists but is not a git worktree",
+            note="target path exists but is not a registered worktree for this repository",
         )
 
     target_base.mkdir(parents=True, exist_ok=True)
