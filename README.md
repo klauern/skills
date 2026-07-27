@@ -71,7 +71,7 @@ git clone https://github.com/klauern/klauern-skills.git
 2. Add the local marketplace and install plugins:
 
 ```bash
-/plugin marketplace add /Users/klauer/dev/klauern-skills
+/plugin marketplace add /path/to/klauern-skills
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills

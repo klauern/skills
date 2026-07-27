@@ -212,7 +212,8 @@ def ensure_worktree(
 def graphql_request(query: str, variables: dict[str, str | int]) -> dict[str, Any]:
     cmd = ["gh", "api", "graphql", "-f", f"query={query}"]
     for name, value in variables.items():
-        cmd.extend(["-F", f"{name}={value}"])
+        flag = "-F" if isinstance(value, int) and not isinstance(value, bool) else "-f"
+        cmd.extend([flag, f"{name}={value}"])
     payload = run_json(cmd)
     if "errors" in payload:
         errors = "; ".join(err.get("message", "unknown error") for err in payload["errors"])
