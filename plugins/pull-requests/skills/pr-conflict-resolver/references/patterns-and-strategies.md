@@ -10,7 +10,7 @@
 | Non-overlapping | Different functions/sections added | Keep both | ✅ |
 | Signature change | Parameters added/modified | Update call sites | ⚠️ Suggest |
 | Variable rename | Identifier changed, usages outdated | Complete rename | ⚠️ Suggest |
-| Version conflict | Same dep, different versions | Choose newer | ⚠️ Suggest |
+| Version conflict | Same dep, different versions | Compare constraints, compatibility, security fixes, and tests — never default to newer | ⚠️ Suggest |
 | Logic conflict | Same function, different impl | Evaluate approaches | ❌ Guide |
 | State conflict | Different state management | Align approach | ❌ Guide |
 | API contract | Breaking interface changes | Design migration | ❌ Guide |

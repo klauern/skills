@@ -59,25 +59,23 @@ Error: Process completed with exit code 1.
 FAIL src/calculator.test.ts
   ● Calculator › calculateTotal › returns sum of array
 
-    expect(received).toBe(expected)
-    Expected: 15
-    Received: 12
+    TypeError: Reduce of empty array with no initial value
 
-      22 |   it('returns sum of array', () => {
-      23 |     const numbers = [3, 4, 5];
-    > 24 |     expect(calculateTotal(numbers)).toBe(15);
+      22 |   it('returns 0 for an empty array', () => {
+      23 |     const numbers: number[] = [];
+    > 24 |     expect(calculateTotal(numbers)).toBe(0);
 ```
 
 ### Analysis
 **Model**: Sonnet (semantic understanding required)
 
-1. Math check: 3 + 4 + 5 = 12 ≠ 15
+1. Non-empty arrays pass; only the empty-array case throws
 2. Check recent diff:
    ```diff
    -  return numbers.reduce((sum, n) => sum + n, 0);
    +  return numbers.reduce((sum, n) => sum + n);  // Missing initial value!
    ```
-3. Root cause: Without initial value 0, reduce uses first element as start
+3. Root cause: Without an initial value, reduce throws on an empty array (and uses the first element as the seed otherwise)
 
 ### Fix
 ```typescript

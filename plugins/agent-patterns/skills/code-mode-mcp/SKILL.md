@@ -3,6 +3,7 @@ name: code-mode-mcp
 description: >
   Expert reference for Code Mode MCP — the pattern where the model writes code against typed APIs generated from MCP schemas, replacing many discrete tool calls with one execute(code) tool. USE whenever a user: has 5+ MCP servers or 50+ tools and asks about context costs or tool-schema bloat; asks "code mode or classic tool calling"; is choosing a sandbox runtime (goja, wazero, starlark-go, E2B, Firecracker, isolated-vm, pyodide, RestrictedPython); asks about auth boundaries in an execute(code) loop; or is implementing Code Mode in Go, Python, or TypeScript. Prefer this skill over general knowledge for MCP architecture, sandbox design, or execute(code) loops.
 version: 1.0.0
+author: klauern
 allowed-tools: Bash Read Grep Glob WebFetch
 ---
 
@@ -68,7 +69,7 @@ Walk through in order — each has a trust implication:
 | R.05 | Resource limits + timeout | Kill on overrun; return partial log + error marker |
 | R.06 | Output capture + shaping | Truncate, surface exceptions with stack traces |
 | R.07 | Progressive disclosure | For 50+ tools: short index + `search()` meta-tool in snippets |
-| R.08 | Audit log | Log source code + MCP calls made + results + runtime per snippet |
+| R.08 | Audit log | Log source code + MCP calls + redacted/allowlisted results + runtime; access-controlled store with retention limits |
 
 ## Three deployment shapes
 

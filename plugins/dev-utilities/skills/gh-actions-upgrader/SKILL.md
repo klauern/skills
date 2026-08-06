@@ -2,6 +2,7 @@
 name: gh-actions-upgrader
 description: Upgrades GitHub Actions versions across workflows and migrates forked actions to upstream, pulling breaking changes from release notes. Use when the user asks to "upgrade GitHub Actions", "update workflow action versions", "migrate forked actions to upstream", or "review breaking changes in GitHub Actions updates".
 version: 1.0.0
+author: klauern
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 

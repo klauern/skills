@@ -2,12 +2,13 @@
 name: dependency-upgrader
 description: This skill should be used when the user asks to "check for outdated dependencies", "upgrade npm/poetry/go/cargo packages", "review breaking dependency updates", or "plan dependency migrations".
 version: 1.0.0
+author: klauern
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 
 # Dependency Upgrader
 
-Automates upgrading package dependencies: detects outdated versions, identifies breaking changes, and creates upgrade PRs.
+Automates upgrading package dependencies: detects outdated versions, identifies breaking changes, and prepares upgrade commits (PR creation stays with the pull-requests plugin).
 
 ## Quick Start
 

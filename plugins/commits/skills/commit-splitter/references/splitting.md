@@ -40,6 +40,10 @@ git commit -m "type(scope): second change"
 
 ## Splitting an Existing Commit
 
+> **Warning**: the commands below rewrite history. Verify the commits are not already
+> pushed/shared first; if they are, coordinate with collaborators and push with
+> `--force-with-lease`.
+
 ```bash
 git reset HEAD~1        # undo last commit, changes back to unstaged
 # then split with the workflows above

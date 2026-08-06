@@ -13,19 +13,22 @@ klauern-skills/
 │   │   ├── commands/
 │   │   │   ├── commit.md
 │   │   │   └── commit-push.md
-│   │   └── conventional-commits/  # Skill directory
-│   │       ├── SKILL.md          # Skill metadata (no version)
-│   │       └── references/
+│   │   └── skills/
+│   │       └── conventional-commits/   # Skill directory
+│   │           ├── SKILL.md            # Skill metadata (no version)
+│   │           └── references/
 │   ├── pull-requests/
 │   │   ├── .claude-plugin/
 │   │   │   └── plugin.json
 │   │   ├── commands/
-│   │   └── pr-creator/           # Skill directory
+│   │   └── skills/
+│   │       └── pr-creator/       # Skill directory
 │   └── dev-utilities/
 │       ├── .claude-plugin/
 │       │   └── plugin.json
 │       ├── commands/
-│       └── version-manager/      # Skill directory
+│       └── skills/
+│           └── git-optimize/     # Skill directory
 ├── CHANGELOG.md                  # Global changelog
 └── README.md
 ```

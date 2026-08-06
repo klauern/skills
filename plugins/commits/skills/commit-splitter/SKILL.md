@@ -2,6 +2,7 @@
 name: commit-splitter
 description: This skill should be used when the user asks to "split commits", "break up changes into atomic commits", "separate mixed git changes", or "propose commit groups" from a large diff.
 version: 1.0.0
+author: klauern
 ---
 
 # Commit Splitter
@@ -49,19 +50,6 @@ Use this skill when:
 3. **Execution mode**:
    - Interactive → Present plan, confirm each commit
    - Automatic → Execute all commits in sequence
-
-### Use Haiku for
-
-- File listing and categorization
-- Simple hunk parsing
-- Git command execution
-
-### Use Sonnet for
-
-- Commit boundary determination
-- Cross-file dependency analysis
-- Message composition for complex changes
-- Hunk-level splitting decisions
 
 ## Progressive Disclosure
 
