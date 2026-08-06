@@ -136,6 +136,21 @@ Disposition meanings:
 - 5 distinct findings: 5 live inline review comments.
 - 5 **assigned** pending the next local batch and exact-head review.
 
+## Luna whole-diff preflight after the second remediation review
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| L17-01 | Luna fixture audit | Execute the documented worktree workflow rather than a test reimplementation | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `worktree-command.sh` greps tokens, then runs its own branch-classification algorithm; the documented block can regress independently. | Mark/extract the authoritative block and execute it for local, cached-remote, unfetched-remote, and new-branch cases. |
+| L17-02 | Luna fixture audit | Render runtime substitutions from the authoritative workflow | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `runtime-version-substitution.sh` reimplements detection and only checks placeholder presence. | Execute the documented/shared workflow for `.nvmrc`, `go.mod`, `.ruby-version`, and `rust-toolchain.toml`; assert exact rendered versions, no remaining placeholders, and confirmation for ambiguous ranges. |
+| L17-03 | Luna fixture audit | Execute the complete TickTick priority mapping | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The marked example handles only medium while prose asserts the full mapping. | Make one authoritative executable mapping cover urgent/critical/high, medium, low, none, and empty-input preservation; run table-driven assertions. |
+| L17-04 | Luna shell audit | Refresh and verify the current remote default before new-branch creation | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `worktree.md` uses the locally cached `origin/HEAD` target/OID; a stale or renamed remote default can create a new branch from the wrong commit. | Resolve remote HEAD from the server, exact-fetch its target, verify the fetched OID, and fixture a stale/renamed cached default. |
+| L17-05 | Luna shell audit | Make `trimall` fail fast between phases | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `configuration.md` separates fetch, trim, cleanup, sweep, and optimize with semicolons, so later success can mask an earlier failure or cancellation. | Guard every phase, stop on fetch/dry-run/cleanup failure or cancellation, and fixture failure propagation before destructive later phases. |
+
+### Luna preflight totals
+
+- 5 distinct high-confidence findings: 3 fixture-validity and 2 shell-safety.
+- 5 **assigned** pending local repair and independent review.
+
 ## Mechanical count validation
 
 Run from the repository root:
@@ -150,9 +165,10 @@ rtk rg -c '^\| 17-.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-led
 rtk rg -c '^\| 17-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R2-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| L17-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
 Expected totals are `37`, `13`, then PR #16's `fixed/superseded 26`,
 `assigned 7`, `policy-rejected 4`, and PR #17's `assigned 12`,
 `policy-rejected 1`, followed by `7` first-remediation and `5`
-second-remediation PR #17 findings.
+second-remediation PR #17 findings, then `5` Luna preflight findings.

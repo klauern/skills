@@ -78,11 +78,22 @@ Apply priority only after the user explicitly states it:
 
 <!-- ticktick-priority-example -->
 ```python
-# Empty or unstated input leaves task["priority"] untouched.
-priority_input = user_supplied_priority.strip().lower() if user_supplied_priority else ""
-if priority_input == "medium":
-    # The user explicitly stated "medium".
-    task["priority"] = 3
+def apply_user_priority(task, user_supplied_priority):
+    priority_input = user_supplied_priority.strip().lower() if user_supplied_priority else ""
+    priority_map = {
+        "urgent": 5,
+        "critical": 5,
+        "high": 5,
+        "medium": 3,
+        "low": 1,
+        "none": 0,
+    }
+    # Empty or unstated input preserves task["priority"] unchanged.
+    if priority_input:
+        task["priority"] = priority_map[priority_input]
+
+
+apply_user_priority(task, user_supplied_priority)
 update_task(task_id=task["id"], task=task)
 ```
 
