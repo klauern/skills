@@ -74,20 +74,21 @@ update_task(
 )
 ```
 
-When priority input is empty or unstated, do not add or change the task's
-`priority` field; preserve any value returned by `get_task_by_id` unchanged.
+Apply priority only after the user explicitly states it:
 
-Set medium priority only after the user explicitly states it:
-
+<!-- ticktick-priority-example -->
 ```python
-# The user explicitly stated "medium".
-task["priority"] = 3
+# Empty or unstated input leaves task["priority"] untouched.
+priority_input = user_supplied_priority.strip().lower() if user_supplied_priority else ""
+if priority_input == "medium":
+    # The user explicitly stated "medium".
+    task["priority"] = 3
 update_task(task_id=task["id"], task=task)
 ```
 
 - Read with `get_task_by_id` (needs only `task_id`; it scans all projects). Carry its `projectId` and existing fields back in the `task` object.
 - **No subtasks** (notes-only enrichment): leave `kind` alone and put the description in `content` instead of `desc`.
-- **Clearing both dates**: the MCP can't send null. `/ticktick:clear-dates` (the `ticktick_api.py` script) clears both `dueDate` and `startDate`; use it only when both should be removed. Never imply that it clears a single date, and never set a sentinel date; a 1970 date makes the task maximally overdue in reviews.
+- **Clearing both dates**: the MCP can't send null. `/ticktick:clear-dates` (the `ticktick_api.py` script) clears both `dueDate` and `startDate`; use it only when both should be removed. Independent field clearing is unsupported, and a sentinel 1970 date makes the task maximally overdue in reviews.
 - **References** (per project default): append a `## References` section to `content` — do not put links in a comment unless the user asks.
 
 ## Output

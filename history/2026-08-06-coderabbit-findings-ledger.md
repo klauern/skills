@@ -12,6 +12,7 @@ syntax is used here.
 | #16 | [review 4869851851](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | `b4ee1808033d32ce6d5099956c1b2d48b8e7c742` | #15 cumulative head `8515964bac597b4a5110dafb1a8d28ef0ab4ca48` |
 | #17 | [review 4870123313](https://github.com/klauern/skills/pull/17#pullrequestreview-4870123313) | `ac9385c6834dbd00e68e5ee9871090d6bcead869` | #17 head `ac9385c6834dbd00e68e5ee9871090d6bcead869`; downstream evidence also checked at `8515964bac597b4a5110dafb1a8d28ef0ab4ca48` |
 | #17 remediation | [review 4870422817](https://github.com/klauern/skills/pull/17#pullrequestreview-4870422817) | `09ac7a8163d4587052177ddc9b3d2a586b49cc1a` | Exact reviewed remediation head; seven findings comprise six inline threads plus one review-body-only, outside-diff finding. |
+| #17 remediation 2 | [review 4870703669](https://github.com/klauern/skills/pull/17#pullrequestreview-4870703669) | `8e24c8ed635f5ff5720fedf6bb0f74485d88fd86` | Exact reviewed second-remediation head; five inline findings. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -120,6 +121,21 @@ Disposition meanings:
   outside-diff finding.
 - 7 **assigned** pending the next local batch and exact-head review.
 
+## PR #17 second remediation review — 5 inline findings
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 17R2-01 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725676062) | Keep the mechanical-total explanation in command order | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The final expected-output sentence lists PR #16 categories in a different order from the preceding commands. | State `fixed/superseded 26`, `assigned 7`, then `policy-rejected 4`; preserve all numeric totals. |
+| 17R2-02 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725676070) | Fail closed on every remote-verification error | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The documented deletion block does not establish a strict execution envelope or explicitly preserve every `ls-remote`/fetch failure before consuming refreshed refs. | Execute with strict error and pipeline handling; capture and validate `ls-remote`; explicitly check both initial and post-confirmation exact fetches so stale refs cannot authorize deletion. |
+| 17R2-03 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725676075) | Exercise the extracted deletion block for the candidate race | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The base-race and success cases execute the documentation block, but the candidate-advance case still calls standalone `git push`. | Run the extracted block, assert it contains the exact reviewed-OID lease deletion, advance the candidate during confirmation, and prove the advanced remote ref remains. |
+| 17R2-04 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725676076) | Extract exactly one marked priority example | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The priority fixture can pass with an empty or ambiguous `update_task` extraction and searches some assertions outside the extracted block. | Add a stable marker, require exactly one extraction, and scope omission/empty/medium assertions to that block. |
+| 17R2-05 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725676079) | Check single-date wording across all validated TickTick docs | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The negative clear-dates wording scan does not include `commands/enrich.md` and can miss equivalent single-date phrasing. | Scan all three contract documents for any guidance that presents clear-dates as clearing only one date while retaining positive dueDate/startDate assertions. |
+
+### PR #17 second-remediation-review totals
+
+- 5 distinct findings: 5 live inline review comments.
+- 5 **assigned** pending the next local batch and exact-head review.
+
 ## Mechanical count validation
 
 Run from the repository root:
@@ -133,8 +149,10 @@ rtk rg -c '^\| 16-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findi
 rtk rg -c '^\| 17-.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R2-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
-Expected totals are `37`, `13`, then PR #16's `assigned 7`,
-`fixed/superseded 26`, `policy-rejected 4`, and PR #17's `assigned 12`,
-`policy-rejected 1`, followed by `7` PR #17 remediation-review findings.
+Expected totals are `37`, `13`, then PR #16's `fixed/superseded 26`,
+`assigned 7`, `policy-rejected 4`, and PR #17's `assigned 12`,
+`policy-rejected 1`, followed by `7` first-remediation and `5`
+second-remediation PR #17 findings.
