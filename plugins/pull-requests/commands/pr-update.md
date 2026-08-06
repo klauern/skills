@@ -30,7 +30,8 @@ Follow the **pr-creator** skill's analysis phases, applied to an existing PR:
    actual base (`baseRefName` — not hardcoded `main`).
 3. Generate an updated title and body. **Preserve any manually written content** in the
    existing body (notes, screenshots, discussion links) — merge, don't overwrite.
-4. Show a before/after preview and confirm with AskUserQuestion. Display:
+4. Show a before/after preview and confirm with AskUserQuestion.
+   Display:
    ```text
    Current Title:    [existing title]
    Proposed Title:   [updated title]
@@ -38,8 +39,8 @@ Follow the **pr-creator** skill's analysis phases, applied to an existing PR:
    Proposed Description:
    [updated body]
    ```
-5. Apply the update. Or if body is long (it always is for a description update), write
-   it with a heredoc so multi-line content survives:
+5. Apply the update with a heredoc-written body file so multi-line content survives.
+   Or if body is long — always the case for a description update — never inline it:
    ```bash
    cat <<'BODY' > /tmp/pr-body.md
    [updated description]
