@@ -4,7 +4,7 @@ This directory contains local configuration for Claude Code specific to the klau
 
 ## Structure
 
-```
+```text
 .claude/
 ├── agents/            # Local subagents (skill-validator, release-checker, etc.)
 ├── commands/          # Local slash commands
