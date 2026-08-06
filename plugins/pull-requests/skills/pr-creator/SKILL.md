@@ -2,6 +2,7 @@
 name: pr-creator
 description: This skill should be used when the user asks to "create a PR", "open a pull request", "fill a PR template from commits", or "prepare PR metadata automatically" with GitHub CLI.
 version: 1.0.0
+author: klauern
 ---
 
 # PR Creator
@@ -42,7 +43,7 @@ Search locations (in order):
 
 **Required field markers**: `[Required]`, `*`, `<!-- Required -->`, `(Required)`
 
-**Commands**: `fd -t f PULL_REQUEST_TEMPLATE .github/ docs/` or `find .github -name "*PULL_REQUEST*"`
+**Command**: `fd -H -t f -i 'pull_request_template' .` (hidden-aware, rooted at `.` so root-level `PULL_REQUEST_TEMPLATE.md` is found too)
 
 ### Phase 2: Commit Analysis
 

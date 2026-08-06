@@ -72,7 +72,7 @@ Structure what the user gave you (and only that):
 Show a before → after diff of every changed field; render new subtasks as a list. Anything the user didn't confirm goes under **"Open / suggested (not applied)"**. Ask for approval. Never write before an explicit yes.
 
 **Phase 6 — Write**
-On approval, take the full task from `get_task_by_id`, merge the enrichment into it, and call `update_task(task_id, task)` with the complete object so nothing is dropped. Subtasks → `kind: "CHECKLIST"`, description in `desc`, steps in `items` (`status: 0`); notes-only → leave `kind` and use `content`.
+On approval, **re-fetch the task with `get_task_by_id` immediately before writing** (the task may have changed during the interview — merging into a stale snapshot would overwrite those changes), merge the enrichment into it, and call `update_task(task_id, task)` with the complete object so nothing is dropped. Subtasks → `kind: "CHECKLIST"`, description in `desc`, steps in `items` (`status: 0`); notes-only → leave `kind` and use `content`.
 
 **Phase 7 — Confirm**
 Summarize what changed and restate anything still open.

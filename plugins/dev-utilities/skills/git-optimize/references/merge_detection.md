@@ -31,15 +31,13 @@ git cherry <base> <branch>  # Empty = merged
 ## Manual Verification
 
 ```bash
-# Check if merged (any method)
-git log origin/main..feature/branch --oneline
-# Empty output = no unique commits = merged
-
-# Ancestry check
+# ANCESTRY checks — valid for classic merges only; a squash- or rebase-merged
+# branch still shows unique commits here:
+git log origin/main..feature/branch --oneline   # Empty = merged (classic only)
 git merge-base --is-ancestor feature/branch origin/main && echo "MERGED"
 
-# Cherry check
-git cherry origin/main feature/branch  # Empty = all merged
+# For squash/rebase merges use patch comparison instead:
+git cherry origin/main feature/branch  # Empty = all patches present upstream
 ```
 
 ## Base Branch Detection Order
@@ -47,7 +45,8 @@ git cherry origin/main feature/branch  # Empty = all merged
 1. User config: `git config trim.bases`
 2. Remote HEAD: `git symbolic-ref refs/remotes/origin/HEAD`
 3. Common names: main, master, develop
-4. Current branch (fallback)
+4. None found → stop and ask the user (never fall back to the current branch —
+   comparing a branch with itself yields an empty range and false "merged" results)
 
 ## Edge Cases
 

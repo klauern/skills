@@ -2,6 +2,7 @@
 name: git-optimize
 description: This skill should be used when the user asks to "clean up merged git branches", "run git trim/cleanup", "optimize repository size", or "perform git maintenance and garbage collection".
 version: 1.0.0
+author: klauern
 allowed-tools: Bash Read
 ---
 
@@ -59,7 +60,8 @@ If the user prefers not to install aliases, use the raw-git equivalents in the t
 
 **After PR merge** (daily):
 ```bash
-git checkout main && git pull && git cleanup
+BASE=$(git symbolic-ref --short refs/remotes/origin/HEAD 2>/dev/null | cut -d/ -f2 || echo main)
+git checkout "$BASE" && git pull && git cleanup
 ```
 
 **Weekly maintenance**:
@@ -114,9 +116,12 @@ See [configuration.md](references/configuration.md) for full alias definitions.
 
 ## Safety
 
-**Always safe**: cleanup, sweep, trim --dry-run, repacker
+**Always safe**: trim --dry-run, repacker (read-only / non-destructive)
 
-**Use caution**: pruner (removes objects), optimize, trimall, sweep -f
+**Review first — deletes branch refs**: cleanup, sweep, trimall (run a dry run or
+review `git branch --merged` output before deleting)
+
+**Use caution**: pruner (removes objects), optimize, sweep -f
 
 **Best practices**:
 1. Use `--dry-run` first

@@ -2,6 +2,7 @@
 name: ci-failure-analyzer
 description: This skill should be used when the user asks to "fix CI", "debug failing GitHub Actions checks", "analyze CI logs", or reports failing checks/tests in GitHub Actions.
 version: 1.0.0
+author: klauern
 allowed-tools: Bash Read Grep Glob Edit Write
 ---
 

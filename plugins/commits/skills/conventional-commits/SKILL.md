@@ -2,6 +2,7 @@
 name: conventional-commits
 description: This skill should be used when the user asks to "create a conventional commit", "write semantic commit messages", or "commit and push with conventional commits".
 version: 1.0.0
+author: klauern
 ---
 
 # Conventional Commits

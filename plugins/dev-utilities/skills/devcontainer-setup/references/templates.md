@@ -78,6 +78,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     wget \
     iptables \
+    dnsutils \
     jq \
     openssh-server \
     ca-certificates \

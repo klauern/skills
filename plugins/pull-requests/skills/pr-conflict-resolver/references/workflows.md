@@ -9,9 +9,9 @@ git rev-parse --verify MERGE_HEAD 2>/dev/null && echo "In merge state"
 
 ### Find Conflicted Files
 ```bash
-git status --porcelain | grep '^UU'    # Both modified (conflict)
-git status --porcelain | grep '^DU'    # Deleted by us
-git status --porcelain | grep '^UD'    # Deleted by them
+git diff --name-only --diff-filter=U   # ALL unmerged files (any conflict state)
+git status --porcelain | grep '^UU'    # Both modified
+git status --porcelain | grep -E '^(DU|UD|AA|AU|UA|DD)'  # Delete/add conflict states
 ```
 
 ### Get Three Versions
@@ -71,8 +71,9 @@ if set(imports(ours)) == set(imports(theirs)): return IMPORT_ORDER
 # After editing file to resolve
 git add path/to/file
 
-# Verify no markers remain
-git diff --check
+# Verify no markers remain in the STAGED content (plain --check misses staged files)
+git diff --cached --check
+grep -rn '^\(<<<<<<<\|=======\|>>>>>>>\)' <file> && echo "markers remain" || true
 
 # Show what will be committed
 git diff --cached path/to/file

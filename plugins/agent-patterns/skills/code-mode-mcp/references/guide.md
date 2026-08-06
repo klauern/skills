@@ -98,7 +98,8 @@ classic mode.
 | `wasmtime` / `wazero` | ~1 ms | Rust, Go (no CGO for wazero) | WASM (any compiled lang) | Capability-based, very strong | Best general-purpose vendor-neutral option |
 | `goja` | < 1 ms | Go | JS / TS (ES5+) | In-process, language-level | Pure-Go JS. Highest LLM fluency. Trades isolation for embedding simplicity. |
 | `starlark-go` | < 1 ms | Go | Starlark (Python-ish) | No I/O by design, very strong | Trivially safe to embed. Lower LLM fluency. |
-| RestrictedPython / pyodide | ~10–50 ms | Python | Python (subset) | AST restrictions (mid) | Python-native harnesses (FastMCP). RestrictedPython: in-process; pyodide: WASM. |
+| RestrictedPython | ~10 ms | Python | Python (subset) | In-process AST restrictions (language-level only) | Python-native harnesses (FastMCP). Simplest path; weakest boundary. |
+| pyodide | ~50 ms | Python / JS host | Python | WASM (strong) | Python-in-WASM when a real isolation boundary is required. |
 | Firecracker / microVM | ~125 ms | any | any | Hardware VM, very strong | Lambda-grade isolation. Mature. Used by E2B, Modal under the hood. |
 | V8 isolates | ~5 ms | JS/TS (Node, Deno, Bun, CF) | JS / TS | Process boundary within V8 | Cloudflare reference. Elsewhere: `isolated-vm` (Node). |
 | Hyperlight | < 10 ms | Rust | WASM | Hardware micro-VM | Microsoft open-source. Strong isolation/startup ratio. Newer. |
@@ -210,6 +211,9 @@ demand. Cloudflare keeps 2,500 endpoints under 1K tokens this way.
 **R.08 — Audit log of every snippet**
 Log every execution with: source code, the MCP calls it made, results, and runtime.
 Treat snippets like IaC change plans — reviewable artifacts, not opaque tool calls.
+**Privacy**: MCP results can carry PII/sensitive service data — redact or allowlist
+result fields before logging, scope the audit store per tenant with access control and
+encryption, and set a retention limit.
 
 ---
 
