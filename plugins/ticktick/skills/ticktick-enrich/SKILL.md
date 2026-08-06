@@ -33,7 +33,7 @@ Fields live in the `task` object (camelCase):
 | Description | `desc` (checklist) / `content` (text) | Markdown. Holds Goal / Acceptance criteria / References |
 | Subtasks | `items` | Native checklist `[{ "title": "...", "status": 0 }]`; checkable in-app (needs `kind: CHECKLIST`) |
 | Priority | `priority` | 0=none, 1=low, 3=medium, 5=high |
-| Due date | `dueDate` | ISO 8601: `2026-06-15T10:00:00.000+0000`; MCP `update_task` cannot clear one date independently; `/ticktick:clear-dates` removes both `dueDate` and `startDate` |
+| Due date | `dueDate` | ISO 8601: `2026-06-15T10:00:00.000+0000`; independent clearing is unsupported; `/ticktick:clear-dates` removes both `dueDate` and `startDate` |
 | Start date | `startDate` | ISO 8601 |
 | Tags | `tags` | Array of strings; match existing via `list_tags` |
 | Project | `projectId` | Carry over unchanged; an actual move is cleaner via `move_task` |

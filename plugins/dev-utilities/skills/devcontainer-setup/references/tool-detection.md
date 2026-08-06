@@ -34,6 +34,65 @@ user to choose an exact value or explicitly approve the proposed default.
 Record the source, raw constraint, and final value in the generation preview. A detected
 exact value always replaces the fallback.
 
+Use this authoritative detection and substitution workflow from the project root. Set
+`RUNTIME_TEMPLATE` and `RUNTIME_OUTPUT` to the input and rendered files. For a range or
+missing source, ask the user to approve the documented fallback and set
+`RUNTIME_VERSION_CONFIRMATION=yes` only after that approval.
+
+<!-- runtime-version-workflow -->
+```bash
+set -euo pipefail
+: "${RUNTIME_TEMPLATE:?set RUNTIME_TEMPLATE to the template path}"
+: "${RUNTIME_OUTPUT:?set RUNTIME_OUTPUT to the rendered output path}"
+
+normalize_version() {
+  printf '%s' "$1" | sed -e 's/^[[:space:]]*v//' -e 's/[[:space:]]*$//'
+}
+
+is_exact_version() {
+  [[ $1 =~ ^[0-9]+(\.[0-9]+){0,2}$ ]]
+}
+
+resolve_version() {
+  runtime=$1
+  raw=$2
+  fallback=$3
+  normalized="$(normalize_version "$raw")"
+  if is_exact_version "$normalized"; then
+    printf '%s\n' "$normalized"
+  elif [ "${RUNTIME_VERSION_CONFIRMATION:-}" = yes ]; then
+    echo "$runtime version '$raw' is ambiguous; using confirmed fallback $fallback" >&2
+    printf '%s\n' "$fallback"
+  else
+    echo "$runtime version '$raw' requires an exact value or confirmed fallback $fallback" >&2
+    return 1
+  fi
+}
+
+node_raw="$(cat .nvmrc 2>/dev/null || cat .node-version 2>/dev/null || true)"
+go_raw="$(awk '/^go / { print $2; exit }' go.mod 2>/dev/null || true)"
+ruby_raw="$(cat .ruby-version 2>/dev/null || true)"
+rust_raw="$(awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/ { print $2; exit }' \
+  rust-toolchain.toml 2>/dev/null || true)"
+
+node_version="$(resolve_version Node.js "$node_raw" 20)"
+go_version="$(resolve_version Go "$go_raw" 1.23)"
+ruby_version="$(resolve_version Ruby "$ruby_raw" 3.3)"
+rust_version="$(resolve_version Rust "$rust_raw" stable)"
+
+sed \
+  -e "s/{{NODE_VERSION}}/$node_version/g" \
+  -e "s/{{GO_VERSION}}/$go_version/g" \
+  -e "s/{{RUBY_VERSION}}/$ruby_version/g" \
+  -e "s/{{RUST_VERSION}}/$rust_version/g" \
+  "$RUNTIME_TEMPLATE" >"$RUNTIME_OUTPUT"
+
+if grep -Eq '\{\{(NODE|GO|RUBY|RUST)_VERSION\}\}' "$RUNTIME_OUTPUT"; then
+  echo "Runtime rendering left unresolved placeholders" >&2
+  exit 1
+fi
+```
+
 ## Node.js / Bun
 
 ### Detection
