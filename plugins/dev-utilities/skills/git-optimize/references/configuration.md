@@ -47,7 +47,7 @@ the final candidates, and requires confirmation before deleting anything:
         excluded=$(git config --get trim.exclude 2>/dev/null || true); \
         targets=${requested:-${configured:-$remote_default}}; \
         [ -n \"$targets\" ] || { echo 'No cleanup base: configure trim.bases, origin/HEAD, or pass a base.' >&2; exit 1; }; \
-        protected=\"main master develop trunk $current $remote_default $configured\"; \
+        protected=\"main master develop trunk $current $remote_default $configured $targets\"; \
         raw_candidates=$(mktemp); \
         candidates=$(mktemp); \
         trap 'rm -f \"$raw_candidates\" \"$candidates\"' EXIT; \

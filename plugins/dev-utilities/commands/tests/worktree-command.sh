@@ -77,6 +77,8 @@ git -C "$ROOT" worktree add --quiet -- "$FIXTURE/local-topic" local/topic
 git -C "$ROOT" branch remote/topic main
 git -C "$ROOT" push --quiet origin remote/topic
 git -C "$ROOT" branch -D remote/topic >/dev/null
+git -C "$ROOT" fetch --quiet --no-tags origin \
+  "+refs/heads/remote/topic:refs/remotes/origin/remote/topic"
 git -C "$ROOT" worktree add --quiet --track -b remote/topic -- "$FIXTURE/remote-topic" origin/remote/topic
 
 REMOTE_BRANCH=remote/unfetched

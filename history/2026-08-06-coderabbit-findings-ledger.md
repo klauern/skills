@@ -11,6 +11,7 @@ syntax is used here.
 |---|---|---|---|
 | #16 | [review 4869851851](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | `b4ee1808033d32ce6d5099956c1b2d48b8e7c742` | #15 cumulative head `8515964bac597b4a5110dafb1a8d28ef0ab4ca48` |
 | #17 | [review 4870123313](https://github.com/klauern/skills/pull/17#pullrequestreview-4870123313) | `ac9385c6834dbd00e68e5ee9871090d6bcead869` | #17 head `ac9385c6834dbd00e68e5ee9871090d6bcead869`; downstream evidence also checked at `8515964bac597b4a5110dafb1a8d28ef0ab4ca48` |
+| #17 remediation | [review 4870422817](https://github.com/klauern/skills/pull/17#pullrequestreview-4870422817) | `09ac7a8163d4587052177ddc9b3d2a586b49cc1a` | Exact reviewed remediation head; seven findings comprise six inline threads plus one review-body-only, outside-diff finding. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -101,6 +102,24 @@ Disposition meanings:
 - 17-06 supersedes PR #16 row 16-15; it is counted once in each source review's
   own total but represents one implementation repair.
 
+## PR #17 remediation review — 6 inline findings plus 1 outside-diff finding
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 17R-01 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725442399) | Fail the hook-path fixture when no commands are discovered | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `.claude/hooks/tests/settings-paths.sh:10-15` lets an empty `jq` result flow through an empty loop to the success message. | Filter to non-empty string commands, explicitly reject an empty command set, and retain the path-with-spaces execution fixture. |
+| 17R-02 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725442401) | Fetch the remote-only fixture ref explicitly | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `worktree-command.sh:75-80` currently relies on push-side remote-tracking behavior before resolving `origin/remote/topic`. | Add an exact refspec fetch before the remote-tracking checkout and keep the separate never-fetched remote discovery case. |
+| 17R-03 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725442407) | Protect every explicitly selected cleanup base | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `configuration.md:48-50` protects configured/default bases but omits the resolved `$targets`, so a requested base can enter the candidate set. | Add all resolved targets to the protected set; fixture a requested `release/1` base and prove it cannot be selected. |
+| 17R-04 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725442418) | Fail clearly when `origin/HEAD` is missing | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `git-optimize/SKILL.md:67-68` can pass an empty branch name to `git checkout`. | Resolve a non-empty default ref or stop with actionable setup guidance before checkout, pull, or cleanup. |
+| 17R-05 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725442421) | Refresh and revalidate the deletion base | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | The remote deletion flow refreshes the candidate branch but checks ancestry against a potentially stale `$base_ref`. | Fetch the exact base ref immediately before deletion, recheck ancestry, require a protected/non-rewritable base, and retain branch-OID comparison, confirmation, and exact-OID lease deletion. |
+| 17R-06 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725442423) | Omit priority when the user did not state one | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `ticktick/commands/enrich.md:45-72` says to preserve unstated priority but its example sends `priority: 3`. | Remove the field from the unstated-priority example; fixture explicit medium separately from omitted/empty input. |
+| 17R-07 | [review body, outside diff](https://github.com/klauern/skills/pull/17#pullrequestreview-4870422817) | Limit `clear-dates` guidance to clearing both dates | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `ticktick/commands/enrich.md:80` says “Clearing a date,” while the referenced command clears both `dueDate` and `startDate`. | State the two-field behavior explicitly and use the command only when both dates should be removed. |
+
+### PR #17 remediation-review totals
+
+- 7 distinct findings: 6 live inline review comments plus 1 review-body-only,
+  outside-diff finding.
+- 7 **assigned** pending the next local batch and exact-head review.
+
 ## Mechanical count validation
 
 Run from the repository root:
@@ -113,8 +132,9 @@ rtk rg -c '^\| 16-.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-led
 rtk rg -c '^\| 16-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17-.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
 Expected totals are `37`, `13`, then PR #16's `assigned 7`,
 `fixed/superseded 26`, `policy-rejected 4`, and PR #17's `assigned 12`,
-`policy-rejected 1`.
+`policy-rejected 1`, followed by `7` PR #17 remediation-review findings.

@@ -77,7 +77,7 @@ All live inside the `task` object (camelCase). **Set only from what the user tel
 | Field | `task` field | Set when… | Notes |
 |-------|--------------|-----------|-------|
 | Priority | `priority` | the user states importance | urgent/critical/high→5, medium→3, low→1, none→0; if unstated, leave as-is |
-| Due date | `dueDate` | the user gives a deadline | ISO 8601 (`.000+0000` offset); to clear, use `/ticktick:clear-dates` — never a sentinel date |
+| Due date | `dueDate` | the user gives a deadline | ISO 8601 (`.000+0000` offset); `/ticktick:clear-dates` removes both `dueDate` and `startDate`, so use it only when both should be cleared; never a sentinel date |
 | Start date | `startDate` | the user gives a start | rarely; ISO 8601 |
 | Tags | `tags` | the user names tags | reuse existing (`list_tags`); confirm new ones |
 | Project | `projectId` | the user asks to move | prefer `move_task`; otherwise just *suggest* |
