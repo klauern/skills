@@ -24,7 +24,7 @@ Follow the **pr-creator** skill's analysis phases, applied to an existing PR:
    ```bash
    gh pr view [number] --json number,title,body,baseRefName
    gh pr diff [number]
-   gh pr view [number] --json commits -q '.commits[].commit.message'
+   gh pr view [number] --json commits -q '.commits[] | [.messageHeadline, .messageBody] | map(select(. != null and . != "")) | join("\n\n") | select(length > 0)'
    ```
 2. Re-run the skill's template discovery and commit/diff analysis against the PR's
    actual base (`baseRefName` — not hardcoded `main`).

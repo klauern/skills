@@ -46,10 +46,12 @@ Automated analysis and resolution of GitHub Actions CI failures.
 
 ### Matrix-Aware Log Collection
 
-- Gather run/job metadata first: `gh run view <run-id> --json jobs`
-- Download failed logs per job/matrix child: `gh run view <run-id> --job "<job-name>" --log-failed`
+- Gather run/job metadata first: `gh run view <run-id> --json jobs --jq '.jobs[] | {name,databaseId,status,conclusion}'`
+- Use `name` for display, but target a job or matrix child by its numeric ID:
+  `gh run view <run-id> --job <job-database-id> --log-failed`
 - Report failing matrix axes explicitly (e.g. `node-version: 18`) and avoid rerunning
-  the full matrix — rerun only the remediated job: `gh run rerun <run-id> --job "<job-name>"`
+  the full matrix — rerun only the remediated job:
+  `gh run rerun <run-id> --job <job-database-id>`
 - If logs are unavailable ("logs are missing"), wait for the run to finish or ask the
   user to rerun once logs are ready
 - Distinguish primary root causes from downstream jobs blocked by `needs`

@@ -83,10 +83,10 @@ File\s+"([^"]+)",\s+line\s+(\d+),\s+in\s+(.+)
 
 ```bash
 # Get all job results
-gh run view <run-id> --json jobs --jq '.jobs[] | {name, conclusion}'
+gh run view <run-id> --json jobs --jq '.jobs[] | {name,databaseId,status,conclusion}'
 
-# Target specific matrix child
-gh run view <run-id> --job "test (node-version: 18, os: ubuntu-latest)" --log-failed
+# Display the matrix child by name, then target it by numeric databaseId
+gh run view <run-id> --job <job-database-id> --log-failed
 ```
 
 ## Secret/Permission Indicators
