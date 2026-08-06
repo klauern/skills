@@ -145,8 +145,9 @@ Personal: `finances`, `purchase`, `gift`, `read`, `read-later`, `books`, `watch`
 ## Someday / placeholder dates (read side)
 
 Treat an existing `1970-01-01` or `2099-01-01` due date as "someday" when reading — they
-are placeholders, not real deadlines. Never write new sentinel dates; clear dates via
-`/ticktick:clear-dates` and leave "someday" tasks dateless (optionally tagged `someday`).
+are placeholders, not real deadlines. Never write new sentinel dates; instead
+`/ticktick:clear-dates` removes both `dueDate` and `startDate`, leaving "someday" tasks
+dateless (optionally tagged `someday`).
 
 ## Worked example
 

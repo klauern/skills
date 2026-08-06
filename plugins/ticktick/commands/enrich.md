@@ -34,24 +34,28 @@ enrichment-guide reference.
 ## Metadata contract (enforced by tests)
 
 - Priority mapping (TickTick-native): urgent/critical/high → 5, medium → 3, low → 1, none → 0.
-- When priority input is empty or unstated, do not add or change the task's
-  `priority` field; preserve any value returned by `get_task_by_id` unchanged:
+- Apply priority only after the user explicitly states it; empty or unstated input
+  preserves the task's existing priority:
 
+<!-- ticktick-priority-example -->
 ```python
-update_task(
-    task_id,
-    {
-        "title": "Renew SSL cert for api.example.com",
-        # ...other enriched fields; no "priority" key when unstated
-    },
-)
+def apply_user_priority(task, user_supplied_priority):
+    priority_input = user_supplied_priority.strip().lower() if user_supplied_priority else ""
+    priority_map = {
+        "urgent": 5,
+        "critical": 5,
+        "high": 5,
+        "medium": 3,
+        "low": 1,
+        "none": 0,
+    }
+    # Empty or unstated input preserves task["priority"] unchanged.
+    if priority_input:
+        task["priority"] = priority_map[priority_input]
+
+
+apply_user_priority(task, user_supplied_priority)
+update_task(task_id=task["id"], task=task)
 ```
 
-Set medium priority only after the user explicitly states it:
-
-```python
-# The user explicitly stated "medium".
-task["priority"] = 3
-```
-
-- **Clearing both dates**: the MCP can't send null. `/ticktick:clear-dates` (the `ticktick_api.py` script) clears both `dueDate` and `startDate`; use it only when both should be removed. Never imply that it clears a single date, and never set a sentinel date; a 1970 date makes the task maximally overdue in reviews.
+- **Clearing both dates**: the MCP can't send null. `/ticktick:clear-dates` (the `ticktick_api.py` script) clears both `dueDate` and `startDate`; use it only when both should be removed. Independent field clearing is unsupported, and a sentinel 1970 date makes the task maximally overdue in reviews.

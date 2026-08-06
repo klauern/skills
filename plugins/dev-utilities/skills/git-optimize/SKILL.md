@@ -111,6 +111,30 @@ git-trim's confirmation prompt uses terminal control sequences that break under 
 Example remote revalidation for one already-reviewed branch:
 
 ```bash
+set -euo pipefail
+
+read_remote_oid() {
+  local remote_branch=$1 remote_line oid
+  if ! remote_line="$(git ls-remote --exit-code --heads origin \
+    "refs/heads/$remote_branch")"; then
+    echo "Could not verify origin/$remote_branch" >&2
+    return 1
+  fi
+  if ! oid="$(printf '%s\n' "$remote_line" | awk \
+    -v expected="refs/heads/$remote_branch" '
+      NF == 2 && $2 == expected && count == 0 { oid = $1; count++; next }
+      { invalid = 1 }
+      END {
+        if (!invalid && count == 1 && oid ~ /^[0-9a-f]+$/) print oid
+        else exit 1
+      }
+    ')"; then
+    echo "Unexpected ls-remote response for origin/$remote_branch" >&2
+    return 1
+  fi
+  printf '%s\n' "$oid"
+}
+
 case "$base_ref" in
   refs/remotes/origin/*) base_branch=${base_ref#refs/remotes/origin/} ;;
   origin/*) base_branch=${base_ref#origin/} ;;
@@ -136,17 +160,29 @@ done
   echo "Verify server-side policy prevents force-pushing $base_branch, then set BASE_IS_PROTECTED=yes" >&2
   exit 1
 }
-git fetch --no-tags origin \
-  "+refs/heads/$base_branch:refs/remotes/origin/$base_branch"
+if ! git fetch --no-tags origin \
+  "+refs/heads/$base_branch:refs/remotes/origin/$base_branch"; then
+  echo "Could not refresh deletion base origin/$base_branch" >&2
+  exit 1
+fi
 base_ref="refs/remotes/origin/$base_branch"
-git fetch --no-tags origin \
-  "+refs/heads/$branch:refs/remotes/origin/$branch"
-reviewed_oid="$(git rev-parse "refs/remotes/origin/$branch")"
+if ! git fetch --no-tags origin \
+  "+refs/heads/$branch:refs/remotes/origin/$branch"; then
+  echo "Could not refresh deletion candidate origin/$branch" >&2
+  exit 1
+fi
+if ! reviewed_oid="$(git rev-parse --verify \
+  "refs/remotes/origin/$branch^{commit}")"; then
+  echo "Could not resolve the reviewed candidate origin/$branch" >&2
+  exit 1
+fi
 git merge-base --is-ancestor "$reviewed_oid" "$base_ref" || {
   echo "Remote branch is not merged into $base_ref" >&2
   exit 1
 }
-current_oid="$(git ls-remote --exit-code --heads origin "refs/heads/$branch" | awk '{print $1}')" || exit 1
+if ! current_oid="$(read_remote_oid "$branch")"; then
+  exit 1
+fi
 [ "$current_oid" = "$reviewed_oid" ] || {
   echo "Remote branch changed after review; refusing deletion" >&2
   exit 1
@@ -155,13 +191,18 @@ printf 'Delete origin/%s at %s? [y/N] ' "$branch" "$reviewed_oid"
 read -r answer
 case "$answer" in
   y|Y|yes|YES)
-    git fetch --no-tags origin \
-      "+refs/heads/$base_branch:refs/remotes/origin/$base_branch"
+    if ! git fetch --no-tags origin \
+      "+refs/heads/$base_branch:refs/remotes/origin/$base_branch"; then
+      echo "Could not revalidate deletion base origin/$base_branch" >&2
+      exit 1
+    fi
     git merge-base --is-ancestor "$reviewed_oid" "$base_ref" || {
       echo "Remote branch is no longer merged into refreshed $base_ref" >&2
       exit 1
     }
-    current_oid="$(git ls-remote --exit-code --heads origin "refs/heads/$branch" | awk '{print $1}')" || exit 1
+    if ! current_oid="$(read_remote_oid "$branch")"; then
+      exit 1
+    fi
     [ "$current_oid" = "$reviewed_oid" ] || {
       echo "Remote branch changed after confirmation; refusing deletion" >&2
       exit 1
