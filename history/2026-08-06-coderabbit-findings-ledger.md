@@ -13,6 +13,7 @@ syntax is used here.
 | #17 | [review 4870123313](https://github.com/klauern/skills/pull/17#pullrequestreview-4870123313) | `ac9385c6834dbd00e68e5ee9871090d6bcead869` | #17 head `ac9385c6834dbd00e68e5ee9871090d6bcead869`; downstream evidence also checked at `8515964bac597b4a5110dafb1a8d28ef0ab4ca48` |
 | #17 remediation | [review 4870422817](https://github.com/klauern/skills/pull/17#pullrequestreview-4870422817) | `09ac7a8163d4587052177ddc9b3d2a586b49cc1a` | Exact reviewed remediation head; seven findings comprise six inline threads plus one review-body-only, outside-diff finding. |
 | #17 remediation 2 | [review 4870703669](https://github.com/klauern/skills/pull/17#pullrequestreview-4870703669) | `8e24c8ed635f5ff5720fedf6bb0f74485d88fd86` | Exact reviewed second-remediation head; five inline findings. |
+| #17 remediation 3 | [review 4870951650](https://github.com/klauern/skills/pull/17#pullrequestreview-4870951650) | `f1f311775f40dd9268a8a228671b64a28dba5513` | Exact reviewed third-remediation head; one inline finding. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -151,6 +152,17 @@ Disposition meanings:
 - 5 distinct high-confidence findings: 3 fixture-validity and 2 shell-safety.
 - 5 **assigned** pending local repair and independent review.
 
+## PR #17 third remediation review — 1 inline finding
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 17R3-01 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725871086) | Scope clear-dates validation to its guidance paragraph | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `priority-mapping.sh:80-95` extracts a broad matched bullet block, so neighboring text can provide `dueDate`/`startDate` and mask a deficient clear-dates paragraph. | Extract only the paragraph associated with `/ticktick:clear-dates`, require both fields inside it, and preserve the missing-contract failure. |
+
+### PR #17 third-remediation-review totals
+
+- 1 distinct finding: 1 live inline review comment.
+- 1 **assigned** pending local repair and exact-head review.
+
 ## Mechanical count validation
 
 Run from the repository root:
@@ -166,9 +178,11 @@ rtk rg -c '^\| 17-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findi
 rtk rg -c '^\| 17R-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R2-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| L17-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R3-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
 Expected totals are `37`, `13`, then PR #16's `fixed/superseded 26`,
 `assigned 7`, `policy-rejected 4`, and PR #17's `assigned 12`,
 `policy-rejected 1`, followed by `7` first-remediation and `5`
 second-remediation PR #17 findings, then `5` Luna preflight findings.
+The third-remediation review adds `1` finding.
