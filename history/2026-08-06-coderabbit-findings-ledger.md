@@ -16,6 +16,7 @@ were exercised by the cumulative fixtures and included in CodeRabbit review
 | #17 remediation | [review 4870422817](https://github.com/klauern/skills/pull/17#pullrequestreview-4870422817) | `09ac7a8163d4587052177ddc9b3d2a586b49cc1a` | Exact reviewed remediation head; seven findings comprise six inline threads plus one review-body-only, outside-diff finding. |
 | #17 remediation 2 | [review 4870703669](https://github.com/klauern/skills/pull/17#pullrequestreview-4870703669) | `8e24c8ed635f5ff5720fedf6bb0f74485d88fd86` | Exact reviewed second-remediation head; five inline findings. |
 | #17 remediation 3 | [review 4870951650](https://github.com/klauern/skills/pull/17#pullrequestreview-4870951650) | `f1f311775f40dd9268a8a228671b64a28dba5513` | Exact reviewed third-remediation head; one inline finding. |
+| #17 remediation 4 | [review 4871336866](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | `54d7083af16f93c7c3d16c55d8655b026f6c670e` | Exact reviewed fourth-remediation head; one review-body-only, outside-diff ledger finding. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -54,7 +55,7 @@ Disposition meanings:
 | 16-12 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Add Haiku/Sonnet delegation guidance | **policy-rejected** | Policy; no repair branch | `docs/skill-authoring-guidelines.md:447-451` states prose model labels do not control execution; only model frontmatter or explicit subagents do. | Keep skills runtime-neutral unless they actually delegate; validate any future delegation through supported model controls. |
 | 16-13 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Add metadata to all plugin Markdown | **policy-rejected** | Policy; no repair branch | Repository frontmatter validation targets `plugins/*/skills/*/SKILL.md` (`skill-validator.md:18,67`), not every reference Markdown file. The affected `commit-splitter/SKILL.md` independently has `author: klauern`. | Validate SKILL.md discovery metadata; do not invent frontmatter requirements for reference documents. |
 | 16-14 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Do not print `CAPACITIES_API_TOKEN` | **fixed/superseded** | #19 cumulative stack | The flagged `capacities-api/references/examples.md` no longer exists in the cumulative tree; `capacities.py:70-74,164` prints only setup/error guidance, never the environment value. | Run a fixture with a unique token and assert it is absent from stdout/stderr. |
-| 16-15 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Do not fall back to current branch as base | **fixed/superseded** by [#17 thread](https://github.com/klauern/skills/pull/17#discussion_r3725174876) | #17 `claude/audit-2-functional-fixes` — Luna Functional | The broader #16 base-resolution concern is replaced by #17's exact worktree/default-branch contract; current `commands/worktree.md:18-21` remains unsafe. | Close only with 17-06: nested-directory fixture plus exact `origin/HEAD` ancestry for new branches. |
+| 16-15 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Do not fall back to current branch as base | **fixed/superseded** by [#17 thread](https://github.com/klauern/skills/pull/17#discussion_r3725174876) | #17 `claude/audit-2-functional-fixes` — Luna Functional | Fixed in `09ac7a8`, hardened in `f1f3117`; the authoritative workflow uses an absolute repository-root sibling path, distinguishes local, cached-remote, unfetched-remote, and new branches, and creates new branches from the fetched and verified server default rather than the caller's current branch. | Shares 17-06 validation: nested local/cached/unfetched/server-default fixtures execute the documented block; reviewed at `f1f3117`. |
 | 16-16 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Check the staged result after staging | **assigned** | #19 `claude/audit-4-consolidate-refs` — Luna Tail | `pr-conflict-resolver/SKILL.md:108-111` lacks staged-blob marker checking after `git add`. | Require `git diff --cached --check` and `git grep --cached` marker detection in a temporary conflict fixture. |
 | 16-17 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Do not overclaim ancestry merge detection | **fixed/superseded** | #16 cumulative stack | `git-optimize/references/merge_detection.md:29,34-40` limits ancestry checks to classic merges and directs squash/rebase cases to patch comparison. | Verify wording and exercise classic-merge and squash-merge fixtures. |
 | 16-18 | [review](https://github.com/klauern/skills/pull/16#pullrequestreview-4869851851) | Add author to affected conventional-commit skills | **fixed/superseded** | #16 cumulative stack | `conventional-commits/SKILL.md:5` and the affected skill frontmatters contain `author: klauern`. | Parse every changed SKILL frontmatter and verify valid YAML where fields are present. |
@@ -189,6 +190,17 @@ Disposition meanings:
 - 1 distinct fixture finding, independently reproduced with `GIT_TRACE` and
   assigned to the current local batch pending exact-head review.
 
+## PR #17 fourth remediation review — 1 outside-diff finding
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 17R4-01 | [review body, outside diff](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | Synchronize finding 16-15 with finding 17-06 | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Ledger | Implemented in the current local batch: row 16-15 now cites the `09ac7a8` repair, `f1f3117` hardening, absolute sibling placement, explicit branch classification, and verified server-default ancestry. | Luna ledger audit and mechanical counts pass; retain the supersession link and keep assigned until CodeRabbit reviews the exact pushed repair head. |
+
+### PR #17 fourth-remediation-review totals
+
+- 1 distinct finding: 1 review-body-only, outside-diff ledger inconsistency.
+- 1 **assigned**, implemented locally and pending exact-head review.
+
 ## Mechanical count validation
 
 Run from the repository root:
@@ -205,6 +217,7 @@ rtk rg -c '^\| 17R-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R2-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| L17-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R3-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R4-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
 Expected current totals are `37`, `13`, then PR #16's
@@ -216,3 +229,4 @@ third-remediation review adds `1` assigned finding implemented locally in
 `f079d0e` and awaiting exact-head review. The post-review Luna audit adds one
 more assigned fixture finding to the current local batch. The original PR #16
 source-review triage remains recorded above as `26/7/4`.
+The fourth-remediation review adds `1` assigned ledger-consistency finding.
