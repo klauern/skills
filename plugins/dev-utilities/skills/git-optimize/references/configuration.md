@@ -75,7 +75,7 @@ the final candidates, and requires confirmation before deleting anything:
         IFS= read -r answer || answer=; \
         case \"$answer\" in \
             y|Y|yes|YES) while IFS= read -r branch; do git branch -d -- \"$branch\"; done <\"$candidates\" ;; \
-            *) echo 'Cancelled.' ;; \
+            *) echo 'Cancelled.'; return 1 ;; \
         esac; \
     }; f"
 
@@ -83,26 +83,30 @@ the final candidates, and requires confirmation before deleting anything:
         if [ $# -gt 0 ]; then git cleanup \"$1\"; else git cleanup; fi; \
     }; f"
 
+    # trimall-workflow
     trimall = "!f() { \
+        set -efu; \
         echo '1. Fetching and pruning remotes...'; \
-        git fetch --all --prune; \
+        git fetch --all --prune || { echo 'Fetch failed; stopping.' >&2; return 1; }; \
         echo '2. Previewing git-trim candidates...'; \
-        git trim --dry-run; \
+        git trim --dry-run || { echo 'git trim dry-run failed; stopping.' >&2; return 1; }; \
         printf 'Continue with confirmed local cleanup and optimization? [y/N] '; \
         IFS= read -r answer || answer=; \
-        case \"$answer\" in y|Y|yes|YES) ;; *) echo 'Cancelled.'; exit 0 ;; esac; \
+        case \"$answer\" in y|Y|yes|YES) ;; *) echo 'Cancelled.'; return 0 ;; esac; \
         echo '3. Running confirmed cleanup...'; \
-        git cleanup; \
-        echo '4. Optimizing repository...'; \
-        git optimize; \
+        git cleanup || { echo 'Cleanup failed or was cancelled; stopping.' >&2; return 1; }; \
+        echo '4. Running confirmed sweep...'; \
+        git sweep || { echo 'Sweep failed or was cancelled; stopping.' >&2; return 1; }; \
+        echo '5. Optimizing repository...'; \
+        git optimize || { echo 'Optimize failed; stopping.' >&2; return 1; }; \
         echo 'Done!'; \
     }; f"
 
-    pruner = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all"
+    pruner = "!git prune --expire=now && git reflog expire --expire-unreachable=now --rewrite --all"
 
     repacker = "!git repack -a -d --depth=250 --window=250"
 
-    optimize = "!git pruner; git repacker; git prune-packed"
+    optimize = "!git pruner && git repacker && git prune-packed"
 ```
 
 ## Common Configurations
