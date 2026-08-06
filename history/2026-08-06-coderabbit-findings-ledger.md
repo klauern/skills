@@ -3,9 +3,10 @@
 This is an evidence record, not a task tracker. Beads epic `klauern-skills-gon`
 owns task state. Repair rows remain **assigned** until the orchestrator adds the
 fixing commit SHA and revalidates the exact pushed head; no unchecked-task syntax
-is used here. Rows fixed through `f1f311775f40dd9268a8a228671b64a28dba5513`
-were exercised by the cumulative fixtures and included in CodeRabbit review
-`4870951650`; the sole finding from that review remains assigned below.
+is used here. Rows fixed through `e5186bce8813d7d4d864147c553791ade293363a`
+were exercised by the cumulative fixtures and included in the exact-head review
+history through CodeRabbit review `4871697177`; the sole finding from that review
+remains assigned below.
 
 ## Review scope and exact heads
 
@@ -17,6 +18,7 @@ were exercised by the cumulative fixtures and included in CodeRabbit review
 | #17 remediation 2 | [review 4870703669](https://github.com/klauern/skills/pull/17#pullrequestreview-4870703669) | `8e24c8ed635f5ff5720fedf6bb0f74485d88fd86` | Exact reviewed second-remediation head; five inline findings. |
 | #17 remediation 3 | [review 4870951650](https://github.com/klauern/skills/pull/17#pullrequestreview-4870951650) | `f1f311775f40dd9268a8a228671b64a28dba5513` | Exact reviewed third-remediation head; one inline finding. |
 | #17 remediation 4 | [review 4871336866](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | `54d7083af16f93c7c3d16c55d8655b026f6c670e` | Exact reviewed fourth-remediation head; one review-body-only, outside-diff ledger finding. |
+| #17 remediation 5 | [review 4871697177](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | `e5186bce8813d7d4d864147c553791ade293363a` | Exact reviewed fifth-remediation head; one review-body nitpick finding about disposition validation. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -24,9 +26,10 @@ The intervening exact remote heads were #18
 
 CodeRabbit's incremental reviews may skip unchanged or similar files, so the
 review evidence is cumulative across the exact heads above rather than a claim
-that review `4870951650` freshly reread every earlier file. That review was not
-clean: it produced `17R3-01`, which is implemented locally but remains assigned
-until CodeRabbit reviews the exact pushed candidate.
+that each incremental review freshly reread every earlier file. Review `4870951650`
+produced `17R3-01`; its repair and the subsequent `L17-06` and `17R4-01` repairs
+were included at exact reviewed head `e5186bce`. Review `4871697177` produced only
+`17R5-01`, which remains assigned pending a later exact-head review.
 
 Disposition meanings:
 
@@ -172,34 +175,47 @@ Disposition meanings:
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
 |---|---|---|---|---|---|---|
-| 17R3-01 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725871086) | Scope clear-dates validation to its guidance paragraph | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | Implemented locally in `f079d0e`; the fixture extracts only the associated Markdown paragraph/row and rejects neighboring-text substitution. | Focused fixture, missing-contract mutation, neighboring-text mutation, ShellCheck, diff check, and Luna audit pass; keep assigned until CodeRabbit reviews the exact pushed candidate. |
+| 17R3-01 | [thread](https://github.com/klauern/skills/pull/17#discussion_r3725871086) | Scope clear-dates validation to its guidance paragraph | **fixed/superseded** | #17 `claude/audit-2-functional-fixes` — Luna Functional | Fixed in `f079d0e`; the fixture extracts only the associated Markdown paragraph/row and rejects neighboring-text substitution. | Focused fixture, missing-contract mutation, neighboring-text mutation, ShellCheck, diff check, and Luna audit passed; included at exact reviewed head `e5186bce` in review `4871697177`. |
 
 ### PR #17 third-remediation-review totals
 
 - 1 distinct finding: 1 live inline review comment.
-- 1 **assigned** pending local repair and exact-head review.
+- 1 **fixed/superseded** in `f079d0e`; included at exact reviewed head
+  `e5186bce` in review `4871697177`.
 
 ## Luna post-review fixture audit
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
 |---|---|---|---|---|---|---|
-| L17-06 | Luna fixture audit | Isolate alias sequencing from executable helper shadowing | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Functional | `cleanup-alias.sh` originally placed generated `git-*` helpers on `PATH` before the top-level assertions, so they shadowed the logging aliases; nested helper calls also bypassed the injection shim and `git -C` hid the observed subcommand. | Create helpers only after alias-sequencing assertions, route their nested Git calls through the shim, and decode `git -C` for deterministic failure injection; rerun cleanup, cumulative fixtures, and ShellCheck. Keep assigned until CodeRabbit reviews the exact pushed candidate. |
+| L17-06 | Luna fixture audit | Isolate alias sequencing from executable helper shadowing | **fixed/superseded** | #17 `claude/audit-2-functional-fixes` — Luna Functional | Fixed in `4edd30d` and hardened in `d00cfe1`; helper creation follows top-level alias assertions, nested calls route through the injection shim, and `git -C` is decoded deterministically. | Cleanup sequencing/failure fixtures, cumulative fixtures, ShellCheck, and Luna review passed; included at exact reviewed head `e5186bce` in review `4871697177`. |
 
 ### Luna post-review totals
 
-- 1 distinct fixture finding, independently reproduced with `GIT_TRACE` and
-  assigned to the current local batch pending exact-head review.
+- 1 distinct fixture finding, **fixed/superseded** in `4edd30d` and `d00cfe1`;
+  included at exact reviewed head `e5186bce` in review `4871697177`.
 
 ## PR #17 fourth remediation review — 1 outside-diff finding
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
 |---|---|---|---|---|---|---|
-| 17R4-01 | [review body, outside diff](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | Synchronize finding 16-15 with finding 17-06 | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Ledger | Implemented in the current local batch: row 16-15 now cites the `09ac7a8` repair, `f1f3117` hardening, absolute sibling placement, explicit branch classification, and verified server-default ancestry. | Luna ledger audit and mechanical counts pass; retain the supersession link and keep assigned until CodeRabbit reviews the exact pushed repair head. |
+| 17R4-01 | [review body, outside diff](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | Synchronize finding 16-15 with finding 17-06 | **fixed/superseded** | #17 `claude/audit-2-functional-fixes` — Luna Ledger | Fixed in `e5186bce`; row 16-15 cites the `09ac7a8` repair, `f1f3117` hardening, absolute sibling placement, explicit branch classification, and verified server-default ancestry. | Luna ledger audit and mechanical counts passed; the supersession link was retained and the repair was included at exact reviewed head `e5186bce` in review `4871697177`. |
 
 ### PR #17 fourth-remediation-review totals
 
 - 1 distinct finding: 1 review-body-only, outside-diff ledger inconsistency.
-- 1 **assigned**, implemented locally and pending exact-head review.
+- 1 **fixed/superseded** in `e5186bce`; reviewed at that exact head in review
+  `4871697177`.
+
+## PR #17 fifth remediation review — 1 nitpick finding
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 17R5-01 | [review body, nitpick](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | Validate remediation dispositions, not only row counts | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Ledger Round 5 | Implemented in the current local batch: the mechanical section checks row counts and expected dispositions for initial #17, 17R, 17R2, Luna preflight, 17R3, L17-06, 17R4, and 17R5 independently. | Run every ledger command plus `git diff --check`; keep assigned until CodeRabbit reviews the exact pushed repair head. |
+
+### PR #17 fifth-remediation-review totals
+
+- 1 distinct finding: 1 review-body nitpick about ledger validation coverage.
+- 1 **assigned**, implemented locally and pending a later exact-head review.
 
 ## Mechanical count validation
 
@@ -218,6 +234,14 @@ rtk rg -c '^\| 17R2-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.m
 rtk rg -c '^\| L17-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R3-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R4-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R5-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R2-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| L17-0[1-5] \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R3-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| L17-06 \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R4-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R5-[0-9]{2} \|.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
 Expected current totals are `37`, `13`, then PR #16's
@@ -225,8 +249,9 @@ Expected current totals are `37`, `13`, then PR #16's
 `fixed/superseded 12`, `policy-rejected 1`, followed by `7`
 first-remediation, `5` second-remediation, and `5` Luna preflight findings; all
 three latter groups are fixed/superseded at reviewed head `f1f3117`. The
-third-remediation review adds `1` assigned finding implemented locally in
-`f079d0e` and awaiting exact-head review. The post-review Luna audit adds one
-more assigned fixture finding to the current local batch. The original PR #16
-source-review triage remains recorded above as `26/7/4`.
-The fourth-remediation review adds `1` assigned ledger-consistency finding.
+third-remediation review, post-review Luna audit, and fourth-remediation review
+each add `1` fixed/superseded finding included at exact reviewed head
+`e5186bce`. The fifth-remediation review adds `1` assigned
+disposition-validation finding implemented locally and awaiting a later
+exact-head review. The original PR #16 source-review triage remains recorded
+above as `26/7/4`.
