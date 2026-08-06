@@ -203,7 +203,7 @@ All commits must follow https://www.conventionalcommits.org/:
 [optional footer(s)]
 ```
 
-**Types**: feat, fix, docs, style, refactor, perf, test, build, ci, chore
+**Types**: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert
 
 **Creating Commits**:
 - Use `/commits:commit` for commit without push

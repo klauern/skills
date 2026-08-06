@@ -19,20 +19,22 @@ fi
 # For heredoc-style commits: git commit -m "$(cat <<'EOF'\ntype: msg\nEOF\n)"
 # Anchor to the heredoc that FOLLOWS -m so an unrelated earlier heredoc isn't picked up.
 if echo "$command" | grep -qE -- '-[a-zA-Z]*m[[:space:]]+"\$\(cat <<'; then
+  # The sed pattern intentionally matches literal `$(`.
+  # shellcheck disable=SC2016
   msg=$(echo "$command" | sed -n '/-[a-zA-Z]*m[[:space:]]*"\$(cat <</{n;s/^[[:space:]]*//;p;}' | head -1)
 elif echo "$command" | grep -q 'cat <<'; then
   msg=$(echo "$command" | sed -n "/cat <</{n;s/^[[:space:]]*//;p;}" | head -1)
 else
   # Extract message from -m "message", --message "message", -am "message", etc.
-  msg=$(echo "$command" | sed -n "s/.*\(-[a-zA-Z]*m\|--message\)[[:space:]]*\"\([^\"]*\)\".*/\2/p")
+  msg=$(echo "$command" | sed -En "s/.*(-[a-zA-Z]*m|--message)[[:space:]]*\"([^\"]*)\".*/\2/p")
   if [[ -z "$msg" ]]; then
-    msg=$(echo "$command" | sed -n "s/.*\(-[a-zA-Z]*m\|--message\)[[:space:]]*'\([^']*\)'.*/\2/p")
+    msg=$(echo "$command" | sed -En "s/.*(-[a-zA-Z]*m|--message)[[:space:]]*'([^']*)'.*/\2/p")
   fi
   if [[ -z "$msg" ]]; then
-    msg=$(echo "$command" | sed -n "s/.*--message=\"\([^\"]*\)\".*/\1/p")
+    msg=$(echo "$command" | sed -En "s/.*--message=\"([^\"]*)\".*/\1/p")
   fi
   if [[ -z "$msg" ]]; then
-    msg=$(echo "$command" | sed -n "s/.*--message='\([^']*\)'.*/\1/p")
+    msg=$(echo "$command" | sed -En "s/.*--message='([^']*)'.*/\1/p")
   fi
 fi
 

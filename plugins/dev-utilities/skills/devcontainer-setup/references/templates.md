@@ -67,7 +67,7 @@ Base templates for generated files. Replace `{{placeholders}}` with detected val
 ## Dockerfile
 
 ```dockerfile
-FROM node:20-bookworm
+FROM node:{{NODE_VERSION}}-bookworm
 
 # System packages
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -90,7 +90,8 @@ RUN npm install -g @anthropic-ai/claude-code@latest
 
 # {{TOOL_INSTALL_BLOCK}}
 # Project-specific tools are inserted here based on Phase 1 detection.
-# See tool-detection.md for per-ecosystem Dockerfile snippets.
+# Insert confirmed {{GO_VERSION}}, {{RUBY_VERSION}}, and {{RUST_VERSION}} values
+# into the corresponding tool-detection.md Dockerfile snippets.
 
 # Firewall setup
 COPY init-firewall.sh /usr/local/bin/init-firewall.sh

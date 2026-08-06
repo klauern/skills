@@ -17,6 +17,23 @@ Detection patterns for each ecosystem: file markers, version extraction commands
 | mise/asdf   | `.mise.toml`, `.tool-versions`                  | Inline versions                           | High     |
 | Just        | `Justfile`                                      | N/A (latest)                              | Low      |
 
+## Runtime Version Substitution Contract
+
+Normalize an optional leading `v`, then accept only an exact numeric runtime version
+matching `^[0-9]+(\.[0-9]+){0,2}$` for automatic substitution. Never guess a concrete
+version from a range, comparison operator, wildcard, or multi-value constraint. Ask the
+user to choose an exact value or explicitly approve the proposed default.
+
+| Runtime | Template placeholder | Confirmed fallback when no version source exists |
+| --- | --- | --- |
+| Node.js | `{{NODE_VERSION}}` in the base image | `20` |
+| Go | `{{GO_VERSION}}` in the install block | `1.23` |
+| Ruby | `{{RUBY_VERSION}}` in the install block | `3.3` |
+| Rust | `{{RUST_VERSION}}` passed to rustup | `stable` |
+
+Record the source, raw constraint, and final value in the generation preview. A detected
+exact value always replaces the fallback.
+
 ## Node.js / Bun
 
 ### Detection
@@ -41,6 +58,10 @@ cat .nvmrc 2>/dev/null || cat .node-version 2>/dev/null
 # From package.json engines
 jq -r '.engines.node // empty' package.json
 ```
+
+Use an exact `.nvmrc`/`.node-version` value directly as `{{NODE_VERSION}}`. Treat an
+`engines.node` range as ambiguous and ask for an exact image version before replacing
+the placeholder.
 
 ### Dockerfile Snippet
 
@@ -72,14 +93,14 @@ test -f go.mod
 
 ```bash
 # From go.mod
-grep '^go ' go.mod | awk '{print $2}'
+awk '/^go / {print $2; exit}' go.mod
 ```
 
 ### Dockerfile Snippet
 
 ```dockerfile
 # Go installation
-ARG GO_VERSION=1.23
+ARG GO_VERSION={{GO_VERSION}}
 RUN curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -C /usr/local -xzf -
 ENV PATH="/usr/local/go/bin:/home/node/go/bin:$PATH"
 ENV GOPATH="/home/node/go"
@@ -162,7 +183,7 @@ cat .ruby-version 2>/dev/null
 # Ruby via rbenv
 RUN apt-get update && apt-get install -y \
     rbenv ruby-build libssl-dev libreadline-dev zlib1g-dev
-ARG RUBY_VERSION=3.3
+ARG RUBY_VERSION={{RUBY_VERSION}}
 RUN rbenv install ${RUBY_VERSION} && rbenv global ${RUBY_VERSION}
 ENV PATH="/home/node/.rbenv/shims:$PATH"
 ```
@@ -186,14 +207,16 @@ test -f Cargo.toml
 
 ```bash
 # From rust-toolchain.toml
-grep 'channel' rust-toolchain.toml 2>/dev/null | grep -oE '[0-9]+\.[0-9]+(\.[0-9]+)?'
+awk -F'"' '/^[[:space:]]*channel[[:space:]]*=/{print $2; exit}' rust-toolchain.toml 2>/dev/null
 ```
 
 ### Dockerfile Snippet
 
 ```dockerfile
 # Rust via rustup
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ARG RUST_VERSION={{RUST_VERSION}}
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | \
+    sh -s -- -y --default-toolchain "${RUST_VERSION}"
 ENV PATH="/home/node/.cargo/bin:$PATH"
 ```
 
