@@ -1,6 +1,6 @@
 ---
 allowed-tools: ["mcp__ticktick__search_task", "mcp__ticktick__get_task_by_id", "mcp__ticktick__update_task", "mcp__ticktick__list_projects", "mcp__ticktick__list_tags", "WebSearch", "WebFetch"]
-description: Enrich a TickTick task — sharpen the title, flesh out the description, add subtasks, and infer metadata (preview before write)
+description: Enrich a TickTick task — sharpen the title, flesh out the description, add subtasks, and apply user-confirmed metadata (preview before write)
 ---
 
 # /ticktick:enrich
@@ -42,7 +42,7 @@ This command **always shows a before → after preview and waits for your approv
 
 - **Sets metadata only from what you tell it** — it won't infer priority from keywords or invent a due date.
 - It never overwrites an existing value without your explicit yes.
-- Priority mapping (when you express importance): urgent/critical → 5, high → 3, medium → 1, low/none → 0.
+- Priority mapping (when you express importance): urgent/critical/high → 5, medium → 3, low → 1, none → 0. If priority is unstated, preserve the existing value.
 - A project move is *suggested*, not done silently (use `move_task`).
 
 ## Implementation

@@ -17,7 +17,12 @@ Migrate this repository's assistant config to the [agents.md](https://agents.md/
      mv CLAUDE.md AGENTS.md && ln -s AGENTS.md CLAUDE.md
      ```
    - Both exist as regular files → merge their content into `AGENTS.md`, deduplicating
-     overlapping sections, then replace `CLAUDE.md` with the symlink.
+     overlapping sections, then explicitly remove the old regular file before creating
+     the symlink:
+     ```bash
+     rm -- CLAUDE.md
+     ln -s AGENTS.md CLAUDE.md
+     ```
    - Neither exists → report that there is nothing to migrate.
 2. Update any references to `CLAUDE.md` elsewhere in the repository (docs, scripts, CI)
    to point at `AGENTS.md`.

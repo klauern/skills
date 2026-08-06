@@ -52,7 +52,7 @@ Detect required tools and runtimes by reading project files. Check sources in pr
 10. `.github/workflows/*.yml` — CI tools hint at required runtimes
 11. `docker-compose.yml` — Existing service dependencies
 
-For each detected tool, extract version constraints where available. See [tool-detection.md](references/tool-detection.md) for extraction patterns.
+For each detected tool, extract version constraints where available. See [tool-detection.md](references/tool-detection.md) for extraction patterns. Propagate every exact detected Node, Go, Ruby, and Rust version into its template placeholder. A range or operator-bearing constraint (for example `>=20`, `^20`, `~> 3.3`, or `1.80.*`) cannot safely select one image/toolchain version: show it to the user and require an exact version or explicit confirmation of the proposed version before generation.
 
 #### API Gateway & MCP Server Detection
 
@@ -88,7 +88,10 @@ devcontainer-ssh.sh            # Entry script: up + ssh + claude
 
 If a `Taskfile.yml` exists, append `devcontainer:*` tasks. Otherwise create one.
 
-Use templates from [templates.md](references/templates.md) as the base for each file, substituting detected tools and versions.
+Use templates from [templates.md](references/templates.md) as the base for each file,
+substituting detected tools and the confirmed `{{NODE_VERSION}}`, `{{GO_VERSION}}`,
+`{{RUBY_VERSION}}`, and `{{RUST_VERSION}}` values. Before writing, show the source file,
+detected constraint, and final substituted value for each runtime.
 
 ### Phase 3: Verification
 
@@ -125,7 +128,7 @@ Report results and next steps to the user.
 
 Layered approach:
 
-1. **Base**: `node:20-bookworm` (matches official Claude Code devcontainer)
+1. **Base**: `node:{{NODE_VERSION}}-bookworm` (`20` only when no project version is available and the user confirms the default)
 2. **System packages**: git, sudo, fzf, zsh, curl, iptables, jq, openssh-server
 3. **Claude Code**: `npm install -g @anthropic-ai/claude-code@latest`
 4. **Project tools**: Detected runtimes from Phase 1 (see [tool-detection.md](references/tool-detection.md))

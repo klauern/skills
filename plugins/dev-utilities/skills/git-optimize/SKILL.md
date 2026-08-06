@@ -38,17 +38,22 @@ them, verify they exist and offer to install the missing ones (definitions in
 [configuration.md](references/configuration.md)):
 
 ```bash
-git config alias.cleanup || echo "alias missing"
+for alias in cleanup sweep pruner repacker optimize trimall; do
+  git config --get "alias.$alias" >/dev/null || echo "missing alias: $alias"
+done
+command -v git-trim >/dev/null || echo "missing external command: git-trim"
 ```
 
-If the user prefers not to install aliases, use the raw-git equivalents in the table.
+Do not treat one present alias as proof that the set is installed. If anything is
+missing, offer to install the definitions from `configuration.md`; if the user declines,
+use the corresponding raw Git flow and preserve the same preview/confirmation gates.
 
 ## Commands
 
 | Alias | Raw-git equivalent | Purpose | Time |
 |-------|--------------------|---------|------|
-| `git cleanup` | `git branch --merged \| grep -vE '^\*\|master\|main' \| xargs -r git branch -d` | Delete branches merged to HEAD | Seconds |
-| `git sweep` | same, against `master`/`develop` | Aggressive merged-branch cleanup | Seconds |
+| `git cleanup` | Safe `git for-each-ref` flow in `configuration.md` | Preview and delete merged local branches | Seconds |
+| `git sweep` | Same safe flow against the configured/default base | Preview merged local branches | Seconds |
 | `git trim` | external tool ([git-trim](references/installation.md)) | Smart detection (merged/stray/squash) | Seconds |
 | `git pruner` | `git reflog expire --expire=now --all && git gc --prune=now` | Remove unreachable objects | Minutes-Hours |
 | `git repacker` | `git repack -a -d --depth=250 --window=250` | Optimal delta compression | Hours |
@@ -59,7 +64,8 @@ If the user prefers not to install aliases, use the raw-git equivalents in the t
 
 **After PR merge** (daily):
 ```bash
-git checkout main && git pull && git cleanup
+DEFAULT_REMOTE="$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD)"
+git checkout "${DEFAULT_REMOTE#origin/}" && git pull && git cleanup
 ```
 
 **Weekly maintenance**:
@@ -69,7 +75,9 @@ git fetch --all --prune && git trim --dry-run   # then delete per the strategy b
 
 **Monthly deep clean**:
 ```bash
-git trimall
+git fetch --all --prune
+git trim --dry-run
+# Show the dry-run result, then ask for explicit confirmation before git trimall.
 ```
 
 ## git-trim Execution Strategy (non-interactive)
@@ -77,12 +85,45 @@ git trimall
 git-trim's confirmation prompt uses terminal control sequences that break under pipes —
 **never** use `yes | git trim` or `echo y | git trim`. Instead:
 
-1. `git trim --dry-run` and parse the branch names under "Delete merged local branches:"
-2. Delete each locally: `git branch -d <branch>`
-3. Attempt remote deletion: `git push origin --delete <branch>`
-4. Treat "remote ref does not exist" as success — the remote branch was already
-   removed (e.g. by fetch --prune or the forge's delete-on-merge)
-5. Verify with `git branch -vv`
+1. Resolve the current branch, `origin/HEAD`, common bases (`main`, `master`,
+   `develop`, `trunk`), `trim.bases`, and `trim.exclude` before selecting candidates.
+2. Enumerate exact local ref names with `git for-each-ref --format='%(refname:short)'
+   --merged <base> refs/heads/`; never parse the decorated output of `git branch`.
+3. Remove every protected/configured/excluded ref, show the exact remaining list, and
+   require confirmation.
+4. Delete confirmed local branches one at a time with `git branch -d -- "$branch"`.
+5. Treat remote deletion as a separate operation. Fetch `refs/heads/$branch`, record
+   its reviewed OID, and verify it is still merged into the intended base. Immediately
+   before deletion, compare `git ls-remote` with that OID. If it changed or cannot be
+   verified, stop. Otherwise show the branch and OID, require explicit confirmation,
+   then make the deletion atomic with
+   `git push --force-with-lease="refs/heads/$branch:$reviewed_oid" origin --delete -- "$branch"`.
+6. Verify with `git branch -vv` and `git ls-remote --heads origin`.
+
+Example remote revalidation for one already-reviewed branch:
+
+```bash
+git fetch origin "refs/heads/$branch:refs/remotes/origin/$branch"
+reviewed_oid="$(git rev-parse "refs/remotes/origin/$branch")"
+git merge-base --is-ancestor "$reviewed_oid" "$base_ref" || {
+  echo "Remote branch is not merged into $base_ref" >&2
+  exit 1
+}
+current_oid="$(git ls-remote --exit-code --heads origin "refs/heads/$branch" | awk '{print $1}')" || exit 1
+[ "$current_oid" = "$reviewed_oid" ] || {
+  echo "Remote branch changed after review; refusing deletion" >&2
+  exit 1
+}
+printf 'Delete origin/%s at %s? [y/N] ' "$branch" "$reviewed_oid"
+read -r answer
+case "$answer" in
+  y|Y|yes|YES)
+    git push --force-with-lease="refs/heads/$branch:$reviewed_oid" \
+      origin --delete -- "$branch"
+    ;;
+  *) echo "Cancelled" ;;
+esac
+```
 
 Note: git-trim upstream (foriequal0/git-trim) has been unmaintained for years — it still
 works, but prefer the raw-git equivalents when it misbehaves.
@@ -104,8 +145,9 @@ git config trim.exclude "staging production"
 
 **Verify aliases**:
 ```bash
-git config alias.cleanup
-git config alias.trimall
+for alias in cleanup sweep pruner repacker optimize trimall; do
+  git config --get "alias.$alias" || echo "missing alias: $alias"
+done
 ```
 
 See [configuration.md](references/configuration.md) for full alias definitions.
@@ -121,13 +163,14 @@ See [configuration.md](references/configuration.md) for full alias definitions.
 
 ## Safety
 
-**Always safe**: cleanup, sweep, trim --dry-run, repacker
+**Always safe**: trim --dry-run and other read-only previews
 
-**Use caution**: pruner (removes objects), optimize, trimall, sweep -f
+**Review first — deletes branch refs**: cleanup, sweep, trimall
+
+**Use caution**: pruner (removes objects), optimize, repacker, sweep -f
 
 **Best practices**:
 1. Use `--dry-run` first
 2. Push important work before aggressive cleanup
 3. Schedule optimize/repacker overnight
 4. Use `git reflog` for recovery
-

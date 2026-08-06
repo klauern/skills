@@ -21,26 +21,79 @@ git config trim.exclude "staging production qa"
 
 ## Git Aliases
 
-The optimization aliases this skill relies on. **They are not git built-ins** — install
-them into `~/.gitconfig` (offer this as setup step 1 if `git config alias.cleanup` is
-empty):
+The optimization aliases this skill relies on. **They are not git built-ins** — verify
+the complete set before use and offer to install the missing definitions:
+
+```bash
+for alias in cleanup sweep pruner repacker optimize trimall; do
+  git config --get "alias.$alias" >/dev/null || echo "missing alias: $alias"
+done
+```
+
+Install these into `~/.gitconfig`. The cleanup function enumerates exact refs, protects
+the current/default/common/configured bases, applies `trim.exclude` patterns, previews
+the final candidates, and requires confirmation before deleting anything:
 
 ```ini
 [alias]
-    cleanup = "!git branch --merged | grep -v '\\*\\|master' | xargs -n 1 git branch -d"
+    cleanup = "!f() { \
+        set -efu; \
+        requested=${1:-}; \
+        current=$(git branch --show-current); \
+        remote_default=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true); \
+        remote_default=${remote_default#origin/}; \
+        configured=$(git config --get trim.bases 2>/dev/null || true); \
+        configured=$(printf '%s' \"$configured\" | tr ',' ' '); \
+        excluded=$(git config --get trim.exclude 2>/dev/null || true); \
+        targets=${requested:-${configured:-$remote_default}}; \
+        [ -n \"$targets\" ] || { echo 'No cleanup base: configure trim.bases, origin/HEAD, or pass a base.' >&2; exit 1; }; \
+        protected=\"main master develop trunk $current $remote_default $configured\"; \
+        raw_candidates=$(mktemp); \
+        candidates=$(mktemp); \
+        trap 'rm -f \"$raw_candidates\" \"$candidates\"' EXIT; \
+        for target in $targets; do \
+            if git show-ref --verify --quiet \"refs/heads/$target\"; then target_ref=$target; \
+            elif git show-ref --verify --quiet \"refs/remotes/origin/$target\"; then target_ref=origin/$target; \
+            elif git rev-parse --verify --quiet \"$target^{commit}\" >/dev/null; then target_ref=$target; \
+            else echo \"Cleanup base not found: $target\" >&2; exit 1; fi; \
+            git for-each-ref --format='%(refname:short)' --merged \"$target_ref\" refs/heads/; \
+        done | sort -u >\"$raw_candidates\"; \
+        while IFS= read -r branch; do \
+            skip=; \
+            for name in $protected; do \
+                [ \"$branch\" = \"$name\" ] && skip=1; \
+            done; \
+            for pattern in $excluded; do \
+                case \"$branch\" in $pattern) skip=1 ;; esac; \
+            done; \
+            [ -n \"$skip\" ] || printf '%s\\n' \"$branch\"; \
+        done <\"$raw_candidates\" >\"$candidates\"; \
+        if [ ! -s \"$candidates\" ]; then echo 'No merged local branches eligible for deletion.'; exit 0; fi; \
+        echo 'Merged local branches eligible for deletion:'; \
+        sed 's/^/  /' \"$candidates\"; \
+        printf 'Delete these local branches? [y/N] '; \
+        IFS= read -r answer || answer=; \
+        case \"$answer\" in \
+            y|Y|yes|YES) while IFS= read -r branch; do git branch -d -- \"$branch\"; done <\"$candidates\" ;; \
+            *) echo 'Cancelled.' ;; \
+        esac; \
+    }; f"
 
-    sweep = "!f(){ git branch --merged $([[ $1 != \"-f\" ]] && git rev-parse master) | egrep -v \"(^\\*|^\\s*(master|develop)$)\" | xargs git branch -d; }; f"
+    sweep = "!f() { \
+        if [ $# -gt 0 ]; then git cleanup \"$1\"; else git cleanup; fi; \
+    }; f"
 
     trimall = "!f() { \
         echo '1. Fetching and pruning remotes...'; \
         git fetch --all --prune; \
-        echo '2. Running git-trim...'; \
-        git trim --no-confirm -d merged:*,stray,diverged:*,local,remote:*; \
-        echo '3. Running cleanup...'; \
+        echo '2. Previewing git-trim candidates...'; \
+        git trim --dry-run; \
+        printf 'Continue with confirmed local cleanup and optimization? [y/N] '; \
+        IFS= read -r answer || answer=; \
+        case \"$answer\" in y|Y|yes|YES) ;; *) echo 'Cancelled.'; exit 0 ;; esac; \
+        echo '3. Running confirmed cleanup...'; \
         git cleanup; \
-        echo '4. Running sweep...'; \
-        git sweep; \
-        echo '5. Optimizing repository...'; \
+        echo '4. Optimizing repository...'; \
         git optimize; \
         echo 'Done!'; \
     }; f"

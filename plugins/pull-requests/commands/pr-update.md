@@ -111,7 +111,7 @@ This command performs a comprehensive review of the PR and updates it to match r
 7. **Show Preview and Get Approval**
 
    Display:
-   ```
+   ```text
    Current Title: [old title]
    New Title:     [proposed title]
 
