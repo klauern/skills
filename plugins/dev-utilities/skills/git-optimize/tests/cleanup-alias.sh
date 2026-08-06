@@ -123,6 +123,10 @@ cat >"$FIXTURE/bin/git" <<'EOF'
 set -euo pipefail
 
 phase=${1:-}
+# Top-level invocations pass "-C <repo>" first; the subcommand is arg 3 there.
+if [ "$phase" = -C ]; then
+  phase=${3:-}
+fi
 status=0
 case "$phase" in
   pruner) status=${PRUNER_STATUS:-0} ;;
@@ -139,27 +143,13 @@ fi
 [ "$status" -eq 0 ] || exit "$status"
 exec "$REAL_GIT" "$@"
 EOF
-{
-  printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
-  printf '%s\n' "${alias_pruner#!}"
-} >"$FIXTURE/bin/git-pruner"
-{
-  printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
-  printf '%s\n' "${alias_repacker#!}"
-} >"$FIXTURE/bin/git-repacker"
-{
-  printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
-  printf '%s\n' "${alias_optimize#!}"
-} >"$FIXTURE/bin/git-optimize"
 cat >"$FIXTURE/bin/git-trim" <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 echo trim >>"$PHASE_LOG"
 exit "${TRIM_STATUS:-0}"
 EOF
-chmod +x "$FIXTURE/bin/git" "$FIXTURE/bin/git-pruner" \
-  "$FIXTURE/bin/git-repacker" "$FIXTURE/bin/git-optimize" \
-  "$FIXTURE/bin/git-trim"
+chmod +x "$FIXTURE/bin/git" "$FIXTURE/bin/git-trim"
 
 # Fetch failure stops before dry-run or any destructive phase.
 git -C "$FIXTURE/repo" config remote.origin.url "$FIXTURE/missing-origin.git"
@@ -209,6 +199,32 @@ printf 'yes\n' | PATH="$FIXTURE/bin:$PATH" PHASE_LOG="$phase_log" \
 git -C "$FIXTURE/repo" config alias.pruner "$alias_pruner"
 git -C "$FIXTURE/repo" config alias.repacker "$alias_repacker"
 git -C "$FIXTURE/repo" config alias.optimize "$alias_optimize"
+
+# External git-* scripts shadow same-named aliases, so these nested-workflow
+# helpers must be created only AFTER the alias-based trimall assertions above.
+{
+  printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
+  # Route nested git calls through the shim: git prepends its exec-path to PATH
+  # when running external git-* commands, which would otherwise bypass it.
+  printf 'git() { "%s" "$@"; }\n' "$FIXTURE/bin/git"
+  printf '%s\n' "${alias_pruner#!}"
+} >"$FIXTURE/bin/git-pruner"
+{
+  printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
+  # Route nested git calls through the shim: git prepends its exec-path to PATH
+  # when running external git-* commands, which would otherwise bypass it.
+  printf 'git() { "%s" "$@"; }\n' "$FIXTURE/bin/git"
+  printf '%s\n' "${alias_repacker#!}"
+} >"$FIXTURE/bin/git-repacker"
+{
+  printf '%s\n' '#!/usr/bin/env bash' 'set -euo pipefail'
+  # Route nested git calls through the shim: git prepends its exec-path to PATH
+  # when running external git-* commands, which would otherwise bypass it.
+  printf 'git() { "%s" "$@"; }\n' "$FIXTURE/bin/git"
+  printf '%s\n' "${alias_optimize#!}"
+} >"$FIXTURE/bin/git-optimize"
+chmod +x "$FIXTURE/bin/git-pruner" "$FIXTURE/bin/git-repacker" \
+  "$FIXTURE/bin/git-optimize"
 
 # The pruner itself stops before reflog expiration when prune fails.
 : >"$nested_phase_log"
