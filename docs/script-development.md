@@ -193,8 +193,8 @@ chmod +x plugins/capacities/scripts/capacities.py
 Verify the command works when `CLAUDE_PLUGIN_ROOT` points at the plugin root:
 
 ```bash
-CLAUDE_PLUGIN_ROOT="$PWD/plugins/dev-utilities" \
-  uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert-hooks.py" --list
+export CLAUDE_PLUGIN_ROOT="$PWD/plugins/dev-utilities"
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert-hooks.py" --list
 ```
 
 ## Checklist

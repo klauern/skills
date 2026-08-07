@@ -1,6 +1,6 @@
 ---
 allowed-tools: ["mcp__ticktick__search_task", "mcp__ticktick__get_task_by_id", "mcp__ticktick__update_task", "mcp__ticktick__list_projects", "mcp__ticktick__list_tags", "WebSearch", "WebFetch"]
-description: Enrich a TickTick task — sharpen the title, flesh out the description, add subtasks, and confirm metadata (preview before write)
+description: Enrich a TickTick task — sharpen the title, flesh out the description, add subtasks, and apply user-confirmed metadata (preview before write)
 argument-hint: "[task id | search terms]"
 ---
 
@@ -30,3 +30,32 @@ Invoke the **ticktick-enrich** skill:
 
 The field reference, templates, and metadata policy live in the skill and its
 enrichment-guide reference.
+
+## Metadata contract (enforced by tests)
+
+- Priority mapping (TickTick-native): urgent/critical/high → 5, medium → 3, low → 1, none → 0.
+- Apply priority only after the user explicitly states it; empty or unstated input
+  preserves the task's existing priority:
+
+<!-- ticktick-priority-example -->
+```python
+def apply_user_priority(task, user_supplied_priority):
+    priority_input = user_supplied_priority.strip().lower() if user_supplied_priority else ""
+    priority_map = {
+        "urgent": 5,
+        "critical": 5,
+        "high": 5,
+        "medium": 3,
+        "low": 1,
+        "none": 0,
+    }
+    # Empty or unstated input preserves task["priority"] unchanged.
+    if priority_input:
+        task["priority"] = priority_map[priority_input]
+
+
+apply_user_priority(task, user_supplied_priority)
+update_task(task_id=task["id"], task=task)
+```
+
+- **Clearing both dates**: the MCP can't send null. `/ticktick:clear-dates` (the `ticktick_api.py` script) clears both `dueDate` and `startDate`; use it only when both should be removed. Independent field clearing is unsupported, and a sentinel 1970 date makes the task maximally overdue in reviews.
