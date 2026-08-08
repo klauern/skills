@@ -3,10 +3,11 @@
 This is an evidence record, not a task tracker. Beads epic `klauern-skills-gon`
 owns task state. Repair rows remain **assigned** until the orchestrator adds the
 fixing commit SHA and revalidates the exact pushed head; no unchecked-task syntax
-is used here. Rows fixed through `e5186bce8813d7d4d864147c553791ade293363a`
-were exercised by the cumulative fixtures and included in the exact-head review
-history through CodeRabbit review `4871697177`; the sole finding from that review
-remains assigned below.
+is used here. Rows fixed through `c77eb732a6b2952b044ebd7512aeb9942c9b7b7c`
+were exercised by the cumulative fixtures. CodeRabbit invocation
+`eb3df2fd-5fe9-4a04-9ce4-de0878755f74` completed at that exact head with zero
+findings and a successful CodeRabbit status; the repository owner accepted that
+clean exact-head result as the serial review gate evidence.
 
 ## Review scope and exact heads
 
@@ -19,6 +20,7 @@ remains assigned below.
 | #17 remediation 3 | [review 4870951650](https://github.com/klauern/skills/pull/17#pullrequestreview-4870951650) | `f1f311775f40dd9268a8a228671b64a28dba5513` | Exact reviewed third-remediation head; one inline finding. |
 | #17 remediation 4 | [review 4871336866](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | `54d7083af16f93c7c3d16c55d8655b026f6c670e` | Exact reviewed fourth-remediation head; one review-body-only, outside-diff ledger finding. |
 | #17 remediation 5 | [review 4871697177](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | `e5186bce8813d7d4d864147c553791ade293363a` | Exact reviewed fifth-remediation head; one review-body nitpick finding about disposition validation. |
+| #17 remediation 6 | [clean invocation eb3df2fd](https://github.com/klauern/skills/pull/17#issuecomment-5201711315) | `c77eb732a6b2952b044ebd7512aeb9942c9b7b7c` | Exact-head incremental review completed with zero findings and successful status; CodeRabbit did not submit an empty GitHub review object. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -29,7 +31,9 @@ review evidence is cumulative across the exact heads above rather than a claim
 that each incremental review freshly reread every earlier file. Review `4870951650`
 produced `17R3-01`; its repair and the subsequent `L17-06` and `17R4-01` repairs
 were included at exact reviewed head `e5186bce`. Review `4871697177` produced only
-`17R5-01`, which remains assigned pending a later exact-head review.
+`17R5-01`; its repair was the sole change reviewed by invocation
+`eb3df2fd-5fe9-4a04-9ce4-de0878755f74` at exact head `c77eb732`, which completed
+with zero findings and successful status.
 
 Disposition meanings:
 
@@ -210,12 +214,14 @@ Disposition meanings:
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
 |---|---|---|---|---|---|---|
-| 17R5-01 | [review body, nitpick](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | Validate remediation dispositions, not only row counts | **assigned** | #17 `claude/audit-2-functional-fixes` — Luna Ledger Round 5 | Implemented in the current local batch: the mechanical section checks row counts and expected dispositions for initial #17, 17R, 17R2, Luna preflight, 17R3, L17-06, 17R4, and 17R5 independently. | Run every ledger command plus `git diff --check`; keep assigned until CodeRabbit reviews the exact pushed repair head. |
+| 17R5-01 | [review body, nitpick](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | Validate remediation dispositions, not only row counts | **fixed/superseded** | #17 `claude/audit-2-functional-fixes` — Luna Ledger Round 5 | Fixed in `c77eb732`; the mechanical section checks row counts and expected dispositions for initial #17, 17R, 17R2, Luna preflight, 17R3, L17-06, 17R4, and 17R5 independently. | All 20 ledger count/disposition commands and `git diff --check` passed before exact-head CodeRabbit invocation `eb3df2fd-5fe9-4a04-9ce4-de0878755f74`, which completed with zero findings and successful status. |
 
 ### PR #17 fifth-remediation-review totals
 
 - 1 distinct finding: 1 review-body nitpick about ledger validation coverage.
-- 1 **assigned**, implemented locally and pending a later exact-head review.
+- 1 **fixed/superseded** in `c77eb732`; exact-head CodeRabbit invocation
+  `eb3df2fd-5fe9-4a04-9ce4-de0878755f74` completed with zero findings and
+  successful status.
 
 ## Mechanical count validation
 
@@ -241,7 +247,7 @@ rtk rg -c '^\| L17-0[1-5] \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coder
 rtk rg -c '^\| 17R3-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| L17-06 \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 rtk rg -c '^\| 17R4-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R5-[0-9]{2} \|.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+rtk rg -c '^\| 17R5-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
 ```
 
 Expected current totals are `37`, `13`, then PR #16's
@@ -251,7 +257,8 @@ first-remediation, `5` second-remediation, and `5` Luna preflight findings; all
 three latter groups are fixed/superseded at reviewed head `f1f3117`. The
 third-remediation review, post-review Luna audit, and fourth-remediation review
 each add `1` fixed/superseded finding included at exact reviewed head
-`e5186bce`. The fifth-remediation review adds `1` assigned
-disposition-validation finding implemented locally and awaiting a later
-exact-head review. The original PR #16 source-review triage remains recorded
+`e5186bce`. The fifth-remediation review adds `1` fixed/superseded
+disposition-validation finding at `c77eb732`; exact-head CodeRabbit invocation
+`eb3df2fd-5fe9-4a04-9ce4-de0878755f74` completed with zero findings and
+successful status. The original PR #16 source-review triage remains recorded
 above as `26/7/4`.

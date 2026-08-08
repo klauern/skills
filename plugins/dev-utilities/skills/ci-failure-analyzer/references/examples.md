@@ -160,7 +160,8 @@ src/index.ts:12 - error TS2304: Cannot find name 'crypto'.
 1. Parse matrix: Only Node 18 fails
 2. Root cause: Node 18 lacks global `crypto` type
 3. Fix: `import { randomUUID } from 'crypto'`
-4. Rerun: `gh run rerun <id> --job "test (node-version: 18)"`
+4. List jobs: `gh run view <id> --json jobs --jq '.jobs[] | {name,databaseId,status,conclusion}'`
+5. Rerun the failed job by numeric ID: `gh run rerun <id> --job <job-database-id>`
 
 ---
 
