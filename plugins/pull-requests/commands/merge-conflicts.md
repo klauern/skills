@@ -15,9 +15,10 @@ and verify with `git diff --check` before staging.
 
 Escape hatch: `git merge --abort` (or `git rebase --abort`) restores the pre-merge state.
 
-## Completing the merge
+## Complete the active operation
 
-After all conflicts are staged, commit with a message that records the resolution:
+After all conflicts are staged, complete the same operation that introduced
+them. For a merge, commit with a message that records the resolution:
 
 ```bash
 git commit -m "$(cat <<'EOF'
@@ -27,4 +28,10 @@ Conflicts resolved:
 - <file>: <one-line strategy, e.g. combined both import blocks>
 EOF
 )"
+```
+
+For a rebase, continue the existing rebase instead of creating a merge commit:
+
+```bash
+git rebase --continue
 ```

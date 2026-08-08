@@ -23,4 +23,18 @@ if bash "$VALIDATOR" "$FIXTURE/disposition.md" >/dev/null 2>&1; then
   exit 1
 fi
 
+sed 's/^| 18R-14 |/| 18R-99 |/' "$LEDGER" >"$FIXTURE/renamed-id.md"
+if bash "$VALIDATOR" "$FIXTURE/renamed-id.md" >"$FIXTURE/out" 2>"$FIXTURE/err"; then
+  echo "renamed evidence ID unexpectedly passed" >&2
+  exit 1
+fi
+rg -q 'PR 18 required ID 18R-14: expected 1, got 0' "$FIXTURE/err"
+
+sed 's/^| 18R2-08 |/| 18R2-99 |/' "$LEDGER" >"$FIXTURE/renamed-second-review-id.md"
+if bash "$VALIDATOR" "$FIXTURE/renamed-second-review-id.md" >"$FIXTURE/out" 2>"$FIXTURE/err"; then
+  echo "renamed second-review evidence ID unexpectedly passed" >&2
+  exit 1
+fi
+rg -q 'PR 18 second-review required ID 18R2-08: expected 1, got 0' "$FIXTURE/err"
+
 echo "CodeRabbit ledger mutation fixtures passed"

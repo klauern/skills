@@ -248,6 +248,28 @@ Disposition meanings:
 - 14 distinct actionable findings, all **fixed/superseded** in `56fa766` after
   independent root verification.
 
+## PR #18 second full review — 8 actionable findings
+
+Exact reviewed head: `34de155449bd3f5f5ab0979c9be218f4e65f5c4b`.
+Submitted CodeRabbit review: [4889772554](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554).
+Full-review invocation: `959f86cb-008f-41b3-8cee-7ef474331cbf`.
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 18R2-01 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Correct the documented Luna preflight total so it agrees with the six `L17-*` rows and validator expectations | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger Round 2 | Repair implemented in the current batch; the mechanical prose now distinguishes the first five `L17-*` findings at `f1f3117` from `L17-06` at `e5186bce`. Exact repair SHA will be recorded in the follow-up evidence commit. | Root reran baseline and mutation ledger validation, ShellCheck, and `git diff --check`; all passed without changing other historical totals. |
+| 18R2-02 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Validate the exact `18R-01` through `18R-14` ID set and add a renamed-ID mutation fixture | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger Round 2 | Repair implemented in the current batch; the validator requires every `18R-01` through `18R-14` exactly once and the mutation renames `18R-14` to `18R-99`. Exact repair SHA will be recorded in the follow-up evidence commit. | Root independently reproduced the missing-ID failure, baseline/mutation suites, ShellCheck, and `git diff --check`. |
+| 18R2-03 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Treat successful `git push` exit status as remote acceptance and reserve `git status` for local cleanliness | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Workflow Round 2 | Repair implemented in the current batch; `commit-push.md` makes zero push exit status the remote-acceptance proof and uses status only for local cleanliness/tracking. Exact repair SHA will be recorded in the follow-up evidence commit. | Root reran the focused executable guidance test, ShellCheck, and `git diff --check`. |
+| 18R2-04 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Use `git commit` to complete merges and `git rebase --continue` to continue rebases | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Workflow Round 2 | Repair implemented in the current batch; `merge-conflicts.md` now gives operation-specific merge and rebase completion commands. Exact repair SHA will be recorded in the follow-up evidence commit. | Root reran the focused merge/rebase guidance test, ShellCheck, and `git diff --check`. |
+| 18R2-05 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Apply the required uv script header, complete Python type annotations, and Black formatting to `test_review_threads.py` | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Python Round 2 | Repair implemented in the current batch; the test uses the uv inline script header, complete generics/return annotations, and Black formatting. Exact repair SHA will be recorded in the follow-up evidence commit. | Root reran Black check, Python compilation, and both mocked pagination unittests with isolated caches. |
+| 18R2-06 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Remove the conflicting automatic-label rule or make inferred labels suggestions requiring explicit approval | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Workflow Round 2 | Repair implemented in the current batch; inferred labels are preview-only suggestions and only explicitly requested labels populate creation arguments. Exact repair SHA will be recorded in the follow-up evidence commit. | Root reran the workflow-safety fixture proving inferred labels are omitted while requested labels remain supported. |
+| 18R2-07 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Preserve the before/after preview and explicit approval gate in the TickTick enrichment priority example | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna TickTick Round 2 | Repair implemented in the current batch; the example previews before/after, requests explicit approval, and writes only after approval. Exact repair SHA will be recorded in the follow-up evidence commit. | Root executed positive and rejected-approval fixture paths and proved no update occurs before or after a rejection. |
+| 18R2-08 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889772554) | Use today's local midnight as the exact overdue `endDate` in the Today command | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna TickTick Round 2 | Repair implemented in the current batch; Today and Inbox now share the exact local-midnight boundary while retaining parallel fetch instructions. Exact repair SHA will be recorded in the follow-up evidence commit. | Root reran the whitespace-normalized cross-command contract fixture, ShellCheck, and `git diff --check`. |
+
+### PR #18 second-full-review totals
+
+- 8 distinct actionable findings, all **fixed/superseded** after Luna implementation
+  and independent root verification; exact repair SHA remains pending orchestration.
+
 ## Luna cumulative release preflight after PR #18 review
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
@@ -269,19 +291,24 @@ bash history/tests/validate-coderabbit-ledger-test.sh
 ```
 
 The validator compares every stable group to its expected count and disposition,
-checks all 14 PR #18 rows have a valid current repair disposition, and rejects
-duplicate IDs. The mutation fixture duplicates the `17R5-01` evidence row and
-changes its disposition independently; both copies must fail validation.
+checks the exact `18R-01` through `18R-14` and `18R2-01` through `18R2-08`
+ID sets with valid current repair dispositions, and rejects duplicate IDs. The
+mutation fixtures duplicate the `17R5-01` evidence row, change its disposition,
+rename `18R-14` to `18R-99`, and rename `18R2-08` to `18R2-99`; every mutation
+must fail validation.
 
 Expected current totals are `37`, `13`, then PR #16's
 `fixed/superseded 28`, `assigned 5`, `policy-rejected 4`, and PR #17's
 `fixed/superseded 12`, `policy-rejected 1`, followed by `7`
-first-remediation, `5` second-remediation, and `5` Luna preflight findings; all
-three latter groups are fixed/superseded at reviewed head `f1f3117`. The
-third-remediation review, post-review Luna audit, and fourth-remediation review
-each add `1` fixed/superseded finding included at exact reviewed head
-`e5186bce`. The fifth-remediation review adds `1` fixed/superseded
+first-remediation, `5` second-remediation, and `6` cumulative `L17-*` Luna
+findings. The first five Luna findings are fixed/superseded at reviewed head
+`f1f3117`; the sixth is the post-review Luna audit fixed/superseded at exact
+reviewed head `e5186bce`. The third-remediation and fourth-remediation reviews
+each add `1` fixed/superseded finding included at `e5186bce`. The
+fifth-remediation review adds `1` fixed/superseded
 disposition-validation finding at `c77eb732`; exact-head CodeRabbit invocation
 `eb3df2fd-5fe9-4a04-9ce4-de0878755f74` completed with zero findings and
 successful status. The original PR #16 source-review triage remains recorded
-above as `26/7/4`.
+above as `26/7/4`. PR #18 has `14` original-review and `8` second-review
+findings, all fixed/superseded; the single downstream `L18-*` finding remains
+assigned to the frozen #15 documentation stage.

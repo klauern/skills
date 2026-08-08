@@ -43,14 +43,24 @@ for group in 17R3 17R4 17R5; do
   assert_count 1 "^\\| $group-[0-9]{2} \\|.*\\*\\*fixed/superseded\\*\\*" "$group fixed"
 done
 assert_count 14 '^\| 18R-[0-9]{2} \|' 'PR 18 review rows'
+for number in {01..14}; do
+  assert_count 1 "^\\| 18R-$number \\|" "PR 18 required ID 18R-$number"
+done
 assert_count 0 '^\| 18R-.*\*\*policy-rejected\*\*' 'PR 18 policy rejected'
 assert_count 14 '^\| 18R-.*\*\*fixed/superseded\*\*' 'PR 18 fixed'
 assert_count 0 '^\| 18R-.*\*\*assigned\*\*' 'PR 18 assigned'
+assert_count 8 '^\| 18R2-[0-9]{2} \|' 'PR 18 second-review rows'
+for number in {01..08}; do
+  assert_count 1 "^\\| 18R2-$number \\|" "PR 18 second-review required ID 18R2-$number"
+done
+assert_count 8 '^\| 18R2-.*\*\*fixed/superseded\*\*' 'PR 18 second-review fixed'
+assert_count 0 '^\| 18R2-.*\*\*assigned\*\*' 'PR 18 second-review assigned'
+assert_count 0 '^\| 18R2-.*\*\*policy-rejected\*\*' 'PR 18 second-review policy rejected'
 assert_count 1 '^\| L18-[0-9]{2} \|' 'PR 18 Luna release rows'
 assert_count 1 '^\| L18-[0-9]{2} \|.*\*\*assigned\*\*' 'PR 18 Luna release assigned'
 
 awk -F '|' '
-  /^\| (16-|17-|17R-|17R2-|17R3-|17R4-|17R5-|L17-|18R-|L18-)/ {
+  /^\| (16-|17-|17R-|17R2-|17R3-|17R4-|17R5-|L17-|18R-|18R2-|L18-)/ {
     id=$2; gsub(/^[[:space:]]+|[[:space:]]+$/, "", id)
     if (++seen[id] > 1) { print "duplicate ledger ID: " id > "/dev/stderr"; bad=1 }
   }
