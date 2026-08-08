@@ -2,10 +2,12 @@
 set -euo pipefail
 
 SKILL_DIR=$(cd "$(dirname "$0")/.." && pwd)
+REPO_ROOT=$(cd "$SKILL_DIR/../../../.." && pwd)
 docs=(
   "$SKILL_DIR/SKILL.md"
   "$SKILL_DIR/references/examples.md"
-  "$SKILL_DIR/references/test-matrix.md"
+  # test-matrix.md was relocated to history/ by the reference consolidation
+  "$REPO_ROOT/history/ci-failure-analyzer-test-matrix.md"
   "$SKILL_DIR/references/workflows.md"
 )
 
