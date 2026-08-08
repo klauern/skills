@@ -19,10 +19,12 @@ access, firewall restrictions, and host `~/.claude/` bind mounts.
 Invoke the **devcontainer-setup** skill:
 
 1. Detect the project's tools and runtimes (see the skill's tool-detection reference).
-2. Scaffold `.devcontainer-devpod/` (devcontainer.json, Dockerfile, firewall + setup
+2. Present the detected gateway and MCP server domains plus every proposed exact
+   runtime version, and require explicit user confirmation before generating files.
+3. Scaffold `.devcontainer-devpod/` (devcontainer.json, Dockerfile, firewall + setup
    scripts) plus the root-level `devcontainer-ssh.sh` entry script and `Taskfile.yml`
    tasks, all from the skill's templates reference.
-3. Report the generated files and the quick-start commands
+4. Report the generated files and the quick-start commands
    (`./devcontainer-ssh.sh --claude` or `task devcontainer:claude`).
 
 Requirements: Docker, DevPod (`brew install devpod`), and valid `~/.claude/` credentials

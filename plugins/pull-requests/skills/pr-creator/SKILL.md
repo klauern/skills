@@ -109,7 +109,7 @@ declare -p REQUESTED_LABELS >/dev/null 2>&1 || REQUESTED_LABELS=()
 declare -p REQUESTED_ASSIGNEES >/dev/null 2>&1 || REQUESTED_ASSIGNEES=()
 PR_DRAFT="${PR_DRAFT:-false}"
 
-PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX.md")
+PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.md.XXXXXX")
 cleanup_pr_body() { rm -f -- "$PR_BODY_FILE"; }
 trap cleanup_pr_body EXIT
 trap 'exit 129' HUP

@@ -25,7 +25,7 @@ Automated analysis and resolution of Git merge conflicts.
 - User runs `/merge-conflicts` command
 
 **Don't use for**:
-- Rebasing (different workflow)
+- Rebasing (this resolver and its command support active merges only)
 - Cherry-picking conflicts (use git directly)
 - Non-Git version control
 

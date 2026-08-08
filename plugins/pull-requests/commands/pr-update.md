@@ -44,7 +44,7 @@ Follow the **pr-creator** skill's analysis phases, applied to an existing PR:
    ```bash
    # BEGIN PR_UPDATE_APPLY
    set -euo pipefail
-   PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX.md")
+   PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.md.XXXXXX")
    cleanup_pr_body() { rm -f -- "$PR_BODY_FILE"; }
    trap cleanup_pr_body EXIT
    trap 'exit 129' HUP
