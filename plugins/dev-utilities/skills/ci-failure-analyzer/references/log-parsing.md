@@ -85,7 +85,8 @@ File\s+"([^"]+)",\s+line\s+(\d+),\s+in\s+(.+)
 # Get all job results
 gh run view <run-id> --json jobs --jq '.jobs[] | {name,databaseId,status,conclusion}'
 
-# Display the matrix child by name, then target it by numeric databaseId
+# Use the displayed name and matrix axes to choose a job, then copy its databaseId
+# Retrieve failed logs for the selected job databaseId
 gh run view <run-id> --job <job-database-id> --log-failed
 ```
 

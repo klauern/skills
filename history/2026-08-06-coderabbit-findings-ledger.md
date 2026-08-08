@@ -1,4 +1,4 @@
-# CodeRabbit Findings Ledger — PRs #16 and #17
+# CodeRabbit Findings Ledger — PRs #16, #17, and #18
 
 This is an evidence record, not a task tracker. Beads epic `klauern-skills-gon`
 owns task state. Repair rows remain **assigned** until the orchestrator adds the
@@ -21,6 +21,7 @@ clean exact-head result as the serial review gate evidence.
 | #17 remediation 4 | [review 4871336866](https://github.com/klauern/skills/pull/17#pullrequestreview-4871336866) | `54d7083af16f93c7c3d16c55d8655b026f6c670e` | Exact reviewed fourth-remediation head; one review-body-only, outside-diff ledger finding. |
 | #17 remediation 5 | [review 4871697177](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | `e5186bce8813d7d4d864147c553791ade293363a` | Exact reviewed fifth-remediation head; one review-body nitpick finding about disposition validation. |
 | #17 remediation 6 | [clean invocation eb3df2fd](https://github.com/klauern/skills/pull/17#issuecomment-5201711315) | `c77eb732a6b2952b044ebd7512aeb9942c9b7b7c` | Exact-head incremental review completed with zero findings and successful status; CodeRabbit did not submit an empty GitHub review object. |
+| #18 | [review 4889211229](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | `a0a64e66236ecf51336b7eed436ca222eef490a5` | Exact reviewed reconciled head; fourteen actionable findings assigned below. |
 
 The intervening exact remote heads were #18
 `1a36a294c2f3fb78bb8ba14964450baa141c59f5` and #19
@@ -223,32 +224,54 @@ Disposition meanings:
   `eb3df2fd-5fe9-4a04-9ce4-de0878755f74` completed with zero findings and
   successful status.
 
+## PR #18 full review — 14 actionable findings
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 18R-01 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Make ledger validation commands assert expected counts and dispositions, including the duplicated evidence entry | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger and PR Creator | `history/tests/validate-coderabbit-ledger.sh` now fails closed on every historical count/disposition group, PR #18 row validity, and duplicate IDs. | Baseline validation and copied-ledger duplicate-ID/disposition mutations pass through `validate-coderabbit-ledger-test.sh`; final commit SHA intentionally remains for the orchestrator. |
+| 18R-02 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Inspect every untracked file before commit staging and message composition | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | `commit-push.md` inventories untracked paths and requires reading every text file or inspecting binary metadata before staging or composing messages, while retaining full tracked-diff review. | Root verified the ordered tracked/untracked gate with focused assertions and `git diff --check`; final commit SHA remains pending orchestration. |
+| 18R-03 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Use the namespaced `/dev-utilities:gh-checks` command in its Usage example | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | `commands/gh-checks.md` now uses `/dev-utilities:gh-checks` in the heading and executable usage block. | Root exact-match assertion and `git diff --check` passed; final commit SHA remains pending orchestration. |
+| 18R-04 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Add `bash` to the opening GitHub CLI fence in CI analyzer examples | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | The matrix-job GitHub CLI example now opens with a `bash` fence. | Root fence assertion and `git diff --check` passed; final commit SHA remains pending orchestration. |
+| 18R-05 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Describe `gh run view --job <databaseId>` as failed-log retrieval, not name-based matrix selection | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | `log-parsing.md` separates choosing a displayed job from retrieving its failed logs by copied numeric `databaseId`. | Root contract assertion and `git diff --check` passed; final commit SHA remains pending orchestration. |
+| 18R-06 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | State that targeted job reruns include dependent jobs | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | The skill, workflows, examples, and test matrix consistently state that the selected child and dependent jobs rerun while sibling matrix children do not. | Root cross-document assertions and `git diff --check` passed; final commit SHA remains pending orchestration. |
+| 18R-07 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Add `bash` to the merge-conflict commit example fence | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | The exact reviewed `a0a64e6` tree already used `bash` for the flagged fence, so no repair edit was necessary. | Root verified the current and reviewed blob at `plugins/pull-requests/commands/merge-conflicts.md:22`; fence assertion passed. |
+| 18R-08 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Move review-thread GraphQL implementation from the thin command into an installed-context-safe script | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna GraphQL | `scripts/review_threads.py` owns query, pagination, filtering, and JSON output; the thin command resolves `CLAUDE_PLUGIN_ROOT` or the source plugin root and passes explicit repository/PR inputs. | Root reran two focused unittest cases, Python compilation, path assertions, and `git diff --check`; final commit SHA remains pending orchestration. |
+| 18R-09 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Paginate both review threads and nested comment connections before filtering | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna GraphQL | The helper exhausts `reviewThreads` pages and every thread's nested `comments` pages before applying outdated/resolved filtering. | Mocked fixtures cover two thread pages plus nested pages for open and filtered-out outdated threads; root reran the focused unittest successfully. |
+| 18R-10 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Fail closed on operational `gh pr view` errors while allowing only explicit no-PR continuation | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger and PR Creator | `pr-creator/SKILL.md` uses a successful empty `gh pr list` result as the only no-PR case and propagates operational failures. | `workflow-safety.sh` executes existing-PR, explicit no-PR, and authentication-failure cases; final commit SHA intentionally remains for the orchestrator. |
+| 18R-11 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Verify or fetch `origin/$BASE` before PR log/diff analysis | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger and PR Creator | Preflight validates the base name, force-refreshes `refs/remotes/origin/$BASE`, and verifies it as a commit before Phase 2. | `workflow-safety.sh` proves fetch-before-verify and refreshes both missing and stale base fixtures; final commit SHA intentionally remains for the orchestrator. |
+| 18R-12 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Use unique temporary files and collision-safe body serialization for PR create/update | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger and PR Creator | PR create and update use `mktemp`, `printf`, and `EXIT` cleanup traps instead of predictable paths and fixed heredocs. | Executed create/update blocks preserve `BODY`, `EOF`, backticks, and literal command-substitution text and remove both body files; final commit SHA intentionally remains for the orchestrator. |
+| 18R-13 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Propagate requested draft state and apply labels/assignees only when permitted and requested | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger and PR Creator | Creation propagates explicit `PR_DRAFT`, defaults metadata arrays empty, and permission-gates requested labels/assignees. | Minimal and full-option executable fixtures prove omission by default and requested draft/metadata propagation; final commit SHA intentionally remains for the orchestrator. |
+| 18R-14 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889211229) | Express overdue TickTick filtering as an explicit start-of-today midnight boundary | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commands and CI | `inbox.md` now calls for `filter_tasks` with `endDate` set explicitly to the start of today at midnight while preserving today and `next7day` queries. | Root contract assertion and `git diff --check` passed; final commit SHA remains pending orchestration. |
+
+### PR #18 full-review totals
+
+- 14 distinct actionable findings, all **fixed/superseded** after independent
+  root verification; final fixing commit SHA remains pending orchestration.
+
+## Luna cumulative release preflight after PR #18 review
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| L18-01 | Luna release-checker execution | Document all six registered plugins in `AGENTS.md` | **assigned** | #15 `claude/skills-audit-optimization-cejr55` — Luna Release Docs | The #18 cumulative marketplace registers `ticktick` and `agent-patterns`, but `AGENTS.md` does not mention either plugin; the other release structure, frontmatter, line-limit, and relative-link checks passed. | Keep #15 frozen until its parent gates complete; at the #15 stage, update the architecture and key-file inventory, rerun the six-plugin release checker, and preserve exact marketplace/command/skill counts. |
+
+### Luna PR #18 release-preflight totals
+
+- 1 valid downstream documentation finding, **assigned** to the frozen #15
+  documentation stage pending its parent review gates.
+
 ## Mechanical count validation
 
 Run from the repository root:
 
 ```bash
-rtk rg -c '^\| 16-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 16-.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 16-.*\*\*assigned\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 16-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17-.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17-.*\*\*policy-rejected\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R2-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| L17-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R3-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R4-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R5-[0-9]{2} \|' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R2-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| L17-0[1-5] \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R3-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| L17-06 \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R4-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
-rtk rg -c '^\| 17R5-[0-9]{2} \|.*\*\*fixed/superseded\*\*' history/2026-08-06-coderabbit-findings-ledger.md
+bash history/tests/validate-coderabbit-ledger.sh
+bash history/tests/validate-coderabbit-ledger-test.sh
 ```
+
+The validator compares every stable group to its expected count and disposition,
+checks all 14 PR #18 rows have a valid current repair disposition, and rejects
+duplicate IDs. The mutation fixture duplicates the `17R5-01` evidence row and
+changes its disposition independently; both copies must fail validation.
 
 Expected current totals are `37`, `13`, then PR #16's
 `fixed/superseded 28`, `assigned 5`, `policy-rejected 4`, and PR #17's

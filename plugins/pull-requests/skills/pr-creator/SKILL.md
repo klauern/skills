@@ -23,13 +23,32 @@ The skill will: find the PR template → analyze branch commits → infer inform
 ### Phase 0: Preflight
 
 ```bash
-gh pr view 2>&1 || true                             # Existing PR? Show URL and stop
+# BEGIN PR_CREATOR_PREFLIGHT
+set -euo pipefail
+BRANCH=$(git branch --show-current)
+[ -n "$BRANCH" ] || { echo "Detached HEAD cannot create a PR" >&2; exit 1; }
+if ! EXISTING_PR_URL=$(gh pr list --head "$BRANCH" --state open --limit 1 \
+  --json url --jq '.[0].url // ""'); then
+  echo "Unable to check for an existing PR" >&2
+  exit 1
+fi
+if [ -n "$EXISTING_PR_URL" ]; then
+  printf 'Existing PR: %s\n' "$EXISTING_PR_URL"
+  exit 0
+fi
 BASE="${BASE:-$(gh repo view --json defaultBranchRef -q .defaultBranchRef.name)}"
-git push -u origin "$(git branch --show-current)"   # Ensure branch is on the remote
+git check-ref-format --branch "$BASE" >/dev/null
+git fetch --no-tags origin "refs/heads/$BASE:refs/remotes/origin/$BASE"
+git rev-parse --verify "refs/remotes/origin/$BASE^{commit}" >/dev/null
+git push -u origin "$BRANCH"                       # Ensure branch is on the remote
+# END PR_CREATOR_PREFLIGHT
 ```
 
 Honor a user-supplied `--base <branch>` over the detected default, and use `$BASE`
-everywhere a base branch appears below — never hardcode `main`.
+everywhere a base branch appears below — never hardcode `main`. The successful
+empty list is the only no-PR result; authentication, network, and repository
+errors stop the workflow. Fetch and verify `origin/$BASE` before any log or diff
+so a missing or stale tracking ref cannot drive the analysis.
 
 ### Phase 1: Template Discovery
 
@@ -82,14 +101,52 @@ from commit messages; the "what" comes from the diff.
 Show the user the proposed title and body and get approval before creating. Then:
 
 ```bash
-cat <<'BODY' > /tmp/pr-body.md
-## Summary
-...
-BODY
-gh pr create --base "$BASE" --title "feat: Add feature" --body-file /tmp/pr-body.md \
-  --label "enhancement" --assignee "@me"
-rm -f /tmp/pr-body.md
+# BEGIN PR_CREATOR_CREATE
+set -euo pipefail
+# PR_TITLE/PR_BODY are approved values. Populate these arrays only with
+# explicitly requested metadata; leave them empty by default.
+declare -p REQUESTED_LABELS >/dev/null 2>&1 || REQUESTED_LABELS=()
+declare -p REQUESTED_ASSIGNEES >/dev/null 2>&1 || REQUESTED_ASSIGNEES=()
+PR_DRAFT="${PR_DRAFT:-false}"
+
+PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX.md")
+cleanup_pr_body() { rm -f -- "$PR_BODY_FILE"; }
+trap cleanup_pr_body EXIT
+trap 'exit 129' HUP
+trap 'exit 130' INT
+trap 'exit 143' TERM
+printf '%s\n' "$PR_BODY" >"$PR_BODY_FILE"
+
+create_args=(--base "$BASE" --title "$PR_TITLE" --body-file "$PR_BODY_FILE")
+case "$PR_DRAFT" in
+  true) create_args+=(--draft) ;;
+  false) ;;
+  *) echo "PR_DRAFT must be true or false" >&2; exit 1 ;;
+esac
+if ((${#REQUESTED_LABELS[@]} > 0 || ${#REQUESTED_ASSIGNEES[@]} > 0)); then
+  VIEWER_PERMISSION=$(gh repo view --json viewerPermission -q .viewerPermission) || {
+    echo "Unable to verify permission for requested PR metadata" >&2; exit 1;
+  }
+  case "$VIEWER_PERMISSION" in
+    ADMIN|MAINTAIN|WRITE|TRIAGE) ;;
+    *) echo "Requested metadata requires triage or write permission" >&2; exit 1 ;;
+  esac
+fi
+for label in "${REQUESTED_LABELS[@]}"; do
+  [ -n "$label" ] && create_args+=(--label "$label")
+done
+for assignee in "${REQUESTED_ASSIGNEES[@]}"; do
+  [ -n "$assignee" ] && create_args+=(--assignee "$assignee")
+done
+gh pr create "${create_args[@]}"
+# END PR_CREATOR_CREATE
 ```
+
+`PR_DRAFT=true` comes only from an explicit `--draft` request. Do not infer
+labels or self-assignment; apply requested metadata only after the permission
+check succeeds. `mktemp` prevents path collisions, `printf` preserves text that
+contains delimiter-like lines such as `BODY` or `EOF`, and the `EXIT` trap removes
+the file after success, failure, or a trapped signal.
 
 **NEVER use `gh pr create --fill`** — it bypasses all analysis and copies commit
 messages verbatim.

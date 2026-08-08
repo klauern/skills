@@ -10,7 +10,7 @@ Review GitHub Action checks on the current branch and fix failures when possible
 ## Usage
 
 ```bash
-/gh-checks
+/dev-utilities:gh-checks
 ```
 
 ## Behavior

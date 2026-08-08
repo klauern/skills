@@ -50,7 +50,8 @@ Automated analysis and resolution of GitHub Actions CI failures.
 - Use `name` for display, but target a job or matrix child by its numeric ID:
   `gh run view <run-id> --job <job-database-id> --log-failed`
 - Report failing matrix axes explicitly (e.g. `node-version: 18`) and avoid rerunning
-  the full matrix — rerun only the remediated job:
+  the full matrix — target the remediated matrix child; GitHub also reruns its
+  dependent jobs, but not sibling matrix children:
   `gh run rerun <run-id> --job <job-database-id>`
 - If logs are unavailable ("logs are missing"), wait for the run to finish or ask the
   user to rerun once logs are ready

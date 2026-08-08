@@ -42,25 +42,18 @@ Review comments can have different states that affect their relevance:
    - These are general comments on the PR itself
 
 3. **Fetch PR Review Threads (with state)**
-   Use GraphQL with variables (robust against quoting; no manual substitution):
+   Resolve the helper from the installed plugin root when available, with a
+   source-checkout fallback. Pass both repository and PR explicitly:
    ```bash
-   gh api graphql \
-     -F owner='{owner}' -F name='{repo}' -F number=<NUM> \
-     -f query='
-       query($owner: String!, $name: String!, $number: Int!) {
-         repository(owner: $owner, name: $name) {
-           pullRequest(number: $number) {
-             reviewThreads(first: 100) {
-               nodes {
-                 isResolved isOutdated path line resolvedBy { login }
-                 comments(first: 10) { nodes { author { login } body createdAt } }
-               }
-             }
-           }
-         }
-       }'
+   REPOSITORY="$(gh repo view --json nameWithOwner -q .nameWithOwner)"
+   PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT:-$(git rev-parse --show-toplevel)/plugins/pull-requests}"
+   uv run "$PLUGIN_ROOT/scripts/review_threads.py" \
+     --repo "$REPOSITORY" --pr "$PR_NUMBER"
    ```
-   (`-F owner='{owner}' -F name='{repo}'` auto-fill from the current repo.)
+
+   The helper independently paginates `reviewThreads` and every nested
+   `comments` connection, then emits JSON grouped into `open` and `resolved`
+   arrays plus an `outdatedCount`.
 
    Key fields:
    - `isResolved` - Whether the thread has been resolved
@@ -102,11 +95,10 @@ gh pr view --json number -q .number
 gh pr view 123 --json comments -q '.comments[] | "\(.author.login): \(.body)"'
 
 # Filter to only open (unresolved, not outdated) threads with jq
-# (pipe the GraphQL query from step 3)
-... | jq '.data.repository.pullRequest.reviewThreads.nodes[] | select(.isResolved == false and .isOutdated == false)'
+... | jq '.open[]'
 
 # Count outdated threads that were filtered
-... | jq '[.data.repository.pullRequest.reviewThreads.nodes[] | select(.isOutdated == true)] | length'
+... | jq '.outdatedCount'
 ```
 
 ## Example Output

@@ -39,12 +39,23 @@ Follow the **pr-creator** skill's analysis phases, applied to an existing PR:
    Proposed Description:
    [updated body]
    ```
-5. Apply the update with a heredoc-written body file so multi-line content survives.
-   Or if body is long — always the case for a description update — never inline it:
+5. Apply the update through a unique body file so multi-line content survives.
+   Never pass a description inline or embed it in a fixed-delimiter heredoc:
    ```bash
-   cat <<'BODY' > /tmp/pr-body.md
-   [updated description]
-   BODY
-   gh pr edit [number] --title "[updated title]" --body-file /tmp/pr-body.md
-   rm -f /tmp/pr-body.md
+   # BEGIN PR_UPDATE_APPLY
+   set -euo pipefail
+   PR_BODY_FILE=$(mktemp "${TMPDIR:-/tmp}/pr-body.XXXXXX.md")
+   cleanup_pr_body() { rm -f -- "$PR_BODY_FILE"; }
+   trap cleanup_pr_body EXIT
+   trap 'exit 129' HUP
+   trap 'exit 130' INT
+   trap 'exit 143' TERM
+   printf '%s\n' "$UPDATED_BODY" >"$PR_BODY_FILE"
+   gh pr edit "$PR_NUMBER" --title "$UPDATED_TITLE" --body-file "$PR_BODY_FILE"
+   # END PR_UPDATE_APPLY
    ```
+
+   `PR_NUMBER`, `UPDATED_TITLE`, and `UPDATED_BODY` are the confirmed preview
+   values. `mktemp` prevents concurrent updates from sharing a path, `printf`
+   preserves delimiter-like body content, and the `EXIT` trap removes the file
+   after successful and failed edits.

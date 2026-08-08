@@ -1,0 +1,1 @@
+{"data":{"repository":{"pullRequest":{"reviewThreads":{"nodes":[{"id":"open","isResolved":false,"isOutdated":false,"path":"a.py","line":1,"resolvedBy":null,"comments":{"nodes":[{"author":{"login":"a"},"body":"open-1","createdAt":"2026-08-08T10:00:00Z"}],"pageInfo":{"hasNextPage":true,"endCursor":"open-comments-1"}}}],"pageInfo":{"hasNextPage":true,"endCursor":"threads-1"}}}}}}

@@ -153,7 +153,7 @@ Error: Resource not accessible by integration
 ## Example 7: Matrix Partial Failure
 
 ### CI Log
-```
+```bash
 ✔ test (node-version: 16, os: ubuntu-latest)
 ✗ test (node-version: 18, os: ubuntu-latest)
 ✔ test (node-version: 20, os: ubuntu-latest)
@@ -168,7 +168,8 @@ src/index.ts:12 - error TS2304: Cannot find name 'crypto'.
 2. Root cause: Node 18 lacks global `crypto` type
 3. Fix: `import { randomUUID } from 'crypto'`
 4. List jobs: `gh run view <id> --json jobs --jq '.jobs[] | {name,databaseId,status,conclusion}'`
-5. Rerun the failed job by numeric ID: `gh run rerun <id> --job <job-database-id>`
+5. Rerun the failed matrix child and its dependent jobs by numeric ID, without
+   rerunning sibling matrix children: `gh run rerun <id> --job <job-database-id>`
 
 ---
 
