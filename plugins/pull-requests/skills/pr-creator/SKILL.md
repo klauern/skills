@@ -145,14 +145,19 @@ gh pr create "${create_args[@]}"
 
 `PR_DRAFT=true` comes only from an explicit `--draft` request. Do not infer
 labels or self-assignment; apply requested metadata only after the permission
-check succeeds. `mktemp` prevents path collisions, `printf` preserves text that
-contains delimiter-like lines such as `BODY` or `EOF`, and the `EXIT` trap removes
-the file after success, failure, or a trapped signal.
+check succeeds. Commit- or branch-derived labels may be shown as suggestions in
+the preview, but they must not populate `REQUESTED_LABELS` until the user
+explicitly requests them. `mktemp` prevents path collisions,
+`printf` preserves text that contains delimiter-like lines such as `BODY` or
+`EOF`, and the `EXIT` trap removes the file after success, failure, or a trapped
+signal.
 
 **NEVER use `gh pr create --fill`** — it bypasses all analysis and copies commit
 messages verbatim.
 
-**Auto-labels**: `feat:` → enhancement, `fix:` → bug, `docs:` → documentation
+**Label suggestions**: `feat:` may suggest enhancement, `fix:` may suggest bug,
+and `docs:` may suggest documentation. Apply a suggestion only when the user
+explicitly requests that label.
 
 ## Template Patterns
 

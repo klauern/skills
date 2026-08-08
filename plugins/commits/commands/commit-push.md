@@ -73,19 +73,26 @@ Extract the target branch from `$ARGUMENTS` by looking for:
 5. Push the commit(s) to the remote repository:
    - For existing branches: `git push`
    - For new branches: `git push -u origin <branch-name>`
+   - Treat a zero exit status from `git push` as proof that the remote accepted
+     the update; if the push fails, stop and report the failure
 
-6. Run `git status` to verify the push succeeded
+6. After a successful push, run `git status` to inspect local worktree
+   cleanliness and branch tracking. Do not use `git status` as proof that the
+   remote accepted the push.
 
 ## Execution Strategy
 
-- **For single commits**: branch creation (if needed), commit, and push run sequentially — chain with `&&`
+- **For single commits**: branch creation (if needed), commit, push, and the
+  post-push `git status` inspection run sequentially — chain with `&&` so a
+  failed push stops the workflow
 - **For multiple commits**: create all commits first, then push once at the end
 
 ## Important
 
 - Follow the repository's existing commit style based on recent commit history
 - Use heredoc for multi-line commit messages
-- Verify the push succeeded by checking the output
+- Verify remote acceptance from the successful `git push` exit status and
+  output; use `git status` only to inspect local cleanliness afterward
 
 ## Multiple Commits
 

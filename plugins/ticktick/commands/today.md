@@ -12,7 +12,7 @@ Display overdue tasks and tasks due today, then offer quick triage actions for e
 Run the **ticktick-review** skill's daily flow:
 
 1. Fetch in parallel: today (`list_undone_tasks_by_time_query "today"`) and overdue
-   (`filter_tasks`, `endDate` < start of today).
+   (`filter_tasks` with `endDate` set to the start of today at midnight).
 2. Display both groups with the skill's priority labels and days-overdue.
 3. Offer per-task actions: [c]omplete, [r]eschedule to tomorrow (same time, or all-day),
    [n]o date (clear via `uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py"
