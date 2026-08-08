@@ -215,7 +215,7 @@ Disposition meanings:
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
 |---|---|---|---|---|---|---|
-| 17R5-01 | [review body, nitpick](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | Validate remediation dispositions, not only row counts | **fixed/superseded** | #17 `claude/audit-2-functional-fixes` — Luna Ledger Round 5 | Fixed in `c77eb732`; the mechanical section checks row counts and expected dispositions for initial #17, 17R, 17R2, Luna preflight, 17R3, L17-06, 17R4, and 17R5 independently. | All 20 ledger count/disposition commands and `git diff --check` passed before exact-head CodeRabbit invocation `eb3df2fd-5fe9-4a04-9ce4-de0878755f74`, which completed with zero findings and successful status. |
+| 17R5-01 | [review body, nitpick](https://github.com/klauern/skills/pull/17#pullrequestreview-4871697177) | Validate remediation dispositions, not only row counts | **fixed/superseded** | #17 `claude/audit-2-functional-fixes` — Luna Ledger Round 5 | Fixed in `c77eb732`; the mechanical section checks row counts and expected dispositions for initial #17, 17R, 17R2, Luna preflight, 17R3, L17-06, 17R4, and 17R5 independently. | Complete ledger count/disposition validation and `git diff --check` passed before exact-head CodeRabbit invocation `eb3df2fd-5fe9-4a04-9ce4-de0878755f74`, which completed with zero findings and successful status. |
 
 ### PR #17 fifth-remediation-review totals
 
@@ -271,6 +271,29 @@ Full-review invocation: `959f86cb-008f-41b3-8cee-7ef474331cbf`.
   `c649f18aa131c8f85100591f4f13f2d1f184b5c2` after Luna implementation and
   independent root verification.
 
+## PR #18 third full review — 8 actionable findings
+
+Exact reviewed head: `fca9b57e059ef993d7a3bd06073938e17737465b`.
+Submitted CodeRabbit review: [4889943744](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744).
+Full-review invocation: `2191ddad-e8b0-43b2-ba86-fc5aa14e4100`.
+
+| ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
+|---|---|---|---|---|---|---|
+| 18R3-01 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Remove the stale hard-coded “20” validator-assertion total from the ledger evidence | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger Round 3 | Fixed in `3af9e17`; the evidence now says complete ledger count/disposition validation instead of a stale assertion total. | Root reran baseline/mutation validation, ShellCheck, the cumulative matrix, and `git diff --check`. |
+| 18R3-02 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Require exact `L17-01` through `L17-06` IDs and add an `L17-06` renamed-ID mutation | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Ledger Round 3 | Fixed in `3af9e17`; the validator requires each `L17-01` through `L17-06` exactly once and the mutation renames `L17-06` to `L17-99`. | Root independently reproduced the missing-ID failure and reran baseline/mutation validation plus ShellCheck. |
+| 18R3-03 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Select `git push` only when upstream tracking exists; otherwise use `git push -u origin HEAD` | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commits Round 3 | Fixed in `3af9e17`; the extracted push block checks `@{upstream}`, selects the correct command, preserves status 42 on either push failure, and skips local status after failure. | Root executed tracked/untracked upstream paths and both failure paths, then reran ShellCheck and the cumulative matrix. |
+| 18R3-04 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Keep `commit-push.md` within the repository thin-command contract | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Commits Round 3 | Fixed in `3af9e17`; `commit-push.md` is 28 lines and delegates analysis, splitting, staging, message composition, and commit creation to `conventional-commits`. | Root verified the authoritative 15–30-line policy, executable delegation/structure fixture, and full cumulative matrix. |
+| 18R3-05 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Require confirmation of detected gateway/MCP domains and proposed exact versions before devcontainer scaffolding | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Dev/PR Round 3 | Fixed in `3af9e17`; detection is followed by an explicit confirmation gate before generation. | Root executed the order-sensitive guidance fixture, existing runtime fixture, ShellCheck, and the cumulative matrix. |
+| 18R3-06 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Describe `gh run rerun --job` as rerunning the selected job and its dependencies, not dependent jobs | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Dev/PR Round 3 | Fixed in `3af9e17`; all cited CI analyzer sites now use selected-job-and-dependencies wording. | Root executed the cross-file contract fixture, ShellCheck, and the cumulative matrix. |
+| 18R3-07 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Align merge/rebase support across the command, delegated conflict-resolver skill, and test | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Dev/PR Round 3 | Fixed in `3af9e17`; command, delegated skill, reference, and fixture consistently support active merges only. | Root executed the cross-layer merge-only fixture, verified abort/commit semantics, and reran the cumulative matrix. |
+| 18R3-08 | [review](https://github.com/klauern/skills/pull/18#pullrequestreview-4889943744) | Use portable `mktemp` templates with `.md` before the trailing `XXXXXX` at both PR body sites | **fixed/superseded** | #18 `claude/audit-3-thin-commands` — Luna Dev/PR Round 3 | Fixed in `3af9e17`; both templates use `pr-body.md.XXXXXX`. | Root executed minimal/full create and update paths, proving six-character expansion, three unique paths, cleanup, and full workflow safety. |
+
+### PR #18 third-full-review totals
+
+- 8 distinct actionable findings, all **fixed/superseded** in repair commit
+  `3af9e1751c23f39848b1ef448e7a02cbd19821e6` after Luna implementation and
+  independent root verification.
+
 ## Luna cumulative release preflight after PR #18 review
 
 | ID | Source | Finding | Validity / disposition | Owning PR / branch | Current evidence / location | Planned validation or rationale |
@@ -292,11 +315,12 @@ bash history/tests/validate-coderabbit-ledger-test.sh
 ```
 
 The validator compares every stable group to its expected count and disposition,
-checks the exact `18R-01` through `18R-14` and `18R2-01` through `18R2-08`
-ID sets with valid current repair dispositions, and rejects duplicate IDs. The
-mutation fixtures duplicate the `17R5-01` evidence row, change its disposition,
-rename `18R-14` to `18R-99`, and rename `18R2-08` to `18R2-99`; every mutation
-must fail validation.
+checks the exact `L17-01` through `L17-06`, `18R-01` through `18R-14`,
+`18R2-01` through `18R2-08`, and `18R3-01` through `18R3-08` ID
+sets with valid current repair dispositions, and rejects duplicate IDs. The mutation
+fixtures duplicate the `17R5-01` evidence row, change its disposition, rename
+`L17-06` to `L17-99`, rename `18R-14` to `18R-99`, and rename `18R2-08` to
+`18R2-99`; every mutation must fail validation.
 
 Expected current totals are `37`, `13`, then PR #16's
 `fixed/superseded 28`, `assigned 5`, `policy-rejected 4`, and PR #17's
@@ -312,4 +336,5 @@ disposition-validation finding at `c77eb732`; exact-head CodeRabbit invocation
 successful status. The original PR #16 source-review triage remains recorded
 above as `26/7/4`. PR #18 has `14` original-review and `8` second-review
 findings, all fixed/superseded; the single downstream `L18-*` finding remains
-assigned to the frozen #15 documentation stage.
+assigned to the frozen #15 documentation stage. Its `8` third-review findings
+are fixed/superseded in `3af9e17`.

@@ -22,7 +22,7 @@ Validation scenarios for `/gh-checks` behavior.
 | 6 | Build failure | Remove required import | Identify missing module, suggest fix, ask first |
 | 7 | Missing secret | Remove `secrets.X` reference | Identify secret name, guide to Settings, **no code changes** |
 | 8 | Cache corruption | Break cache key | Advise clearing cache, rerun |
-| 9 | Matrix partial | Break only one Node version | Show failing axis, provide targeted repro, rerun that child and its dependent jobs without rerunning sibling matrix children |
+| 9 | Matrix partial | Break only one Node version | Show failing axis, provide targeted repro, rerun the selected job and its dependencies without rerunning sibling matrix children |
 | 10 | Flaky test | Add random timing | Detect history inconsistency, suggest mocking/retries |
 | 11 | No runs | Use branch without CI trigger | Explain absence, suggest checking workflow filters |
 | 12 | Auth failure | Revoke `gh` auth | Prompt `gh auth login` |
@@ -35,7 +35,7 @@ Validation scenarios for `/gh-checks` behavior.
 | Type errors | Never auto-edit business logic |
 | Secrets | Never print or guess values |
 | Cache | Never delete via API without approval |
-| Matrix | Target the selected child plus dependent jobs; never rerun sibling matrix children unnecessarily |
+| Matrix | Target the selected job and its dependencies; never rerun sibling matrix children unnecessarily |
 
 ## Execution Tips
 

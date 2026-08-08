@@ -2,6 +2,9 @@
 
 ## Detection Phase
 
+These workflows support conflicts from an active merge only. For rebase
+conflicts, abort or continue the rebase directly instead of invoking this skill.
+
 ### Check Merge State
 ```bash
 git rev-parse --verify MERGE_HEAD 2>/dev/null && echo "In merge state"

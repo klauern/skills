@@ -37,4 +37,11 @@ if bash "$VALIDATOR" "$FIXTURE/renamed-second-review-id.md" >"$FIXTURE/out" 2>"$
 fi
 rg -q 'PR 18 second-review required ID 18R2-08: expected 1, got 0' "$FIXTURE/err"
 
+sed 's/^| L17-06 |/| L17-99 |/' "$LEDGER" >"$FIXTURE/renamed-luna-id.md"
+if bash "$VALIDATOR" "$FIXTURE/renamed-luna-id.md" >"$FIXTURE/out" 2>"$FIXTURE/err"; then
+  echo "renamed Luna evidence ID unexpectedly passed" >&2
+  exit 1
+fi
+rg -q 'Luna evidence required ID L17-06: expected 1, got 0' "$FIXTURE/err"
+
 echo "CodeRabbit ledger mutation fixtures passed"
