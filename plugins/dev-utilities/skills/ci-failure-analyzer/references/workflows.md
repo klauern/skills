@@ -97,7 +97,7 @@ npm ci                      # Verify
 1. List jobs: `gh run view <id> --json jobs --jq '.jobs[] | {name,databaseId,status,conclusion}'`
 2. Identify failing combination (e.g., Node 18 only)
 3. Provide targeted repro: `nvm use 18 && npm test`
-4. Rerun the failing matrix child and its dependent jobs by numeric ID, without
+4. Rerun the selected job and its dependencies by numeric job ID, without
    rerunning sibling matrix children: `gh run rerun <id> --job <job-database-id>`
 
 ---

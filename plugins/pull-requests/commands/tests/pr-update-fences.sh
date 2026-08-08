@@ -3,6 +3,8 @@ set -euo pipefail
 
 COMMAND_FILE="$(cd "$(dirname "$0")/.." && pwd)/pr-update.md"
 
+rg -q -F 'mktemp "${TMPDIR:-/tmp}/pr-body.md.XXXXXX"' "$COMMAND_FILE"
+
 awk '
   /Never pass a description inline/ { expected = 1; next }
   expected == 1 {

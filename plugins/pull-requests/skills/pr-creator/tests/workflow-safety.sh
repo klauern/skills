@@ -105,7 +105,12 @@ if rg -q '^--draft$|^--label$|^--assignee$' "$CAPTURE_ARGS"; then
   echo "minimal create unexpectedly added optional metadata" >&2; exit 1
 fi
 [ "$(cat "$CAPTURE_BODY")" = "$BODY_TEXT" ]
-[ ! -e "$(cat "$CAPTURE_BODY_PATH")" ]
+create_body_path=$(cat "$CAPTURE_BODY_PATH")
+case "$create_body_path" in
+  "$TMPDIR"/pr-body.md.??????) ;;
+  *) echo "create body path did not use a portable trailing XXXXXX template" >&2; exit 1 ;;
+esac
+[ ! -e "$create_body_path" ]
 
 export PR_DRAFT=true GH_PERMISSION=WRITE
 { printf 'REQUESTED_LABELS=("bug" "needs docs")\nREQUESTED_ASSIGNEES=("@me")\n'; cat "$FIXTURE/create.block"; } >"$FIXTURE/create-full.sh"
@@ -113,10 +118,24 @@ bash "$FIXTURE/create-full.sh"
 rg -q '^--draft$' "$CAPTURE_ARGS"
 [ "$(rg -c '^--label$' "$CAPTURE_ARGS")" -eq 2 ]
 rg -q '^--assignee$' "$CAPTURE_ARGS"
+full_body_path=$(cat "$CAPTURE_BODY_PATH")
+case "$full_body_path" in
+  "$TMPDIR"/pr-body.md.??????) ;;
+  *) echo "full create body path did not use a portable trailing XXXXXX template" >&2; exit 1 ;;
+esac
+[ "$full_body_path" != "$create_body_path" ]
+[ ! -e "$full_body_path" ]
 
 export PR_NUMBER=42 UPDATED_TITLE='fix: safe update' UPDATED_BODY="$BODY_TEXT"
 bash "$FIXTURE/update.sh"
 [ "$(cat "$CAPTURE_BODY")" = "$BODY_TEXT" ]
-[ ! -e "$(cat "$CAPTURE_BODY_PATH")" ]
+update_body_path=$(cat "$CAPTURE_BODY_PATH")
+case "$update_body_path" in
+  "$TMPDIR"/pr-body.md.??????) ;;
+  *) echo "update body path did not use a portable trailing XXXXXX template" >&2; exit 1 ;;
+esac
+[ "$update_body_path" != "$create_body_path" ]
+[ "$update_body_path" != "$full_body_path" ]
+[ ! -e "$update_body_path" ]
 
 echo "PR creator safety fixtures passed"
