@@ -33,6 +33,7 @@ Extract the target branch from `$ARGUMENTS` by looking for:
 
 - Current git status: !`git status`
 - Change summary (fetch the full diff on demand): !`git diff HEAD --stat`
+- Untracked-file inventory: !`git ls-files --others --exclude-standard`
 - Current branch: !`git branch --show-current`
 - **Target branch argument: `$ARGUMENTS`**
 
@@ -58,16 +59,22 @@ Extract the target branch from `$ARGUMENTS` by looking for:
      - Examples: `git checkout -b feature/add-user-auth`, `git checkout -b fix/memory-leak`, `git checkout -b chore/update-deps`
      - If already on a feature branch, proceed to next step
 
-3. Create the commit(s) per the **conventional-commits** skill (same behavior as `/commits:commit`)
+3. **Inspect All Changes Before Staging or Composing Commit Messages**:
+   - Review the full tracked diff with `git diff HEAD`
+   - Inventory untracked files with `git ls-files --others --exclude-standard`
+   - Read every untracked file in full (or inspect binary metadata when it cannot be read as text)
+   - Do not stage files or compose commit messages until both tracked and untracked changes have been inspected
+
+4. Create the commit(s) per the **conventional-commits** skill (same behavior as `/commits:commit`)
    - Analyze the changes and create appropriate conventional commit message(s)
    - Stage relevant untracked files if needed
    - Create commit(s) with well-formatted messages
 
-4. Push the commit(s) to the remote repository:
+5. Push the commit(s) to the remote repository:
    - For existing branches: `git push`
    - For new branches: `git push -u origin <branch-name>`
 
-5. Run `git status` to verify the push succeeded
+6. Run `git status` to verify the push succeeded
 
 ## Execution Strategy
 
