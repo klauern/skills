@@ -11,7 +11,8 @@ Full inbox triage across overdue tasks, today's tasks, and the rest of the week.
 
 Run the **ticktick-review** skill's triage flow over three sections:
 
-1. Fetch in parallel: overdue (`filter_tasks`, `endDate` < today), today
+1. Fetch in parallel: overdue (`filter_tasks` with `endDate` set to the start of
+   today at midnight), today
    (`list_undone_tasks_by_time_query "today"`), this week (`"next7day"`).
 2. Dedup by task ID before rendering This Week — the `next7day` query includes today's
    tasks.

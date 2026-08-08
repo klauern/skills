@@ -4,7 +4,7 @@ set -euo pipefail
 COMMAND_FILE="$(cd "$(dirname "$0")/.." && pwd)/pr-update.md"
 
 awk '
-  /Or if body is long/ { expected = 1; next }
+  /Never pass a description inline/ { expected = 1; next }
   expected == 1 {
     if ($0 !~ /^[[:space:]]*```bash[[:space:]]*$/) exit 1
     found = 1
