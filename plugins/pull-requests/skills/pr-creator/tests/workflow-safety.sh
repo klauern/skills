@@ -95,7 +95,11 @@ export CAPTURE_ARGS="$FIXTURE/args" CAPTURE_BODY="$FIXTURE/body" \
 literal_dollar='$'
 BODY_TEXT=$(printf "summary\nBODY\nEOF\n\`literal\` and %s(literal)" "$literal_dollar")
 export BASE=main PR_TITLE='feat: safe PR' PR_BODY="$BODY_TEXT" PR_DRAFT=false
-{ printf 'REQUESTED_LABELS=()\nREQUESTED_ASSIGNEES=()\n'; cat "$FIXTURE/create.block"; } >"$FIXTURE/create.sh"
+{
+  printf 'REQUESTED_LABELS=()\nREQUESTED_ASSIGNEES=()\n'
+  printf 'INFERRED_LABELS=("enhancement")\n'
+  cat "$FIXTURE/create.block"
+} >"$FIXTURE/create.sh"
 bash "$FIXTURE/create.sh"
 if rg -q '^--draft$|^--label$|^--assignee$' "$CAPTURE_ARGS"; then
   echo "minimal create unexpectedly added optional metadata" >&2; exit 1

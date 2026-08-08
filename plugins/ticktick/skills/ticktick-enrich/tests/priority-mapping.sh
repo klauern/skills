@@ -47,37 +47,69 @@ rg -q -F 'task["priority"] = priority_map[priority_input]' <<<"$priority_example
   echo "Marked priority example must contain exactly one update_task call" >&2
   exit 1
 }
+rg -q -F 'preview_before_after(before, after)' <<<"$priority_example"
+rg -q -F 'if request_explicit_approval():' <<<"$priority_example"
 if rg -q '^[[:space:]]*"priority"[[:space:]]*:' <<<"$priority_example"; then
   echo "Marked example must omit a default priority field" >&2
   exit 1
 fi
 
-while IFS='|' read -r supplied expected; do
+while IFS='|' read -r supplied expected approval; do
   PRIORITY_EXAMPLE="$priority_example" PRIORITY_INPUT="$supplied" EXPECTED="$expected" \
+    APPROVAL="$approval" \
     uv run --no-project python - <<'PY'
 import os
 
 task = {"id": "fixture", "priority": 42}
 user_supplied_priority = os.environ["PRIORITY_INPUT"]
 written = []
+events = []
+
+def preview_before_after(before, after):
+    events.append(("preview", before, after))
+
+def request_explicit_approval():
+    events.append(("approval",))
+    return os.environ["APPROVAL"] == "yes"
 
 def update_task(task_id, task):
+    events.append(("update",))
     written.append((task_id, dict(task)))
 
 exec(os.environ["PRIORITY_EXAMPLE"])
 expected = int(os.environ["EXPECTED"])
 assert task["priority"] == expected, (user_supplied_priority, task)
-assert written == [("fixture", task)]
+assert events[0][0] == "preview", events
+assert events[0][1]["priority"] == 42, events
+assert events[0][2]["priority"] == expected, events
+assert events[1] == ("approval",), events
+if os.environ["APPROVAL"] == "yes":
+    assert events[2] == ("update",), events
+    assert written == [("fixture", task)]
+else:
+    assert len(events) == 2, events
+    assert written == [], written
 PY
 done <<'EOF'
-urgent|5
-critical|5
-high|5
-medium|3
-low|1
-none|0
-|42
+urgent|5|yes
+critical|5|yes
+high|5|yes
+medium|3|yes
+low|1|yes
+none|0|yes
+|42|yes
+urgent|5|no
 EOF
+
+TODAY_COMMAND="$PLUGIN_DIR/commands/today.md"
+INBOX_COMMAND="$PLUGIN_DIR/commands/inbox.md"
+rg -q -F 'Fetch in parallel:' "$TODAY_COMMAND"
+rg -q -F 'Fetch in parallel:' "$INBOX_COMMAND"
+midnight_boundary="\`filter_tasks\` with \`endDate\` set to the start of today at midnight"
+today_compact="$(awk '{$1 = $1; printf "%s ", $0}' "$TODAY_COMMAND")"
+inbox_compact="$(awk '{$1 = $1; printf "%s ", $0}' "$INBOX_COMMAND")"
+rg -q -F "$midnight_boundary" <<<"$today_compact"
+rg -q -F "$midnight_boundary" <<<"$inbox_compact"
 
 extract_clear_dates_paragraphs() {
   awk -v needle='/ticktick:clear-dates' '

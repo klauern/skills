@@ -54,8 +54,12 @@ def apply_user_priority(task, user_supplied_priority):
         task["priority"] = priority_map[priority_input]
 
 
+before = dict(task)
 apply_user_priority(task, user_supplied_priority)
-update_task(task_id=task["id"], task=task)
+after = dict(task)
+preview_before_after(before, after)
+if request_explicit_approval():
+    update_task(task_id=task["id"], task=task)
 ```
 
 - **Clearing both dates**: the MCP can't send null. `/ticktick:clear-dates` (the `ticktick_api.py` script) clears both `dueDate` and `startDate`; use it only when both should be removed. Independent field clearing is unsupported, and a sentinel 1970 date makes the task maximally overdue in reviews.
