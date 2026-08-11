@@ -21,7 +21,7 @@
 ### Plugin Development
 - Each plugin lives in `plugins/<plugin-name>/`
 - Commands go in `plugins/<plugin-name>/commands/*.md`
-- Skills go in `plugins/<plugin-name>/<skill-name>/SKILL.md`
+- Skills go in `plugins/<plugin-name>/skills/<skill-name>/SKILL.md` (the `skills/` directory is required for discovery)
 - Always include frontmatter with metadata
 
 ### Git Workflow
@@ -89,7 +89,7 @@ klauern-skills/
 
 - **AGENTS.md** - Comprehensive AI agent guide
 - **README.md** - User-facing documentation
-- **plugins/*/SKILL.md** - Individual skill documentation
+- **plugins/*/skills/*/SKILL.md** - Individual skill documentation
 
 ## CLI Help
 
