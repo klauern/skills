@@ -61,12 +61,12 @@ bd close bd-42 --reason "Done"         # Complete task
 3. **Do work**: Implement, test, document
 4. **Found new work?**: `bd create "Found bug" -p 1 --deps discovered-from:<parent-id>`
 5. **Complete**: `bd close <id> --reason "Done"`
-6. **Commit together**: Include `.beads/issues.jsonl` with code changes
+6. **Commit together**: Include `.beads/beads.left.jsonl` with code changes
 
 ## Auto-Sync
 
 bd automatically syncs with git:
-- Exports to `.beads/issues.jsonl` after changes (5s debounce)
+- Exports to `.beads/beads.left.jsonl` after changes (5s debounce)
 - Imports from JSONL when newer (e.g., after `git pull`)
 - No manual export/import needed
 

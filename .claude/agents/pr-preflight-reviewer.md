@@ -2,7 +2,7 @@
 name: pr-preflight-reviewer
 model: sonnet
 description: Reviews PR diff against description draft, flagging inconsistencies and suggesting improvements before submission
-allowedTools:
+tools:
   - Read
   - Bash
   - Grep

@@ -18,3 +18,7 @@ config.yaml
 
 # Beads / Dolt files (added by bd init)
 .beads-credential-key
+
+# Python bytecode (from running plugin scripts)
+__pycache__/
+*.pyc

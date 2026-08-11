@@ -1,6 +1,6 @@
 ---
 allowed-tools: Bash, Read, Write, Edit, Grep, Glob, Agent, Skill
-description: Autonomous multi-task TDD work loop — runs N tasks (default 5) or M minutes (default 60), test-first, with structured deferral and a Confluence-ready session log
+description: Autonomous multi-task TDD work loop — runs N tasks (default 5) or M minutes (default 60), test-first, with structured deferral and a session log
 ---
 # /bd-work-loop
 

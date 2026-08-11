@@ -10,7 +10,7 @@ This guide provides comprehensive best practices for creating efficient, maintai
 - [Optimization Techniques](#optimization-techniques)
 - [Bloat Patterns to Avoid](#bloat-patterns-to-avoid)
 - [Frontmatter Best Practices](#frontmatter-best-practices)
-- [Model Strategy Guidelines](#model-strategy-guidelines)
+- [Model Selection](#model-selection)
 - [Checklist](#checklist)
 
 ## Token Budgets
@@ -146,14 +146,13 @@ skill-name/
 When skills or commands need complex logic, external dependencies, or reusable functionality, use external scripts in the `scripts/` directory.
 
 **Key requirements:**
-- Use relative path resolution (not hardcoded paths)
+- Resolve script paths via `${CLAUDE_PLUGIN_ROOT}` (never `$0`-derived or hardcoded paths)
 - Python scripts should use uv inline dependencies
 - Keep scripts focused and well-documented
 
 **Standard path resolution pattern:**
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-uv run "$SCRIPT_DIR/my-script.py" [args]
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/my-script.py" [args]
 ```
 
 **See [script-development.md](script-development.md) for comprehensive guidance on:**
@@ -441,57 +440,18 @@ allowed-tools: Bash Read Write Grep
 
 **Use when**: You want to restrict which tools the agent can use during skill execution.
 
-## Model Strategy Guidelines
+## Model Selection
 
-Define when to use different AI models for optimal cost and performance.
+Do **not** add "Model Strategy" tables to SKILL.md bodies — a skill cannot switch the
+model that executes it, so those sections are inert documentation that costs tokens on
+every activation. The only mechanisms that actually control model choice:
 
-### Model Tiers
+- The `model` frontmatter field on the SKILL.md (applies to the whole skill run).
+- Sub-agent definitions (`.claude/agents/*.md` `model:` frontmatter) when a skill
+  explicitly delegates work via the Agent tool.
 
-**Haiku 4.5** - Fast operations (low cost, sub-second response):
-- File I/O operations (read, write, parse)
-- Pattern matching and simple analysis
-- Git command execution
-- Template filling
-- Simple categorization
-
-**Sonnet 4.5** - Complex reasoning (higher cost, detailed analysis):
-- Decision-making with multiple factors
-- Natural language synthesis and generation
-- Cross-cutting change analysis
-- Commit/PR body composition
-- Gap detection and inference
-
-### Documentation Pattern
-
-Include a model strategy section in your SKILL.md:
-
-```markdown
-## Model Strategy
-
-| Task | Model | Rationale |
-|------|-------|-----------|
-| File discovery, git ops, parsing | Haiku | Fast, deterministic |
-| Commit analysis, PR generation, gap detection | Sonnet | Complex reasoning |
-```
-
-### Sub-Agent Instructions
-
-When your skill involves sub-agents, provide explicit guidance:
-
-```markdown
-## Sub-Agent Strategy
-
-### Use Haiku 4.5 for
-
-- Quick diff analysis and file categorization
-- Simple commit message drafting
-
-### Use Sonnet 4.5 for
-
-- Commit breakpoint determination and multi-commit planning
-- Scope identification and complex message composition
-- Cross-cutting change analysis
-```
+If a skill genuinely spawns sub-agents, name the agent to use — don't restate a
+Haiku/Sonnet task-split table.
 
 ## Checklist
 
@@ -540,33 +500,30 @@ Use this checklist when authoring or reviewing skills:
 
 ### Efficient Skill: pr-creator
 
-**Size**: 138 lines
 **Structure**: Core workflow in SKILL.md, no separate references needed
 **Efficiency techniques**:
 - Tables for checkbox auto-fill rules
 - Consolidated git commands in single code block
 - Quick start prominently placed
-- Model strategy clearly documented
 
-**Location**: `plugins/pull-requests/pr-creator/SKILL.md`
+**Location**: `plugins/pull-requests/skills/pr-creator/SKILL.md`
 
 ### Efficient Skill: conventional-commits
 
-**Size**: 102 lines (SKILL.md) + 719 lines (references)
-**Structure**: Core overview in SKILL.md, detailed content in 4 reference files
+**Structure**: Core overview in SKILL.md, detailed content in focused reference files
 **Efficiency techniques**:
 - Index-style SKILL.md that links to focused reference files
-- Clear separation: workflows vs. examples vs. specification
+- Clear separation: examples vs. best practices vs. specification
 - Each reference file covers one topic
 - Cross-references instead of duplication
 
-**Location**: `plugins/commits/conventional-commits/SKILL.md`
+**Location**: `plugins/commits/skills/conventional-commits/SKILL.md`
 
 ## Additional Resources
 
 - **Agent Skills Specification**: https://agentskills.io/specification
 - **This Repository's AGENTS.md**: `AGENTS.md` (repository root)
-- **Example Skills**: `plugins/*/*/SKILL.md`
+- **Example Skills**: `plugins/*/skills/*/SKILL.md`
 
 ## Summary
 

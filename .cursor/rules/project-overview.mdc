@@ -7,56 +7,29 @@ This is a Claude Code plugin marketplace repository containing custom skills tha
 
 ## Repository Structure
 
-The project follows a modular structure where each skill is self-contained:
-
-- **Skills Directory**: Each skill has its own directory at the root level
-- **Command Files**: Slash commands are defined in the [`commands/`](mdc:commands/) directory
-- **Marketplace Config**: Plugin definitions in [`.claude-plugin/marketplace.json`](mdc:.claude-plugin/marketplace.json)
+- **Marketplace Config**: plugin registry in [`.claude-plugin/marketplace.json`](mdc:.claude-plugin/marketplace.json) — the source of truth for the plugin list (currently six: commits, pull-requests, dev-utilities, capacities, ticktick, agent-patterns)
+- **Plugins**: each plugin is self-contained under `plugins/<plugin-name>/`
+  - `commands/*.md` — slash commands (thin wrappers that invoke skills)
+  - `skills/<skill-name>/SKILL.md` — skills, with on-demand docs in `references/`
+  - `scripts/*.py` — external scripts invoked via `${CLAUDE_PLUGIN_ROOT}`
+- **Guides**: [`docs/skill-authoring-guidelines.md`](mdc:docs/skill-authoring-guidelines.md), [`docs/script-development.md`](mdc:docs/script-development.md)
+- **Repo tooling**: `.claude/` (hooks, subagents, version-manager skill)
 
 ## Main Entry Points
 
-- **Repository README**: [`README.md`](mdc:README.md) - Installation instructions and overview
-- **Conventional Commits Skill**: [`conventional-commits/SKILL.md`](mdc:conventional-commits/SKILL.md)
-- **PR Creator Skill**: [`pr-creator/SKILL.md`](mdc:pr-creator/SKILL.md)
-
-## Available Commands
-
-- [`/commit`](mdc:commands/commit.md) - Create conventional commits without pushing
-- [`/commit-push`](mdc:commands/commit-push.md) - Create conventional commits and push
-- [`/pr`](mdc:commands/pr.md) - Create intelligent pull requests
-
-## Skills Documentation
-
-### Conventional Commits
-
-- **Main**: [`conventional-commits/SKILL.md`](mdc:conventional-commits/SKILL.md)
-- **Workflows**: [`conventional-commits/workflows.md`](mdc:conventional-commits/workflows.md)
-- **Examples**: [`conventional-commits/examples.md`](mdc:conventional-commits/examples.md)
-- **Best Practices**: [`conventional-commits/best-practices.md`](mdc:conventional-commits/best-practices.md)
-- **Format Reference**: [`conventional-commits/format-reference.md`](mdc:conventional-commits/format-reference.md)
-
-### PR Creator
-
-- **Main**: [`pr-creator/SKILL.md`](mdc:pr-creator/SKILL.md)
-- **Example Workflows**: [`pr-creator/references/example_workflows.md`](mdc:pr-creator/references/example_workflows.md)
-- **Implementation Guide**: [`pr-creator/references/implementation_guide.md`](mdc:pr-creator/references/implementation_guide.md)
-- **Template Patterns**: [`pr-creator/references/template_patterns.md`](mdc:pr-creator/references/template_patterns.md)
+- **Repository README**: [`README.md`](mdc:README.md) — installation instructions and full command list
+- **Agent guidance**: [`AGENTS.md`](mdc:AGENTS.md) (CLAUDE.md symlinks to it)
 
 ## Development Guidelines
 
-When developing in this repository:
-
-1. Each skill should be self-contained in its own directory
-2. Skills must include a `SKILL.md` file with metadata and instructions
-3. Commands go in the `commands/` directory as markdown files
-4. Reference documentation goes in skill subdirectories
-5. All skills must be registered in `.claude-plugin/marketplace.json`
+1. Skills live at `plugins/<plugin>/skills/<skill>/SKILL.md` — the `skills/` directory is required for discovery
+2. Commands go in `plugins/<plugin>/commands/` and should delegate to skills, not duplicate them
+3. New plugins must be registered in `.claude-plugin/marketplace.json`
+4. Bump versions with `/bump-version <plugin-name>` after plugin changes
 
 ## Installation Methods
 
-Users can install skills via:
-
-- Interactive: `/plugin` then search
-- All plugins: `/plugin install conventional-commits@klauern-skills` and `/plugin install pr-creator@klauern-skills`
-- Individual: `/plugin install conventional-commits@klauern-skills` or `/plugin install pr-creator@klauern-skills`
-- Local dev: `/plugin add-marketplace /path/to/repo`
+- Interactive: `/plugin` then browse
+- Marketplace: `/plugin marketplace add klauern/klauern-skills`
+- Individual plugin: `/plugin install <plugin-name>@klauern-skills` (e.g. `commits`, `pull-requests`)
+- Local dev: `/plugin marketplace add /path/to/repo`

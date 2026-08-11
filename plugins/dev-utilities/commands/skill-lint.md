@@ -1,6 +1,7 @@
 ---
-allowed-tools: Bash Read Grep Glob
+allowed-tools: Bash, Read, Grep, Glob, Agent
 description: Validate SKILL.md files against authoring guidelines
+argument-hint: "[plugin-name]"
 ---
 
 # /skill-lint
@@ -16,40 +17,11 @@ Validate one or all SKILL.md files against the token budget and authoring guidel
 
 ## Behavior
 
-1. **Discover Skills**
-   - If a plugin name is provided, find `plugins/<name>/*/SKILL.md`
-   - Otherwise, find all `plugins/*/*/SKILL.md`
+Delegate to the **skill-validator** agent so validation criteria live in exactly one
+place (`.claude/agents/skill-validator.md`):
 
-2. **For Each SKILL.md, Check**:
-
-   | Check | Pass Criteria | Severity |
-   |-------|--------------|----------|
-   | Line count | < 500 lines | FAIL if over |
-   | Frontmatter `name` | Present, matches `[a-z0-9-]+` | FAIL if missing |
-   | Frontmatter `description` | Present, < 1024 chars | FAIL if missing |
-   | Description length | < 200 chars | WARN if over |
-   | Reference files | Each < 500 lines | FAIL if over |
-   | Reference depth | One level only | FAIL if nested |
-   | Directory name | Matches frontmatter `name` | WARN if mismatch |
-
-3. **Check Each Reference File** in `references/`:
-   - Line count under 500
-   - No subdirectories (one-level depth)
-
-4. **Report Results**:
-   ```
-   plugins/commits/conventional-commits/SKILL.md
-     [PASS] 102 lines (limit: 500)
-     [PASS] name: conventional-commits
-     [PASS] description: 145 chars (limit: 200)
-     [PASS] 4 reference files, all valid
-
-   Summary: 8 skills | 8 passed | 0 warnings | 0 failures
-   ```
-
-## Implementation Notes
-
-- Use `wc -l` for line counts
-- Parse frontmatter between `---` delimiters
-- Use `fd` for file discovery when available, fall back to `find`
-- Exit with summary showing total pass/warn/fail counts
+1. Discover targets — `plugins/<name>/skills/*/SKILL.md` if a plugin was named,
+   otherwise all `plugins/*/skills/*/SKILL.md`.
+2. Launch the skill-validator agent with the target list.
+3. Relay its per-skill PASS/WARN/FAIL results and the summary line
+   (`N skills | N passed | N warnings | N failures`).

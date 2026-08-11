@@ -2,7 +2,7 @@
 name: release-checker
 model: haiku
 description: Pre-publish validation across all plugins for version consistency and structural integrity
-allowedTools:
+tools:
   - Read
   - Bash
   - Grep

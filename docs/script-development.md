@@ -28,47 +28,30 @@ plugins/<plugin-name>/
 
 ## Path Resolution Pattern
 
-Commands must resolve script paths relative to themselves, not assume a fixed installation location.
+Commands must resolve script paths via `${CLAUDE_PLUGIN_ROOT}`, the environment variable
+Claude Code sets to the installed plugin's root directory.
 
 ### The Standard Pattern
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-uv run "$SCRIPT_DIR/my-script.py" [args]
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/my-script.py" [args]
 ```
 
-**How it works:**
-1. `$0` - The command file being executed
-2. `realpath "$0"` - Absolute path to the command file
-3. `dirname "..."` - Parent directory (commands/)
-4. `dirname "..."` - Parent directory again (plugin root)
-5. `/scripts` - Append scripts directory
+### Why Not Derive Paths From `$0` or Hardcode Them?
 
-**Example path resolution:**
-```
-Command:  /path/to/plugins/dev-utilities/commands/convert-hooks.md
-Step 1:   /path/to/plugins/dev-utilities/commands/convert-hooks.md  (realpath)
-Step 2:   /path/to/plugins/dev-utilities/commands                   (first dirname)
-Step 3:   /path/to/plugins/dev-utilities                            (second dirname)
-Result:   /path/to/plugins/dev-utilities/scripts                    (append /scripts)
-```
+Command markdown is not executed as a script file — Claude runs the bash blocks via
+`bash -c`, so `$0` resolves to the shell binary, not the command file. Hardcoded paths
+fail across installations. Both classes of pattern break:
 
-### Why Not Hardcode Paths?
-
-Hardcoded paths fail in these scenarios:
-- Development (running from source checkout)
-- Different home directories across systems
-- Custom plugin installation locations
-- Symlinked plugin directories
-
-**Bad pattern (don't do this):**
+**Bad patterns (don't do these):**
 ```bash
+SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"   # $0 is /usr/bin/bash
 SCRIPT="$(ls -t ~/.claude/plugins/cache/plugin-name/*/scripts/script.py | head -1)"
 ```
 
 **Good pattern:**
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/my-script.py"
 ```
 
 ## Python Script Template
@@ -135,13 +118,11 @@ One-line description of what this command does.
 ## Usage
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 # List available items
-uv run "$SCRIPT_DIR/my-script.py" list
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/my-script.py" list
 
 # Process with options
-uv run "$SCRIPT_DIR/my-script.py" process --input file.txt
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/my-script.py" process --input file.txt
 ```
 
 ## Examples
@@ -166,15 +147,13 @@ uv run "$SCRIPT_DIR/my-script.py" process --input file.txt
 
 **Command**: `plugins/capacities/commands/daily-note.md`
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 if [ -z "$SPACE_ID" ]; then
     echo "Available spaces:"
-    uv run "$SCRIPT_DIR/capacities.py" spaces
+    uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" spaces
     exit 0
 fi
 
-uv run "$SCRIPT_DIR/capacities.py" daily-note \
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/capacities.py" daily-note \
     --space-id "$SPACE_ID" \
     --text "$TEXT" \
     --json
@@ -189,13 +168,11 @@ uv run "$SCRIPT_DIR/capacities.py" daily-note \
 
 **Command**: `plugins/dev-utilities/commands/convert-hooks.md`
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-
 # List rules
-uv run "$SCRIPT_DIR/convert-hooks.py" --list
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert-hooks.py" --list
 
 # Convert
-uv run "$SCRIPT_DIR/convert-hooks.py"
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert-hooks.py"
 ```
 
 ## Testing Scripts
@@ -213,13 +190,11 @@ chmod +x plugins/capacities/scripts/capacities.py
 
 ### Path Resolution Testing
 
-Verify the relative path resolves correctly:
+Verify the command works when `CLAUDE_PLUGIN_ROOT` points at the plugin root:
 
 ```bash
-# From command file location
-cd plugins/dev-utilities/commands
-dirname "$(dirname "$(realpath "convert-hooks.md")")"
-# Should output: /path/to/plugins/dev-utilities
+export CLAUDE_PLUGIN_ROOT="$PWD/plugins/dev-utilities"
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/convert-hooks.py" --list
 ```
 
 ## Checklist
@@ -228,7 +203,7 @@ When adding scripts to plugins:
 
 - [ ] Script in `scripts/` directory with proper shebang
 - [ ] PEP 723 inline dependencies declared
-- [ ] Command uses relative path resolution pattern
+- [ ] Command invokes scripts via `${CLAUDE_PLUGIN_ROOT}/scripts/...`
 - [ ] Script has docstring with usage examples
 - [ ] Works both from source and installed locations
 - [ ] Exit codes: 0 for success, non-zero for errors

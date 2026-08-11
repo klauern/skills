@@ -20,8 +20,7 @@ The user must provide a task ID and project ID. If not given, ask for them.
 Run the script to clear dates:
 
 ```bash
-SCRIPT_DIR="$(dirname "$(dirname "$(realpath "$0")")")/scripts"
-uv run "$SCRIPT_DIR/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
+uv run "${CLAUDE_PLUGIN_ROOT}/scripts/ticktick_api.py" clear-dates --task-id <TASK_ID> --project-id <PROJECT_ID> --json
 ```
 
 Replace `<TASK_ID>` and `<PROJECT_ID>` with the values from the user or from a prior MCP tool call.

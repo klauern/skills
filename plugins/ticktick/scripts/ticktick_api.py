@@ -34,7 +34,11 @@ def get_token() -> str:
     token = os.environ.get("TICKTICK_ACCESS_TOKEN")
     if not token:
         print("Error: TICKTICK_ACCESS_TOKEN environment variable not set.", file=sys.stderr)
-        print("Run /ticktick:setup to configure authentication.", file=sys.stderr)
+        print(
+            "Set TICKTICK_ACCESS_TOKEN in your environment (an Open API token from "
+            "https://developer.ticktick.com/ — separate from the MCP server's OAuth).",
+            file=sys.stderr,
+        )
         sys.exit(1)
     return token
 

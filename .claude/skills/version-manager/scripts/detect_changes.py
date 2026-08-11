@@ -79,9 +79,9 @@ def detect_changes(plugin_path: str):
     for file in plugin_files:
         rel_path = file.replace(plugin_prefix, "")
 
-        # Check if it's a skill
-        if "/" in rel_path and not rel_path.startswith(".claude-plugin/") and not rel_path.startswith("commands/"):
-            skill_name = rel_path.split("/")[0]
+        # Check if it's a skill (skills live under skills/<skill-name>/)
+        if rel_path.startswith("skills/") and rel_path.count("/") >= 2:
+            skill_name = rel_path.split("/")[1]
             skills_changed.add(skill_name)
         # Check if it's a command
         elif rel_path.startswith("commands/"):

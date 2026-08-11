@@ -4,12 +4,15 @@ Custom skills and commands for Claude Code.
 
 ## Overview
 
-This is a Claude Code plugin marketplace repository containing three plugins that automate Git workflows, pull request management, and development utilities. The repository is organized similarly to the official [Anthropic skills repository](https://github.com/anthropics/skills).
+This is a Claude Code plugin marketplace repository containing six plugins that automate Git workflows, pull request management, development utilities, and personal knowledge/task management. The repository is organized similarly to the official [Anthropic skills repository](https://github.com/anthropics/skills).
 
 **Plugins**:
-- **commits** - Conventional commit message creation following conventionalcommits.org
+- **commits** - Conventional commit message creation and splitting following conventionalcommits.org
 - **pull-requests** - Intelligent PR creation, updates, conflict resolution, and comment review
-- **dev-utilities** - Development workflow utilities (AGENTS.md generation, GH Actions upgrades, CI analysis, git optimization, worktrees)
+- **dev-utilities** - Development workflow utilities (AGENTS.md generation, GH Actions upgrades, CI analysis, git optimization, worktrees, devcontainers)
+- **capacities** - Capacities knowledge management API integration
+- **ticktick** - TickTick task management via MCP (capture, review, enrich)
+- **agent-patterns** - Agent architecture patterns (Code Mode MCP)
 
 ## Installation
 
@@ -38,10 +41,13 @@ Add the marketplace once (GitHub repo or local path):
 Install one or more plugins from the marketplace:
 
 ```bash
-# Install all three plugins
+# Install all plugins
 /plugin install commits@klauern-skills
 /plugin install pull-requests@klauern-skills
 /plugin install dev-utilities@klauern-skills
+/plugin install capacities@klauern-skills
+/plugin install ticktick@klauern-skills
+/plugin install agent-patterns@klauern-skills
 
 # Or install selectively
 /plugin install commits@klauern-skills
@@ -398,7 +404,7 @@ Create and manage git worktrees for parallel development work.
 /dev-utilities:worktree
 ```
 
-This command uses the git-worktree-creator agent to set up separate working directories for different branches.
+Creates, lists, and removes worktrees with `git worktree`, setting up separate working directories for different branches.
 
 #### /dev-utilities:continue
 
