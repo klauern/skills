@@ -22,3 +22,6 @@ config.yaml
 # Python bytecode (from running plugin scripts)
 __pycache__/
 *.pyc
+
+# Beads / Dolt files (added by bd init)
+.beads/proxieddb/
