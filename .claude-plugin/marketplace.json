@@ -1,7 +1,7 @@
 {
   "metadata": {
     "description": "Custom skills developed by klauern for Claude Code",
-    "version": "3.1.0"
+    "version": "3.2.0"
   },
   "name": "klauern-skills",
   "owner": {
@@ -15,7 +15,7 @@
       "source": "./plugins/commits"
     },
     {
-      "description": "Pull request creation, updating, review-comment triage, and merge conflict resolution",
+      "description": "Pull request assessment, creation, updating, review-comment triage, and merge conflict resolution",
       "name": "pull-requests",
       "source": "./plugins/pull-requests"
     },
