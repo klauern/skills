@@ -63,6 +63,6 @@ into `template.html` at the `%%DATA%%` placeholder.
 
 | Script | Input | Output |
 |---|---|---|
-| `scripts/repo-facts.py` | repo path | JSON facts (repo, languages, manifests, dir map, activity) |
+| `scripts/repo_facts.py` | repo path | JSON facts (repo, languages, manifests, dir map, activity) |
 | `scripts/prepare_workflow.py` | repo path + facts JSON | uniquely named temporary workflow (or explicit output path) |
 | `scripts/render.py` | data JSON | uniquely named temporary HTML file |

@@ -38,7 +38,7 @@ All output uses plain language in the ASD-STE100 style:
    `agents/architect.md` to `~/.pi/agent/agents/architect.md`.
 2. Gather facts to a file:
    ```bash
-   uv run scripts/repo-facts.py <REPO_PATH> > /tmp/repo-onboarding-facts.json
+   uv run scripts/repo_facts.py <REPO_PATH> > /tmp/repo-onboarding-facts.json
    ```
    If no path is given, use the current directory. Do not ask for a path.
 

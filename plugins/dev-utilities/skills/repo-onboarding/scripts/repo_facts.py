@@ -8,7 +8,7 @@
 Walks the repository and prints one JSON object. No network access.
 Safe for directories that are not git repositories.
 
-Usage: uv run repo-facts.py [path]
+Usage: uv run repo_facts.py [path]
 """
 from __future__ import annotations
 

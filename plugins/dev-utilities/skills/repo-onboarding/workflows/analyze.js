@@ -1,7 +1,7 @@
 // Repo-onboarding analysis workflow.
 // The parent substitutes these before launch:
 //   __REPO_PATH__  -> JSON string literal (json.dumps of the absolute repo path)
-//   __FACTS_JSON__ -> JSON object literal (output of scripts/repo-facts.py)
+//   __FACTS_JSON__ -> JSON object literal (output of scripts/repo_facts.py)
 //   __QUICK__      -> boolean literal (true for a lightweight 6-scout pass)
 const REPO_PATH = __REPO_PATH__;
 const FACTS = __FACTS_JSON__;
