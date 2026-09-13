@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Repo map</title>
+<style>
+  :root {
+    --bg: #0e1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-2: #bc8cff;
+    --code-bg: #0d1117;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --measure: 74ch;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    position: sticky; top: 0; z-index: 20;
+    display: flex; gap: 8px; align-items: center;
+    padding: 10px 20px;
+    background: rgba(14, 17, 23, 0.92);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .toolbar button {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .toolbar button:hover { border-color: var(--accent); }
+  .toolbar input {
+    margin-left: auto;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    width: 220px;
+  }
+  .toolbar input:focus { outline: none; border-color: var(--accent); }
+
+  /* Layout */
+  .layout { display: flex; align-items: flex-start; max-width: 1180px; margin: 0 auto; }
+
+  /* Sidebar */
+  .sidebar {
+    position: sticky; top: 57px;
+    width: 230px; flex: 0 0 230px;
+    padding: 24px 16px 40px;
+    max-height: calc(100vh - 57px);
+    overflow-y: auto;
+  }
+  .sidebar .group {
+    font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--muted); margin: 18px 0 6px;
+  }
+  .sidebar a {
+    display: block; color: var(--muted); text-decoration: none;
+    padding: 5px 10px; border-radius: 6px; font-size: 14px;
+  }
+  .sidebar a:hover { color: var(--text); background: var(--surface); }
+  .sidebar a.active { color: var(--accent); background: var(--surface); }
+
+  /* Main */
+  main { flex: 1 1 auto; padding: 20px 28px 80px; min-width: 0; }
+
+  /* Hero */
+  .hero {
+    padding: 36px 32px;
+    border: 1px solid var(--border); border-radius: 12px;
+    background: linear-gradient(135deg, #1a2233 0%, #161b22 55%, #201a2e 100%);
+    margin-bottom: 24px;
+  }
+  .hero h1 { margin: 0 0 6px; font-size: 30px; letter-spacing: -0.02em; }
+  .hero .tagline { color: var(--text); font-size: 18px; margin: 0 0 14px; }
+  .hero .mental {
+    border-left: 3px solid var(--accent);
+    padding: 6px 0 6px 14px; margin: 0 0 16px;
+    color: var(--text); font-size: 15px; font-style: italic;
+  }
+  .hero .goal { color: var(--text); margin: 0 0 16px; max-width: var(--measure); }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .chip {
+    background: rgba(88, 166, 255, 0.12);
+    color: var(--accent);
+    border: 1px solid rgba(88, 166, 255, 0.35);
+    border-radius: 999px; padding: 3px 12px; font-size: 13px;
+  }
+  .chip.muted { background: var(--surface-2); color: var(--muted); border-color: var(--border); }
+  .hero .meta { color: var(--muted); font-size: 13px; margin-top: 10px; }
+
+  /* Sections */
+  section.card {
+    border: 1px solid var(--border); border-radius: 12px;
+    background: var(--surface);
+    padding: 22px 24px; margin-bottom: 18px;
+  }
+  section.card > h2 {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 4px; font-size: 19px;
+  }
+  section.card > h2 .icon { font-size: 20px; }
+  section.card > .lead { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+
+  /* Collapsible items */
+  details.item {
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--surface-2); margin-bottom: 8px;
+  }
+  details.item > summary {
+    cursor: pointer; list-style: none;
+    padding: 10px 14px; display: flex; align-items: baseline; gap: 10px;
+  }
+  details.item > summary::-webkit-details-marker { display: none; }
+  details.item > summary::before {
+    content: "▸"; color: var(--muted); flex: 0 0 auto;
+    transition: transform 0.15s ease; font-size: 13px;
+  }
+  details.item[open] > summary::before { transform: rotate(90deg); }
+  .item-title { font-weight: 600; }
+  .item-sub { color: var(--muted); font-size: 13px; }
+  .item-body { padding: 2px 16px 14px 40px; color: var(--text); max-width: var(--measure); }
+  .item-body p { margin: 8px 0; }
+  .item-body ul { margin: 6px 0; padding-left: 20px; }
+  .item-body li { margin: 4px 0; }
+
+  .badge {
+    margin-left: auto; flex: 0 0 auto;
+    font-size: 11px; color: var(--muted);
+    border: 1px solid var(--border); border-radius: 4px; padding: 1px 6px;
+  }
+  .badge.kind { color: var(--accent-2); border-color: rgba(188, 140, 255, 0.4); }
+
+  code, pre {
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+  }
+  code {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1px 6px;
+  }
+  li code { border: none; background: transparent; color: var(--accent); padding: 0; }
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px 16px; overflow-x: auto;
+    color: var(--text); line-height: 1.5;
+  }
+
+  /* Diagrams */
+  details.diagram > summary { align-items: center; }
+  .diagram-body { padding: 12px 16px 16px; }
+  .diagram-body .mermaid { background: transparent; border: none; padding: 8px 0; }
+  .diagram-body svg { max-width: 100%; height: auto; }
+  .mermaid-note { color: var(--muted); font-size: 12px; margin-top: 6px; }
+
+  .empty { color: var(--muted); font-style: italic; }
+
+  /* Directory map */
+  .dirmap summary { align-items: center; }
+  .dirmap .dir-path { color: var(--accent); font-family: monospace; font-size: 13px; }
+
+  /* Responsive */
+  @media (max-width: 860px) {
+    .layout { flex-direction: column; }
+    .sidebar { position: static; width: 100%; flex: none; max-height: none; display: flex; flex-wrap: wrap; gap: 4px; padding: 12px 16px; }
+    .sidebar .group { display: none; }
+    .sidebar a { display: inline-block; }
+  }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button id="expandAll" type="button">Expand all</button>
+  <button id="collapseAll" type="button">Collapse all</button>
+  <input id="filter" type="search" placeholder="Filter…" autocomplete="off">
+</div>
+
+<div class="layout">
+  <nav class="sidebar" id="nav" aria-label="Sections"></nav>
+  <main id="main">
+    <header class="hero" id="hero"></header>
+    <div id="sections"></div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.0/dist/mermaid.min.js"></script>
+<script>
+const DATA = %%DATA%%;
+
+/* ---------- helpers ---------- */
+function el(tag, cls, text) {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+function p(text) { return el("p", null, text); }
+function ul(items, asCode) {
+  const u = el("ul");
+  items.forEach(function (t) {
+    const li = el("li");
+    if (asCode) { li.appendChild(el("code", null, t)); }
+    else { li.textContent = t; }
+    u.appendChild(li);
+  });
+  return u;
+}
+function chip(text, muted) { return el("span", muted ? "chip muted" : "chip", text); }
+function list(items, asCode) { return items && items.length ? ul(items, asCode) : el("p", "empty", "None found."); }
+
+function item(title, subtitle, bodyNodes, extraCls) {
+  const d = el("details", (extraCls ? extraCls + " " : "") + "item filterable");
+  const s = el("summary");
+  s.appendChild(el("span", "item-title", title));
+  if (subtitle) s.appendChild(el("span", "item-sub", subtitle));
+  d.appendChild(s);
+  const body = el("div", "item-body");
+  (bodyNodes || []).forEach(function (n) { if (n) body.appendChild(n); });
+  d.appendChild(body);
+  return d;
+}
+
+function section(id, icon, title, lead, bodyNodes) {
+  const sec = el("section", "card");
+  sec.id = id;
+  const h = el("h2");
+  h.appendChild(el("span", "icon", icon));
+  h.appendChild(document.createTextNode(title));
+  sec.appendChild(h);
+  if (lead) sec.appendChild(el("p", "lead", lead));
+  (bodyNodes || []).forEach(function (n) { if (n) sec.appendChild(n); });
+  return sec;
+}
+
+function isEmpty(v) {
+  if (v == null) return true;
+  if (Array.isArray(v)) return v.length === 0;
+  if (typeof v === "object") return Object.keys(v).length === 0;
+  return v === "";
+}
+
+/* Agent-provided SVG is parsed and rebuilt from a small visual-only allowlist.
+   This excludes scripts, event handlers, links, embedded documents, and URLs. */
+const SAFE_SVG_ELEMENTS = new Set([
+  "svg", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
+  "text", "tspan", "title", "desc", "defs", "linearGradient", "radialGradient", "stop",
+  "marker"
+]);
+const SAFE_SVG_ATTRIBUTES = new Set([
+  "viewBox", "preserveAspectRatio", "width", "height", "x", "y", "x1", "y1", "x2", "y2",
+  "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "fill-rule", "fill-opacity",
+  "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit",
+  "stroke-opacity", "opacity", "transform", "text-anchor", "dominant-baseline", "font-family",
+  "font-size", "font-weight", "letter-spacing", "offset", "stop-color", "stop-opacity",
+  "gradientUnits", "markerWidth", "markerHeight", "refX", "refY", "orient"
+]);
+
+function safeSvgAttribute(name, value) {
+  if (!SAFE_SVG_ATTRIBUTES.has(name)) return false;
+  return !/(?:url\s*\(|javascript:|data:)/i.test(value);
+}
+function sanitizeSvg(code) {
+  const parsed = new DOMParser().parseFromString(String(code), "image/svg+xml");
+  const source = parsed.documentElement;
+  if (!source || source.localName !== "svg" || parsed.querySelector("parsererror")) return null;
+
+  function copy(node) {
+    if (!SAFE_SVG_ELEMENTS.has(node.localName)) return null;
+    const result = document.createElementNS("http://www.w3.org/2000/svg", node.localName);
+    node.getAttributeNames().forEach(function (name) {
+      const value = node.getAttribute(name);
+      if (value != null && safeSvgAttribute(name, value)) result.setAttribute(name, value);
+    });
+    node.childNodes.forEach(function (child) {
+      if (child.nodeType === 3) {
+        result.appendChild(document.createTextNode(child.nodeValue || ""));
+      } else if (child.nodeType === 1) {
+        const safeChild = copy(child);
+        if (safeChild) result.appendChild(safeChild);
+      }
+    });
+    return result;
+  }
+  return copy(source);
+}
+function appendSafeSvg(parent, code) {
+  const svg = sanitizeSvg(code);
+  if (svg) parent.appendChild(svg);
+  else parent.appendChild(el("p", "empty", "This SVG diagram was not safe to display."));
+}
+
+/* ---------- render ---------- */
+function render() {
+  const hero = document.getElementById("hero");
+  const sections = document.getElementById("sections");
+  const nav = document.getElementById("nav");
+
+  /* Hero */
+  hero.appendChild(el("h1", null, DATA.repo || "Repository"));
+  if (DATA.tagline) hero.appendChild(el("p", "tagline", DATA.tagline));
+  if (DATA.mentalModel) hero.appendChild(el("p", "mental", DATA.mentalModel));
+  if (DATA.goal) hero.appendChild(el("p", "goal", DATA.goal));
+
+  const chips = el("div", "chips");
+  const prof = DATA.profile || {};
+  (prof.languages || []).forEach(function (l) { chips.appendChild(chip(l)); });
+  (prof.frameworks || []).forEach(function (f) { chips.appendChild(chip(f)); });
+  if (prof.runtime) chips.appendChild(chip(prof.runtime, true));
+  if (prof.license && prof.license !== "not found") chips.appendChild(chip("License: " + prof.license, true));
+  hero.appendChild(chips);
+
+  if (prof.build) hero.appendChild(el("p", "meta", "Build: " + prof.build));
+  if (DATA.audience) hero.appendChild(el("p", "meta", "Audience: " + DATA.audience));
+
+  /* Sections */
+  const secs = [];
+  const navGroups = [];
+
+  function push(id, group, title, icon, lead, bodyNodes) {
+    if (!bodyNodes || (Array.isArray(bodyNodes) && bodyNodes.length === 0)) return null;
+    const s = section(id, icon, title, lead, bodyNodes);
+    sections.appendChild(s);
+    navGroups.push({ group: group, id: id, title: title });
+    return s;
+  }
+
+  /* Get started */
+  const contrib = DATA.contributing || {};
+  if (contrib.setup && contrib.setup.length) {
+    push("get-started", "Overview", "Get started", "🚀", "Commands to run the project for the first time.", [list(contrib.setup, true)]);
+  }
+
+  /* Diagrams */
+  const diagrams = DATA.diagrams || [];
+  if (diagrams.length) {
+    const nodes = diagrams.map(function (dg) {
+      const d = el("details", "item diagram");
+      d.open = true;
+      const s = el("summary");
+      s.appendChild(el("span", "item-title", dg.title));
+      s.appendChild(el("span", "badge kind", dg.kind === "svg" ? "SVG" : "Mermaid"));
+      d.appendChild(s);
+      const body = el("div", "item-body diagram-body");
+      if (dg.kind === "svg") {
+        appendSafeSvg(body, dg.code);
+      } else {
+        body.appendChild(el("pre", "mermaid", dg.code));
+      }
+      d.appendChild(body);
+      return d;
+    });
+    push("diagrams", "Diagrams", "Architecture diagrams", "🧭", "The big picture, drawn from the scouts' findings.", nodes);
+  }
+
+  /* Entry points */
+  const entry = DATA.entryPoint;
+  if (entry && entry.items && entry.items.length) {
+    const nodes = entry.items.map(function (it) { return item(it.path, null, [p(it.why)]); });
+    push("entry", "Architecture", "Entry points", "🏁", entry.summary || null, nodes);
+  }
+
+  /* Extension points */
+  const ext = DATA.extensionPoints || [];
+  if (ext.length) {
+    push("extensions", "Architecture", "Extension points", "🧩", "Where you plug in new behavior.", ext.map(function (x) { return item(x.name, x.location, [p(x.how)]); }));
+  }
+
+  /* Abstractions */
+  const abs = DATA.abstractions || [];
+  if (abs.length) {
+    push("abstractions", "Architecture", "Architectural abstractions", "🏛️", "The main building blocks and layers.", abs.map(function (a) { return item(a.name, a.where, [p(a.role)]); }));
+  }
+
+  /* Data & integrations */
+  const data = DATA.data || [];
+  if (data.length) {
+    push("data", "Data & Ops", "Data & integrations", "🗄️", "Storage, services, and queues the project touches.", data.map(function (d0) { return item(d0.name, d0.kind, [p(d0.detail)]); }));
+  }
+
+  /* Deployment */
+  const dep = DATA.deployment;
+  if (dep && (dep.summary || (dep.config && dep.config.length) || dep.secrets || dep.observability)) {
+    const nodes = [];
+    if (dep.summary) nodes.push(p(dep.summary));
+    if (dep.config && dep.config.length) {
+      nodes.push(el("p", null, "Configuration:"));
+      nodes.push(ul(dep.config, true));
+    }
+    if (dep.secrets && dep.secrets !== "not found") nodes.push(p("Secrets: " + dep.secrets));
+    if (dep.observability && dep.observability !== "not found") nodes.push(p("Observability: " + dep.observability));
+    push("deployment", "Data & Ops", "Deployment & config", "🚢", "How it runs in production.", nodes);
+  }
+
+  /* Testing */
+  const test = DATA.testing;
+  if (test && (test.commands && test.commands.length || test.quality && test.quality.length || test.ci)) {
+    const nodes = [];
+    if (test.commands && test.commands.length) {
+      nodes.push(el("p", null, "Run these commands:"));
+      nodes.push(ul(test.commands, true));
+    }
+    if (test.quality && test.quality.length) {
+      const q = el("div", "chips");
+      test.quality.forEach(function (t) { q.appendChild(chip(t, true)); });
+      nodes.push(q);
+    }
+    if (test.ci && test.ci !== "none found") nodes.push(p("CI: " + test.ci));
+    push("testing", "Data & Ops", "Testing & CI", "✅", "How quality is enforced.", nodes);
+  }
+
+  /* Repos */
+  const repos = DATA.repos || [];
+  if (repos.length) {
+    push("repos", "Repositories", "Related repositories", "🔗", "Other repositories this one depends on or feeds.", repos.map(function (r) { return item(r.name, r.relationship, [p(r.note)]); }));
+  }
+
+  /* Contributing */
+  if (contrib.setup && contrib.setup.length || contrib.conventions && contrib.conventions.length || contrib.readingOrder && contrib.readingOrder.length) {
+    const nodes = [];
+    if (contrib.setup && contrib.setup.length) {
+      nodes.push(el("p", null, "Developer setup:"));
+      nodes.push(ul(contrib.setup, true));
+    }
+    if (contrib.conventions && contrib.conventions.length) {
+      nodes.push(el("p", null, "Conventions:"));
+      nodes.push(ul(contrib.conventions));
+    }
+    if (contrib.readingOrder && contrib.readingOrder.length) {
+      nodes.push(el("p", null, "Read first, in this order:"));
+      nodes.push(ul(contrib.readingOrder, true));
+    }
+    push("contributing", "Contributing", "Contributing", "🤝", "How to contribute and where to start.", nodes);
+  }
+
+  /* Rationale & glossary */
+  const rat = DATA.rationale;
+  if (rat) {
+    const nodes = [];
+    if (rat.glossary && Object.keys(rat.glossary).length) {
+      nodes.push(el("p", null, "Domain terms:"));
+      Object.keys(rat.glossary).forEach(function (term) { nodes.push(item(term, null, [p(rat.glossary[term])])); });
+    }
+    if (rat.adrs && rat.adrs.length) {
+      nodes.push(el("p", null, "Design decisions:"));
+      nodes.push(ul(rat.adrs));
+    }
+    if (rat.debt && rat.debt.length) {
+      nodes.push(el("p", null, "Tech debt and deprecations:"));
+      nodes.push(ul(rat.debt));
+    }
+    if (rat.activity && rat.activity.length) {
+      nodes.push(el("p", null, "Recent activity:"));
+      nodes.push(ul(rat.activity));
+    }
+    if (nodes.length) push("rationale", "Deep cuts", "Rationale & glossary", "📚", "Why things are the way they are, and the domain language.", nodes);
+  }
+
+  /* Missed / gotchas */
+  const missed = DATA.missed || [];
+  if (missed.length) {
+    push("missed", "Deep cuts", "Also worth knowing", "⚠️", "Gotchas, conventions, and security notes you might otherwise miss.", missed.map(function (m) { return item(m.title, null, [p(m.detail)]); }));
+  }
+
+  /* Next reads */
+  const next = DATA.nextReads || [];
+  if (next.length) {
+    push("next-reads", "Deep cuts", "Next reads", "📖", "Files and docs to read next.", [ul(next, true)]);
+  }
+
+  /* Directory map */
+  const dmap = DATA.directoryMap || {};
+  const dkeys = Object.keys(dmap);
+  if (dkeys.length) {
+    const nodes = dkeys.map(function (k) {
+      const title = k === "." ? "/" : k + "/";
+      const subs = dmap[k] || [];
+      return item(title, null, [subs.length ? p(subs.join(", ")) : p("no subdirectories")], "dirmap");
+    });
+    push("directory", "Deep cuts", "Directory map", "🗂️", "Top-level folders and their subfolders.", nodes);
+  }
+
+  /* Nav */
+  const groups = {};
+  navGroups.forEach(function (g) { (groups[g.group] = groups[g.group] || []).push(g); });
+  Object.keys(groups).forEach(function (group) {
+    nav.appendChild(el("div", "group", group));
+    groups[group].forEach(function (g) {
+      const a = el("a", null, g.title);
+      a.href = "#" + g.id;
+      nav.appendChild(a);
+    });
+  });
+}
+
+render();
+
+/* ---------- interactions ---------- */
+function allDetails() {
+  return Array.prototype.slice.call(document.querySelectorAll("main details"));
+}
+document.getElementById("expandAll").addEventListener("click", function () {
+  allDetails().forEach(function (d) { d.open = true; });
+});
+document.getElementById("collapseAll").addEventListener("click", function () {
+  allDetails().forEach(function (d) { if (!d.classList.contains("diagram")) d.open = false; });
+});
+
+/* Filter */
+document.getElementById("filter").addEventListener("input", function (e) {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll("details.filterable").forEach(function (d) {
+    const text = (d.querySelector("summary") || {}).textContent || "";
+    d.hidden = q !== "" && text.toLowerCase().indexOf(q) === -1;
+  });
+});
+
+/* Sidebar active highlight */
+function setActive() {
+  const links = document.querySelectorAll("#nav a");
+  let current = null;
+  document.querySelectorAll("main section").forEach(function (sec) {
+    if (sec.getBoundingClientRect().top <= 120) current = sec.id;
+  });
+  links.forEach(function (a) {
+    a.classList.toggle("active", a.getAttribute("href") === "#" + current);
+  });
+}
+window.addEventListener("scroll", setActive, { passive: true });
+setActive();
+
+/* ---------- mermaid ---------- */
+function initMermaid() {
+  if (!window.mermaid) return;
+  mermaid.initialize({ startOnLoad: false, theme: "dark", securityLevel: "strict" });
+  const nodes = Array.prototype.slice.call(document.querySelectorAll("pre.mermaid"));
+  if (!nodes.length) return;
+  mermaid.run({ nodes: nodes }).catch(function () {
+    /* invalid diagrams fall back to showing the raw source */
+  });
+}
+if (window.mermaid) { initMermaid(); }
+else { window.addEventListener("load", initMermaid); }
+</script>
+</body>
+</html>

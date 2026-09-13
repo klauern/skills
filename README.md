@@ -180,6 +180,20 @@ Comprehensive Git repository optimization including branch cleanup, garbage coll
 
 **Usage**: Use the `/dev-utilities:git-optimize` command.
 
+#### repo-onboarding
+
+Produces a collapsible HTML map of a repository: goal, entry points, extension points, architectural abstractions, languages and frameworks, multi-repo relationships, and Mermaid architecture diagrams.
+
+**Features**:
+
+- 11 parallel read-only scouts (goal, stack, entry, extensions, abstractions, data, deployment, testing, repos, contributing, rationale)
+- Two fresh reviewers catch omissions and inconsistencies
+- A diagram agent draws Mermaid and SVG architecture diagrams
+- Plain-language (ASD-STE100) writing throughout
+- Collapsible, filterable, self-contained HTML output
+
+**Usage**: Ask "onboard to this repo" or use `/repo-onboarding`.
+
 ## Available Commands
 
 Commands are organized by plugin. Each command is invoked with the format `/plugin-name:command-name`.
