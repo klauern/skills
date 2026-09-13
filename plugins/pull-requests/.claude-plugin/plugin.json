@@ -5,5 +5,5 @@
   },
   "description": "Pull request assessment, creation, updating, review-comment triage, and merge conflict resolution",
   "name": "pull-requests",
-  "version": "1.3.0"
+  "version": "1.4.0"
 }
