@@ -90,6 +90,19 @@ A skill that helps write conventional commit messages following best practices a
 
 ### pull-requests Plugin
 
+#### pr-assessment
+
+Assesses a pull request end to end without mutating PR state: gathers metadata, commits, files, comments, and review threads, classifies feedback, and creates or reuses a dedicated worktree.
+
+**Features**:
+
+- Gathers PR metadata and review threads with paginated GraphQL
+- Triage comments into blocking, actionable, suggestion, nit, and informational items
+- Creates or reuses a dedicated detached worktree under `.worktrees/`
+- Read-only to PR state: no replies, resolves, or edits during assessment
+
+**Usage**: Ask to "assess a PR" or use the `/pull-requests:pr-assess` command.
+
 #### pr-creator
 
 An intelligent pull request creation skill that discovers and parses PR templates, analyzes commits to infer context, and prompts only for information that can't be automatically determined.
