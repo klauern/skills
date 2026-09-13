@@ -261,6 +261,56 @@ function isEmpty(v) {
   return v === "";
 }
 
+/* Agent-provided SVG is parsed and rebuilt from a small visual-only allowlist.
+   This excludes scripts, event handlers, links, embedded documents, and URLs. */
+const SAFE_SVG_ELEMENTS = new Set([
+  "svg", "g", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
+  "text", "tspan", "title", "desc", "defs", "linearGradient", "radialGradient", "stop",
+  "marker"
+]);
+const SAFE_SVG_ATTRIBUTES = new Set([
+  "viewBox", "preserveAspectRatio", "width", "height", "x", "y", "x1", "y1", "x2", "y2",
+  "cx", "cy", "r", "rx", "ry", "d", "points", "fill", "fill-rule", "fill-opacity",
+  "stroke", "stroke-width", "stroke-linecap", "stroke-linejoin", "stroke-miterlimit",
+  "stroke-opacity", "opacity", "transform", "text-anchor", "dominant-baseline", "font-family",
+  "font-size", "font-weight", "letter-spacing", "offset", "stop-color", "stop-opacity",
+  "gradientUnits", "markerWidth", "markerHeight", "refX", "refY", "orient"
+]);
+
+function safeSvgAttribute(name, value) {
+  if (!SAFE_SVG_ATTRIBUTES.has(name)) return false;
+  return !/(?:url\s*\(|javascript:|data:)/i.test(value);
+}
+function sanitizeSvg(code) {
+  const parsed = new DOMParser().parseFromString(String(code), "image/svg+xml");
+  const source = parsed.documentElement;
+  if (!source || source.localName !== "svg" || parsed.querySelector("parsererror")) return null;
+
+  function copy(node) {
+    if (!SAFE_SVG_ELEMENTS.has(node.localName)) return null;
+    const result = document.createElementNS("http://www.w3.org/2000/svg", node.localName);
+    node.getAttributeNames().forEach(function (name) {
+      const value = node.getAttribute(name);
+      if (value != null && safeSvgAttribute(name, value)) result.setAttribute(name, value);
+    });
+    node.childNodes.forEach(function (child) {
+      if (child.nodeType === 3) {
+        result.appendChild(document.createTextNode(child.nodeValue || ""));
+      } else if (child.nodeType === 1) {
+        const safeChild = copy(child);
+        if (safeChild) result.appendChild(safeChild);
+      }
+    });
+    return result;
+  }
+  return copy(source);
+}
+function appendSafeSvg(parent, code) {
+  const svg = sanitizeSvg(code);
+  if (svg) parent.appendChild(svg);
+  else parent.appendChild(el("p", "empty", "This SVG diagram was not safe to display."));
+}
+
 /* ---------- render ---------- */
 function render() {
   const hero = document.getElementById("hero");
@@ -314,9 +364,7 @@ function render() {
       d.appendChild(s);
       const body = el("div", "item-body diagram-body");
       if (dg.kind === "svg") {
-        const wrap = el("div");
-        wrap.innerHTML = dg.code;
-        body.appendChild(wrap);
+        appendSafeSvg(body, dg.code);
       } else {
         body.appendChild(el("pre", "mermaid", dg.code));
       }

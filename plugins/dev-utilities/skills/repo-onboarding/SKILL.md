@@ -38,21 +38,21 @@ All output uses plain language in the ASD-STE100 style:
    `agents/architect.md` to `~/.pi/agent/agents/architect.md`.
 2. Gather facts to a file:
    ```bash
-   python3 scripts/repo-facts.py <REPO_PATH> > /tmp/repo-onboarding-facts.json
+   uv run scripts/repo-facts.py <REPO_PATH> > /tmp/repo-onboarding-facts.json
    ```
    If no path is given, use the current directory. Do not ask for a path.
 
 ## Phase 1 — Prepare and launch the subagent workflow
 
 ```bash
-python3 scripts/prepare_workflow.py <REPO_PATH> /tmp/repo-onboarding-facts.json
-# add --quick for a 6-scout pass (goal, profile, entry, ext, abs)
+uv run scripts/prepare_workflow.py <REPO_PATH> /tmp/repo-onboarding-facts.json
+# Use the printed path below. Add --quick for a 6-scout pass (goal, profile, entry, ext, abs, contrib).
 ```
-This writes `/tmp/repo-onboarding-analyze.js`. Launch it (blocking — you need the results):
+This writes a uniquely named temporary workflow and prints its path. Pass that path to `workflowScriptPath`, then launch it (blocking — you need the results):
 
 ```js
 subagent({
-  workflowScriptPath: "/tmp/repo-onboarding-analyze.js",
+  workflowScriptPath: "<PATH_PRINTED_BY_PREPARE>",
   cwd: "<REPO_PATH>",
   async: false
 });
@@ -79,8 +79,8 @@ the field-to-scout mapping are in
 ## Phase 3 — Render and open
 
 ```bash
-python3 scripts/render.py /tmp/repo-onboarding-<repo>.json
-open /tmp/repo-onboarding-<repo>.html
+HTML_PATH="$(uv run scripts/render.py /tmp/repo-onboarding-<repo>.json)"
+open "$HTML_PATH"
 ```
 
 ## Phase 4 — Recap
@@ -91,6 +91,6 @@ interesting section.
 ## Notes
 
 - Children are read-only. Only the parent writes files.
-- `--quick` skips `data`, `runtime`, `testing`, `repos`, `rationale` (6 scouts).
+- `--quick` runs `goal`, `profile`, `entry`, `ext`, `abs`, and `contrib` (6 scouts).
 - Helpers are Python on purpose: short, I/O-bound, stdlib-only. The JSON contract
   is fixed, so swapping them for a compiled binary later is a drop-in change.
