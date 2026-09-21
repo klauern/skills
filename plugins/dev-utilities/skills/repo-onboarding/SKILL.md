@@ -1,6 +1,6 @@
 ---
 name: repo-onboarding
-description: Produce a collapsible HTML map of a repository: goal, entry points, extensions, abstractions, stack, and Mermaid diagrams, via parallel subagents. Use to onboard to a new codebase.
+description: "Produce a collapsible HTML map of a repository: goal, entry points, extensions, abstractions, stack, and Mermaid diagrams, via parallel subagents. Use to onboard to a new codebase."
 version: 1.0.0
 author: klauern
 ---

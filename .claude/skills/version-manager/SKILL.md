@@ -1,6 +1,8 @@
 ---
 name: version-manager
 description: Local skill for managing versions in the klauern-skills repository. Use when bumping versions for this repository's plugins after modifying skills, commands, or metadata. Detects changes via git, infers version bump type from conventional commits, and updates plugin.json and marketplace.json. Triggered by /bump-version command or used directly via scripts.
+metadata:
+  internal: true
 ---
 
 # Version Manager (Local Skill)
