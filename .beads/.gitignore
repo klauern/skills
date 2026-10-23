@@ -49,6 +49,16 @@ dolt-server.log
 dolt-server.lock
 dolt-server.port
 dolt-server.activity
+dolt-server-config.yaml
+dolt-monitor.pid
+
+# Cooperative gate locks (flock names, never deleted)
+*.gate.lock*
+
+# Proxied server mode and pull state (runtime, per-machine)
+proxieddb/
+proxied_server_client_info.json
+last_pull
 
 # Corrupt backup directories (created by bd doctor --fix recovery)
 *.corrupt.backup/

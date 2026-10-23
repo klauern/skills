@@ -18,6 +18,8 @@ config.yaml
 
 # Beads / Dolt files (added by bd init)
 .beads-credential-key
+.beads/proxieddb/
+*.gate.lock*
 
 # Python bytecode (from running plugin scripts)
 __pycache__/
