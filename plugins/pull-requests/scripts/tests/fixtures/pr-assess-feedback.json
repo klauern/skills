@@ -1,0 +1,147 @@
+{
+  "number": 9,
+  "title": "Synthetic PR feedback",
+  "state": "OPEN",
+  "headRefName": "example",
+  "baseRefName": "main",
+  "comments": {
+    "nodes": [
+      {
+        "body": "Not blocking: consider adding an example to the docs.",
+        "author": {
+          "login": "reviewer"
+        },
+        "createdAt": "2026-01-13T12:00:00Z"
+      },
+      {
+        "body": "I'd hold the merge until the parser handles empty rows.",
+        "author": {
+          "login": "reviewer"
+        },
+        "createdAt": "2026-01-14T12:00:00Z"
+      },
+      {
+        "body": "How did you verify the cache behavior?",
+        "author": {
+          "login": "reviewer"
+        },
+        "createdAt": "2026-01-12T12:00:00Z"
+      },
+      {
+        "body": "Nit: typo in the example.",
+        "author": {
+          "login": "reviewer"
+        },
+        "createdAt": "2026-01-11T12:00:00Z"
+      }
+    ]
+  },
+  "reviewThreads": {
+    "nodes": [
+      {
+        "path": "example.py",
+        "line": 42,
+        "isResolved": false,
+        "isOutdated": false,
+        "comments": {
+          "nodes": [
+            {
+              "body": "Must fix: exports can duplicate rows.",
+              "author": {
+                "login": "reviewer"
+              },
+              "createdAt": "2026-01-01T12:00:00Z"
+            },
+            {
+              "body": "Can you send me a screenshot?",
+              "author": {
+                "login": "author"
+              },
+              "createdAt": "2026-01-02T12:00:00Z"
+            },
+            {
+              "body": "I pushed a fix.",
+              "author": {
+                "login": "author"
+              },
+              "createdAt": "2026-01-03T12:00:00Z"
+            },
+            {
+              "body": "I tried the fix. This is no longer a blocker and I don't need anything else.",
+              "author": {
+                "login": "reviewer"
+              },
+              "createdAt": "2026-01-04T12:00:00Z"
+            }
+          ]
+        }
+      },
+      {
+        "path": "example.py",
+        "line": 42,
+        "isResolved": false,
+        "isOutdated": false,
+        "comments": {
+          "nodes": [
+            {
+              "body": "Must fix: blank names make the export crash.",
+              "author": {
+                "login": "reviewer"
+              },
+              "createdAt": "2026-01-01T12:00:00Z"
+            },
+            {
+              "body": "I pushed a fix.",
+              "author": {
+                "login": "author"
+              },
+              "createdAt": "2026-01-05T12:00:00Z"
+            }
+          ]
+        }
+      },
+      {
+        "path": "example.py",
+        "line": 42,
+        "isResolved": true,
+        "isOutdated": false,
+        "comments": {
+          "nodes": [
+            {
+              "body": "Must change this resolved item.",
+              "author": {
+                "login": "reviewer"
+              },
+              "createdAt": "2026-01-15T12:00:00Z"
+            }
+          ]
+        }
+      },
+      {
+        "path": "example.py",
+        "line": 42,
+        "isResolved": false,
+        "isOutdated": true,
+        "comments": {
+          "nodes": [
+            {
+              "body": "Must change this stale item.",
+              "author": {
+                "login": "reviewer"
+              },
+              "createdAt": "2026-01-16T12:00:00Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "expected": {
+    "Not blocking: consider adding an example to the docs.": "suggestion",
+    "I'd hold the merge until the parser handles empty rows.": "blocking",
+    "How did you verify the cache behavior?": "actionable",
+    "Nit: typo in the example.": "nit",
+    "Must fix: exports can duplicate rows.": "informational",
+    "Must fix: blank names make the export crash.": "blocking"
+  }
+}

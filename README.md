@@ -103,6 +103,8 @@ Assesses a pull request end to end without mutating PR state: gathers metadata, 
 
 **Usage**: Ask to "assess a PR" or use the `/pull-requests:pr-assess` command.
 
+In Pi 1.6.1 or later, you can opt in to [advisory classifier triage](plugins/pull-requests/skills/pr-assessment/references/pi-classifier.md).  The keyword report remains the default.
+
 #### pr-creator
 
 An intelligent pull request creation skill that discovers and parses PR templates, analyzes commits to infer context, and prompts only for information that can't be automatically determined.
