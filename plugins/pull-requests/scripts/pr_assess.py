@@ -16,6 +16,9 @@ from typing import Any
 
 MAX_COMMIT_HEADLINES = 8
 GRAPHQL_PAGE_SIZE = 100
+MAX_CLASSIFIER_ITEMS = 12
+MAX_CLASSIFIER_REPLIES = 2
+MAX_CLASSIFIER_EXCERPT = 320
 
 
 @dataclass
@@ -532,6 +535,7 @@ def build_triage(
             "source": "comment",
             "author": comment.get("author", {}),
             "body": body,
+            "updated_at": comment.get("createdAt") or "",
         }
         item["kind"] = classify_comment(body)
         open_items.append(item)
@@ -555,6 +559,9 @@ def build_triage(
         if thread.get("isResolved"):
             resolved_items.append(item)
         else:
+            item["updated_at"] = comments[-1].get("createdAt") or ""
+            reply_start = max(1, len(comments) - MAX_CLASSIFIER_REPLIES)
+            item["replies"] = comments[reply_start:]
             open_items.append(item)
 
     def sort_key(item: dict[str, Any]) -> tuple[int, str]:
@@ -572,7 +579,40 @@ def build_triage(
     return open_items, resolved_items, outdated_count
 
 
-def build_report(root: Path, pr_number: int) -> str:
+def classifier_input(open_items: list[dict[str, Any]]) -> dict[str, Any]:
+    # Sample recent feedback independently of the keyword severity sort.
+    recent = sorted(open_items, key=lambda item: item["updated_at"], reverse=True)
+    items = []
+    for item in recent:
+        opening = excerpt(item["body"], MAX_CLASSIFIER_EXCERPT)
+        author = (item.get("author") or {}).get("login")
+        replies = []
+        for reply in item.get("replies", []):
+            reply_author = (reply.get("author") or {}).get("login")
+            text = excerpt(reply.get("body", ""), MAX_CLASSIFIER_EXCERPT)
+            if text:
+                replies.append(
+                    {"text": text, "by_opener": bool(author and author == reply_author)}
+                )
+        if not opening and not replies:
+            continue
+        items.append(
+            {
+                "display": format_comment_item(
+                    item, kind=item["kind"], source=item["source"]
+                ),
+                "baseline": item["kind"],
+                "feedback": {"opening": opening, "replies": replies},
+            }
+        )
+        if len(items) == MAX_CLASSIFIER_ITEMS:
+            break
+    return {"items": items, "omitted": len(open_items) - len(items)}
+
+
+def build_report(
+    root: Path, pr_number: int, *, include_classifier_input: bool = False
+) -> str:
     repo_owner, repo_name, repo_name_with_owner = get_repo_identity(root)
     pr = fetch_graphql(repo_owner, repo_name, pr_number)
 
@@ -665,7 +705,10 @@ def build_report(root: Path, pr_number: int) -> str:
     else:
         lines.append("- Worktree creation was unavailable; inspect the note above.")
     lines.append("")
-    return "\n".join(lines)
+    report = "\n".join(lines)
+    if include_classifier_input:
+        return json.dumps({"report": report, **classifier_input(open_items)})
+    return report
 
 
 def main() -> int:
@@ -677,13 +720,20 @@ def main() -> int:
         nargs="?",
         help="Optional PR number. Defaults to the current branch PR.",
     )
+    parser.add_argument(
+        "--classifier-input",
+        action="store_true",
+        help="Emit the normal report and a bounded sample of open feedback as JSON (no inference).",
+    )
     args = parser.parse_args()
 
     root = Path(run(["git", "rev-parse", "--show-toplevel"]))
 
     try:
         pr_number = get_pr_number(root, args.pr_number)
-        report = build_report(root, pr_number)
+        report = build_report(
+            root, pr_number, include_classifier_input=args.classifier_input
+        )
     except Exception as exc:  # pragma: no cover - surfaced directly to the user
         print(f"pr-assess: {exc}", file=sys.stderr)
         return 1

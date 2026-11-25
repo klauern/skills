@@ -42,3 +42,7 @@ uv run "$PLUGIN_ROOT/scripts/pr_assess.py" [pr-number]
 ```
 
 See [references/assessment.md](references/assessment.md) for the report shape, triage rules, and worktree selection.
+
+## Optional Pi classifier triage
+
+Use the keyword report by default.  On Pi 1.6.1 or later, use the [classifier pilot](references/pi-classifier.md) only if the user opts in and approves the exact provider and model for the PR feedback.  Keep classifier judgments separate from the normal report and don't act on them.
